@@ -13,3 +13,4 @@ tqdm
 faiss-cpu
 langchain-google-genai
 python-docx
+pandas

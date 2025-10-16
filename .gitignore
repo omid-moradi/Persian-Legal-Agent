@@ -1,1 +1,7 @@
 .env
+1-BaselineTest/Models Responses/self-consistency
+1-BaselineTest/Models Responses/zero-shot-cot-e2p
+1-BaselineTest/Models Responses/few-shot-cot-e2p
+1-BaselineTest/Models Responses/few-shot
+q1.json
+q2.json
