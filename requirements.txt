@@ -14,3 +14,7 @@ faiss-cpu
 langchain-google-genai
 python-docx
 pandas
+matplotlib
+seaborn
+openai
+openpyxl
