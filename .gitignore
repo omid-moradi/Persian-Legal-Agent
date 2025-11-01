@@ -9,4 +9,8 @@ grok 4 fast report.docx
 
 deepseek r1t2 chimera
 deepSeek v32 exp
-gpt oss 20
+gpt oss 120
+llama 4 maverick
+qwen3 235
+llama 4 scout
+qwen3 80
