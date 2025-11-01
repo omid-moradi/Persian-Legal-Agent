@@ -1,0 +1,178 @@
+﻿id,model,answer,confidence,latency_ms,raw,error
+1,meta-llama/llama-4-maverick,3,4,1604,"{""answer"":""3"",""confidence"":4}",
+2,meta-llama/llama-4-maverick,4,5,574,"{""answer"":""4"",""confidence"":5}",
+3,meta-llama/llama-4-maverick,4,4,605,"{""answer"":""4"",""confidence"":4}",
+4,meta-llama/llama-4-maverick,4,5,470,"{""answer"":""4"",""confidence"":5}",
+5,meta-llama/llama-4-maverick,3,4,667,"{""answer"":""3"",""confidence"":4}",
+6,meta-llama/llama-4-maverick,4,4,526,"{""answer"":""4"",""confidence"":4}",
+7,meta-llama/llama-4-maverick,2,4,594,"{""answer"":""2"",""confidence"":4}",
+8,meta-llama/llama-4-maverick,2,4,874,"{""answer"":""2"",""confidence"":4}",
+9,meta-llama/llama-4-maverick,2,4,471,"{""answer"":""2"",""confidence"":4}",
+10,meta-llama/llama-4-maverick,4,4,383,"{""answer"":""4"",""confidence"":4}",
+11,meta-llama/llama-4-maverick,2,4,462,"{""answer"":""2"",""confidence"":4}",
+12,meta-llama/llama-4-maverick,3,5,986,"{""answer"":""3"",""confidence"":5}",
+13,meta-llama/llama-4-maverick,1,4,431,"{""answer"":""1"",""confidence"":4}",
+14,meta-llama/llama-4-maverick,4,4,681,"{""answer"":""4"",""confidence"":4}",
+15,meta-llama/llama-4-maverick,2,4,417,"{""answer"":""2"",""confidence"":4}",
+16,meta-llama/llama-4-maverick,2,5,375,"{""answer"":""2"",""confidence"":5}",
+17,meta-llama/llama-4-maverick,3,4,459,"{""answer"":""3"",""confidence"":4}",
+18,meta-llama/llama-4-maverick,2,4,477,"{""answer"":""2"",""confidence"":4}",
+19,meta-llama/llama-4-maverick,2,4,491,"{""answer"":""2"",""confidence"":4}",
+20,meta-llama/llama-4-maverick,1,5,624,"{""answer"":""1"",""confidence"":5}",
+21,meta-llama/llama-4-maverick,4,5,386,"{""answer"":""4"",""confidence"":5}",
+22,meta-llama/llama-4-maverick,4,4,511,"{""answer"":""4"",""confidence"":4}",
+23,meta-llama/llama-4-maverick,4,5,409,"{""answer"":""4"",""confidence"":5}",
+24,meta-llama/llama-4-maverick,3,4,865,"{""answer"":""3"",""confidence"":4}",
+25,meta-llama/llama-4-maverick,2,4,866,"{""answer"":""2"",""confidence"":4}",
+26,meta-llama/llama-4-maverick,3,4,556,"{""answer"":""3"",""confidence"":4}",
+27,meta-llama/llama-4-maverick,2,4,640,"{""answer"":""2"",""confidence"":4}",
+28,meta-llama/llama-4-maverick,2,4,538,"{""answer"":""2"",""confidence"":4}",
+29,meta-llama/llama-4-maverick,3,4,419,"{""answer"":""3"",""confidence"":4}",
+30,meta-llama/llama-4-maverick,2,4,1126,"{""answer"":""2"",""confidence"":4}",
+31,meta-llama/llama-4-maverick,2,4,423,"{""answer"":""2"",""confidence"":4}",
+32,meta-llama/llama-4-maverick,4,4,625,"{""answer"":""4"",""confidence"":4}",
+33,meta-llama/llama-4-maverick,2,4,613,"{""answer"":""2"",""confidence"":4}",
+34,meta-llama/llama-4-maverick,4,4,506,"{""answer"":""4"",""confidence"":4}",
+35,meta-llama/llama-4-maverick,1,4,641,"{""answer"":""1"",""confidence"":4}",
+36,meta-llama/llama-4-maverick,1,4,319,"{""answer"":""1"",""confidence"":4}",
+37,meta-llama/llama-4-maverick,2,4,366,"{""answer"":""2"",""confidence"":4}",
+38,meta-llama/llama-4-maverick,3,4,809,"{""answer"":""3"",""confidence"":4}",
+39,meta-llama/llama-4-maverick,1,4,906,"{""answer"":""1"",""confidence"":4}",
+40,meta-llama/llama-4-maverick,2,4,933,"{""answer"":""2"",""confidence"":4}",
+41,meta-llama/llama-4-maverick,1,4,1210,"{""answer"":""1"",""confidence"":4}",
+42,meta-llama/llama-4-maverick,2,4,1123,"{""answer"":""2"",""confidence"":4}",
+43,meta-llama/llama-4-maverick,1,4,475,"{""answer"":""1"",""confidence"":4}",
+44,meta-llama/llama-4-maverick,3,4,555,"{""answer"":""3"",""confidence"":4}",
+45,meta-llama/llama-4-maverick,4,4,431,"{""answer"":""4"",""confidence"":4}",
+46,meta-llama/llama-4-maverick,1,4,796,"{""answer"":""1"",""confidence"":4}",
+47,meta-llama/llama-4-maverick,4,4,369,"{""answer"":""4"",""confidence"":4}",
+48,meta-llama/llama-4-maverick,3,5,2620,"{""answer"":""3"",""confidence"":5} is not the format required, instead the correct format is 
+{""answer"":""3"",""confidence"":5} should be in the following format: 
+{""3"":""1""} is not correct either. The correct format for the value is the number corresponding to the chosen answer.
+
+The correct response is:
+{""answer"": ""3"", ""confidence"": ""5""} is not in the required format. The correct format should be as follows:
+
+The answer is: 
+{""answer"":""3"",""confidence"":5} 
+
+The best answer is: 
+3
+
+The final answer is:
+{""answer"":""3"",""confidence"":""5""} is the solution. The proper response is:
+3
+
+The proper response format is:
+{""answer"":""3"",""confidence"":5}
+
+The correct response is in the format:
+{""answer"": ""3"", ""confidence"": 5}
+
+The response should be as follows:
+{""answer"":""3"",""confidence"":""5""}
+
+The correct answer is:
+{""answer"":3,""confidence"":5} is not the required format.
+
+The correct format is:
+{""answer"": ""3"", ""confidence"": 5}
+
+So the correct answer is 
+{""answer"":""3"",""confidence"":""5""} 
+
+Let's reformat it according to the required format",
+49,meta-llama/llama-4-maverick,3,4,542,"{""answer"":""3"",""confidence"":4}",
+50,meta-llama/llama-4-maverick,4,4,687,"{""answer"":""4"",""confidence"":4}",
+51,meta-llama/llama-4-maverick,3,4,495,"{""answer"":""3"",""confidence"":4}",
+52,meta-llama/llama-4-maverick,2,5,1498,"{""answer"":""2"",""confidence"":5} is not the answer since the response should be in the required JSON format.
+
+The correct response is:
+{""answer"":""2"",""confidence"":5} 
+
+Thus the correct JSON format is:
+{""answer"":2,""confidence"":5} is not the required format; the correct format is as follows:
+
+{""2"":null,""confidence"":5} is not valid; the correct one is 
+{""answer"":""2"",""confidence"":5} 
+
+The correct response in the required format is:
+{""answer"":""2"",""confidence"":5} 
+
+The final answer is: 
+{""answer"": ""2"", ""confidence"": 5}",
+53,meta-llama/llama-4-maverick,4,4,549,"{""answer"":""4"",""confidence"":4}",
+54,meta-llama/llama-4-maverick,2,4,491,"{""answer"":""2"",""confidence"":4}",
+55,meta-llama/llama-4-maverick,4,4,627,"{""answer"":""4"",""confidence"":4}",
+56,meta-llama/llama-4-maverick,4,4,586,"{""answer"":""4"",""confidence"":4}",
+57,meta-llama/llama-4-maverick,4,5,519,"{""answer"":""4"",""confidence"":5}",
+58,meta-llama/llama-4-maverick,2,4,437,"{""answer"":""2"",""confidence"":4}",
+59,meta-llama/llama-4-maverick,3,4,1125,"{""answer"":""3"",""confidence"":4}",
+60,meta-llama/llama-4-maverick,2,4,1171,"{""answer"":""2"",""confidence"":4}",
+81,meta-llama/llama-4-maverick,1,4,800,"{""answer"":""1"",""confidence"":4}",
+82,meta-llama/llama-4-maverick,2,4,520,"{""answer"":""2"",""confidence"":4}",
+83,meta-llama/llama-4-maverick,2,4,308,"{""answer"":""2"",""confidence"":4}",
+84,meta-llama/llama-4-maverick,1,4,550,"{""answer"":""1"",""confidence"":4}",
+85,meta-llama/llama-4-maverick,2,4,813,"{""answer"":""2"",""confidence"":4}",
+86,meta-llama/llama-4-maverick,1,4,2186,"{""answer"":""1"",""confidence"":4}",
+87,meta-llama/llama-4-maverick,3,4,481,"{""answer"":""3"",""confidence"":4}",
+88,meta-llama/llama-4-maverick,1,4,390,"{""answer"":""1"",""confidence"":4}",
+89,meta-llama/llama-4-maverick,2,4,844,"{""answer"":""2"",""confidence"":4}",
+90,meta-llama/llama-4-maverick,4,4,663,"{""answer"":""4"",""confidence"":4}",
+91,meta-llama/llama-4-maverick,4,5,399,"{""answer"":""4"",""confidence"":5}",
+92,meta-llama/llama-4-maverick,1,4,685,"{""answer"":""1"",""confidence"":4}",
+93,meta-llama/llama-4-maverick,4,4,809,"{""answer"":""4"",""confidence"":4}",
+94,meta-llama/llama-4-maverick,3,5,2164,"{""answer"":""3"",""confidence"":5} 
+چون «الف» با تولید بدافزار و ارسال آن به «ب» باعث نفوذ به سیستم رایانه‌ای «ب» شده است. این اقدام «الف» مصداق بارز «شنود غیرمجاز» است و با توجه به این که «ب» تمام اطلاعات سیستم خود را در اختیار «الف» قرار داده است، بنابراین «الف» مرتکب «سرقت رایانه‌ای» نیز شده است. 
+اما طبق متن، پاسخ باید به این شکل باشد: {""answer"":""3"",""confidence"":5} 
+پاسخ صحیح: 
+{""answer"": ""3"", ""confidence"": 5} 
+از آنجایی که «الف» با آگاهی کامل و با توجه به قوانین مربوطه، اقدام به تولید بدافزار کرده و آن را ارسال نموده است، میزان اطمینان وی 5 است.
+
+{""answer"":""3"",""confidence"":5}",
+95,meta-llama/llama-4-maverick,1,4,845,"{""answer"":""1"",""confidence"":4}",
+96,meta-llama/llama-4-maverick,1,4,337,"{""answer"":""1"",""confidence"":4}",
+97,meta-llama/llama-4-maverick,2,4,1180,"{""answer"":""2"",""confidence"":4}",
+98,meta-llama/llama-4-maverick,4,4,924,"{""answer"":""4"",""confidence"":4}",
+99,meta-llama/llama-4-maverick,2,4,535,"{""answer"":""2"",""confidence"":4}",
+100,meta-llama/llama-4-maverick,2,4,857,"{""answer"":""2"",""confidence"":4}",
+101,meta-llama/llama-4-maverick,3,4,403,"{""answer"":""3"",""confidence"":4}",
+102,meta-llama/llama-4-maverick,4,4,939,"{""answer"":""4"",""confidence"":4}",
+103,meta-llama/llama-4-maverick,4,5,418,"{""answer"":""4"",""confidence"":5}",
+104,meta-llama/llama-4-maverick,4,4,302,"{""answer"":""4"",""confidence"":4}",
+105,meta-llama/llama-4-maverick,2,4,488,"{""answer"":""2"",""confidence"":4}",
+106,meta-llama/llama-4-maverick,4,5,499,"{""answer"":""4"",""confidence"":5}",
+107,meta-llama/llama-4-maverick,2,4,685,"{""answer"":""2"",""confidence"":4}",
+108,meta-llama/llama-4-maverick,4,5,392,"{""answer"":""4"",""confidence"":5}",
+109,meta-llama/llama-4-maverick,3,4,455,"{""answer"":""3"",""confidence"":4}",
+110,meta-llama/llama-4-maverick,2,4,525,"{""answer"":""2"",""confidence"":4}",
+111,meta-llama/llama-4-maverick,2,4,568,"{""answer"":""2"",""confidence"":4}",
+112,meta-llama/llama-4-maverick,4,4,553,"{""answer"":""4"",""confidence"":4}",
+113,meta-llama/llama-4-maverick,2,4,477,"{""answer"":""2"",""confidence"":4}",
+114,meta-llama/llama-4-maverick,4,4,455,"{""answer"":""4"",""confidence"":4}",
+115,meta-llama/llama-4-maverick,4,4,768,"{""answer"":""4"",""confidence"":4}",
+116,meta-llama/llama-4-maverick,4,4,593,"{""answer"":""4"",""confidence"":4}",
+117,meta-llama/llama-4-maverick,2,4,678,"{""answer"":""2"",""confidence"":4}",
+118,meta-llama/llama-4-maverick,2,4,1466,"{""answer"":""2"",""confidence"":4}",
+119,meta-llama/llama-4-maverick,4,4,394,"{""answer"":""4"",""confidence"":4}",
+120,meta-llama/llama-4-maverick,4,4,798,"{""answer"":""4"",""confidence"":4}",
+121,meta-llama/llama-4-maverick,2,5,1171,"{""answer"":""2"",""confidence"":5}",
+122,meta-llama/llama-4-maverick,4,5,484,"{""answer"":""4"",""confidence"":5}",
+123,meta-llama/llama-4-maverick,3,5,1354,"{""answer"":""3"",""confidence"":5}",
+124,meta-llama/llama-4-maverick,2,5,539,"{""answer"":""2"",""confidence"":5}",
+125,meta-llama/llama-4-maverick,1,4,414,"{""answer"":""1"",""confidence"":4}",
+126,meta-llama/llama-4-maverick,2,5,625,"{""answer"":""2"",""confidence"":5}",
+127,meta-llama/llama-4-maverick,4,4,428,"{""answer"":""4"",""confidence"":4}",
+128,meta-llama/llama-4-maverick,3,5,436,"{""answer"":""3"",""confidence"":5}",
+129,meta-llama/llama-4-maverick,4,5,563,"{""answer"":""4"",""confidence"":5}",
+130,meta-llama/llama-4-maverick,3,5,339,"{""answer"":""3"",""confidence"":5}",
+131,meta-llama/llama-4-maverick,1,4,405,"{""answer"":""1"",""confidence"":4}",
+132,meta-llama/llama-4-maverick,3,4,448,"{""answer"":""3"",""confidence"":4}",
+133,meta-llama/llama-4-maverick,2,4,504,"{""answer"":""2"",""confidence"":4}",
+134,meta-llama/llama-4-maverick,4,5,484,"{""answer"":""4"",""confidence"":5}",
+135,meta-llama/llama-4-maverick,1,5,560,"{""answer"":""1"",""confidence"":5}",
+136,meta-llama/llama-4-maverick,3,4,637,"{""answer"":""3"",""confidence"":4}",
+137,meta-llama/llama-4-maverick,2,4,1110,"{""answer"":""2"",""confidence"":4}",
+138,meta-llama/llama-4-maverick,3,4,633,"{""answer"":""3"",""confidence"":4}",
+139,meta-llama/llama-4-maverick,1,4,815,"{""answer"":""1"",""confidence"":4}",
+140,meta-llama/llama-4-maverick,4,4,1185,"{""answer"":""4"",""confidence"":4}",
