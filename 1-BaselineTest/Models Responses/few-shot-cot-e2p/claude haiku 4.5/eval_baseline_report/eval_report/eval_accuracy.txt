@@ -1,0 +1,83 @@
+eval_accuracy
+
+فایل‌ها:
+
+eval_detailed.csv: برای هر سؤال شناسه، پاسخ مدل، gold_set، پرچم is_multi و correct=0/1 ثبت شده است.
+
+accuracy_overall.txt: دقت کلی به درصد.
+
+accuracy_by_pred.csv: دقت به‌تفکیک گزینه‌ای که مدل انتخاب کرده (bias احتمالی به یک گزینه).
+
+confusion.csv: جدول pred×gold_primary برای دیدن الگوی خطا.
+
+plot_accuracy_overall.png: ستون دقت کلی.
+
+plot_accuracy_by_pred.png: دقت به‌تفکیک گزینه پیش‌بینی‌شده.
+
+plot_confusion_heatmap.png: هیت‌مپ ماتریس خطا.
+
+تحلیل: محاسبه دقت کلی، شناسایی تمایل مدل به گزینه خاص، و الگوهای اشتباه پرتکرار.
+
+calibration_confidence
+
+فایل‌ها:
+
+calibration_by_conf.csv: میانگین correctness و تعداد نمونه در هر confidence.
+
+threshold_tradeoff.csv: دقت و پوشش (coverage) برای آستانه‌های مختلف confidence (≥1..≥5).
+
+plot_reliability_curve.png: منحنی کالیبراسیون (confidence در برابر accuracy).
+
+plot_accuracy_coverage_threshold.png: نمودار دقت و پوشش در آستانه‌های confidence.
+
+تحلیل: سنجش over/under-confidence و طراحی قانون پذیرش بر اساس confidence برای افزایش دقت با کنترل پوشش.
+
+tokens_usage
+
+فایل‌ها:
+
+tokens_summary.csv: میانگین/میانه/حداقل/حداکثر prompt_tokens، completion_tokens، total_tokens.
+
+tokens_by_correct.csv: همین آمارها برای درست/نادرست جداگانه.
+
+plot_tokens_hist.png: توزیع completion_tokens.
+
+plot_tokens_vs_latency.png: پراکنش completion_tokens در برابر latency (رنگ‌بندی براساس درستی).
+
+تحلیل: هزینه توکنی و رابطه‌اش با صحت و تاخیر؛ تصمیم‌گیری درباره سقف تولید و stop.
+
+explanation_quality
+
+فایل‌ها:
+
+explain_len_vs_correct.csv: میانگین/میانه/تعداد طول توضیح (کلمات) برای درست/نادرست.
+
+plot_explain_len_box.png: باکس‌پلات طول توضیح برای کلاس‌های درست/نادرست.
+
+plot_explain_len_vs_confidence.png: رابطه طول توضیح با confidence.
+
+تحلیل: بررسی اینکه CoT بلندتر واقعاً کمک می‌کند یا نه؛ اگر بی‌اثر/منفی بود، توجیه برای کوتاه نگه داشتن explain.
+
+latency_profile
+
+فایل‌ها:
+
+latency_summary.csv: آمار کلی تاخیر (mean/median/min/max/p90/p95).
+
+plot_latency_dist.png: هیستوگرام تاخیر.
+
+plot_conf_vs_latency.png: رابطه confidence با latency.
+
+تحلیل: شناخت پرفورمنس، پرت‌های تاخیری، و اثر اعتماد بر زمان پاسخ.
+
+error_inspection
+
+فایل‌ها:
+
+top_mistakes.csv: پرتکرارترین جفت‌های اشتباه pred→gold (برای هدف‌گذاری بهبود).
+
+review_hard_false_high_conf.csv: پاسخ‌های غلط با confidence بالا (کاندید بازبینی/اصلاح few‑shot).
+
+review_lucky_true_low_conf.csv: پاسخ‌های درست با confidence پایین (کاندید بهبود کالیبراسیون).
+
+تحلیل: تمرکز بر نقاط ضعف مشخص برای بازنویسی پرامپت، افزودن مثال‌های ضدسوگیری، و تنظیم confidence.
