@@ -1,0 +1,102 @@
+﻿id,model,answer,confidence,latency_ms,raw,error,idx,gold_set,is_multi,correct,run_type,lat_bucket
+3,x-ai/grok-4-fast,4,4,4155,"{""answer"":""4"",""confidence"":4}
+
+## Explanation
+
+The provided AI-generated answer, {""answer"":""4"",""confidence"":4}, is derived from an analysis of Iranian civil law principles, particularly those outlined in the Iranian Civil Code. The question focuses on possession (تصرف) accompanied by the intention of ownership (قصد تملک) and its potential to establish ownership (تملک). 
+
+First, the options are evaluated against relevant legal provisions: Option 1 suggests possession can constitute ownership without intent, which aligns partially with Article 35 of the Civil Code (presumption of ownership through possession) but does not directly address the query's emphasis on intent. Option 2 claims possession with intent never leads to ownership, which contradicts established doctrines. Option 3 states possession cannot be a factor in ownership acquisition, which is inaccurate given its role in various scenarios. Option 4 posits that possession may alone cause ownership in certain cases, which is supported by concepts such as ""تصرف مالکانه"" (possessory acts as ownership) and specific acquisition rules in Articles 140–142 (e.g., for lost property or prescriptive rights under Islamic jurisprudence integrated into Iranian law).
+
+This leads to the selection of option 4 as the correct choice, as it accurately reflects instances where",,3,{'2'},False,0,few_shot,3-5s
+8,x-ai/grok-4-fast,2,4,5821,"{""answer"":""2"",""confidence"":4}",,8,{'4'},False,0,few_shot,5-10s
+18,x-ai/grok-4-fast,3,5,4909,"{""answer"":""3"",""confidence"":5}",,18,{'1'},False,0,few_shot,3-5s
+22,x-ai/grok-4-fast,1,4,2840,"{""answer"":""1"",""confidence"":4}",,22,{'3'},False,0,few_shot,2-3s
+25,x-ai/grok-4-fast,2,4,10021,"{""answer"":""2"",""confidence"":4}",,25,{'4'},False,0,few_shot,>10s
+26,x-ai/grok-4-fast,3,4,3802,"{""answer"":""3"",""confidence"":4}",,26,{'4'},False,0,few_shot,3-5s
+27,x-ai/grok-4-fast,2,4,3019,"{""answer"":""2"",""confidence"":4}",,27,{'4'},False,0,few_shot,3-5s
+28,x-ai/grok-4-fast,3,4,5050,"{""answer"":""3"",""confidence"":4}",,28,{'1'},False,0,few_shot,5-10s
+30,x-ai/grok-4-fast,2,4,18936,"{""answer"":""2"",""confidence"":4}
+
+## Explanation
+
+The provided answer derives from an analysis of Iranian civil procedure law, specifically Article 366",,30,{'1'},False,0,few_shot,>10s
+33,x-ai/grok-4-fast,1,4,5958,"{""answer"":""1"",""confidence"":4}",,33,{'4'},False,0,few_shot,5-10s
+35,x-ai/grok-4-fast,2,4,5452,"{""answer"":""2"",""confidence"":4}",,35,{'1'},False,0,few_shot,5-10s
+36,x-ai/grok-4-fast,4,4,13020,"{""answer"":""4"",""confidence"":4}",,36,{'1'},False,0,few_shot,>10s
+37,x-ai/grok-4-fast,2,5,2209,"{""answer"":""2"",""confidence"":5}",,37,{'4'},False,0,few_shot,2-3s
+40,x-ai/grok-4-fast,4,4,31558,"{""answer"":""4"",""confidence"":4}",,40,{'1'},False,0,few_shot,>10s
+42,x-ai/grok-4-fast,1,4,2722,"{""answer"":""1"",""confidence"":4}",,42,{'2'},False,0,few_shot,2-3s
+43,x-ai/grok-4-fast,2,4,2638,"{""answer"":""2"",""confidence"":4}",,43,{'1'},False,0,few_shot,2-3s
+48,x-ai/grok-4-fast,2,4,2496,"{""answer"":""2"",""confidence"":4}",,48,{'1'},False,0,few_shot,2-3s
+49,x-ai/grok-4-fast,3,4,5095,"{""answer"":""3"",""confidence"":4}",,49,{'1'},False,0,few_shot,5-10s
+53,x-ai/grok-4-fast,1,4,5032,"{""answer"":""1"",""confidence"":4}",,53,{'2'},False,0,few_shot,5-10s
+54,x-ai/grok-4-fast,2,4,7654,"{""answer"":""2"",""confidence"":4}",,54,{'3'},False,0,few_shot,5-10s
+55,x-ai/grok-4-fast,1,4,4444,"{""answer"":""1"",""confidence"":4}",,55,{'4'},False,0,few_shot,3-5s
+58,x-ai/grok-4-fast,3,4,3466,"{""answer"":""3"",""confidence"":4}",,58,{'4'},False,0,few_shot,3-5s
+59,x-ai/grok-4-fast,3,4,11720,"{""answer"":""3"",""confidence"":4}
+
+## Explanation
+
+The provided AI-generated answer, {""answer"":""3"",""confidence"":4}, is based on an analysis of the Iranian Commercial Code, specifically provisions related to joint-stock companies (Articles 211–313). The question asks which statement about temporary share certificates (گواهینامه موقت سهم) is correct. Each option was evaluated against relevant legal articles:
+
+- Option 1 refers to the issuance of temporary certificates before company registration, which aligns with Article 37, requiring the board to issue them to subscribers after the constitutive general assembly but before registration. However, the phrasing ""صاحبان سهام"" (shareholders) may be imprecise, as subscribers are not full shareholders until registration.
+
+- Option 2 describes the certificate as a negotiable document indicating share numbers, which is partially accurate under Article 40, as it is transferable by endorsement. Yet, it functions more as a provisional right rather than a fully negotiable instrument like final shares.
+
+- Options 3 and 4 address liability for unpaid nominal share value upon transfer. Article 42 of the Commercial Code stipulates that the transferor and transferee of partly paid shares (including via temporary certificates) are ""متضامناً مسئول"" (jointly and sever",,59,{'2'},False,0,few_shot,>10s
+60,x-ai/grok-4-fast,2,4,2335,"{""answer"":""2"",""confidence"":4}",,60,{'1'},False,0,few_shot,2-3s
+84,x-ai/grok-4-fast,1,4,5636,"{""answer"":""1"",""confidence"":4}",,84,{'4'},False,0,few_shot,5-10s
+86,x-ai/grok-4-fast,1,4,4349,"{""answer"":""1"",""confidence"":4}",,86,{'3'},False,0,few_shot,3-5s
+90,x-ai/grok-4-fast,4,4,3767,"{""answer"":""4"",""confidence"":4}",,90,{'3'},False,0,few_shot,3-5s
+93,x-ai/grok-4-fast,4,4,5635,"{""answer"":""4"",""confidence"":4}",,93,{'1'},False,0,few_shot,5-10s
+95,x-ai/grok-4-fast,4,4,3127,"{""answer"":""4"",""confidence"":4}",,95,{'2'},False,0,few_shot,3-5s
+96,x-ai/grok-4-fast,3,4,3716,"{""answer"":""3"",""confidence"":4}",,96,{'1'},False,0,few_shot,3-5s
+97,x-ai/grok-4-fast,2,4,4420,"{""answer"":""2"",""confidence"":4}
+
+## Explanation
+
+The reasoning process begins by analyzing the question under Iranian law, specifically Article 1 of the Law on Fraud, which defines fraud as the use of deceptive means to unlawfully obtain another's property. The task requires identifying the option where such deception is absent, thus exempting the person from fraud punishment.
+
+Options are evaluated as follows:
+
+- Option 1 involves collusion (تبانی) between parties to file false lawsuits and deprive a third party of property, which constitutes deceptive means and qualifies as fraud.
+- Option 2 describes transferring benefits of rented property to another, a potentially legitimate or contractual act without any element of deception or intent to defraud, making it a civil matter rather than criminal fraud.
+- Option 3 entails obtaining a checkbook through fraudulent methods disproportionate to financial status, directly involving deception to gain undue benefits, thus falling under fraud.
+- Option 4 refers to entering a lawsuit as a third party due to collusion with one side to seize another's property, which involves manipulative deception in legal proceedings and is punishable as fraud.
+
+Based on this, Option 2 lacks the required deceptive element, leading to the selection of ""2"" as the answer. Confidence is rated at 4, reflecting strong alignment with the clear legal",,97,{'3'},False,0,few_shot,3-5s
+98,x-ai/grok-4-fast,1,4,7136,"{""answer"":""1"",""confidence"":4}",,98,{'4'},False,0,few_shot,5-10s
+102,x-ai/grok-4-fast,4,4,2817,"{""answer"":""4"",""confidence"":4}",,102,{'2'},False,0,few_shot,2-3s
+105,x-ai/grok-4-fast,2,4,3616,"{""answer"":""2"",""confidence"":4}",,105,{'1'},False,0,few_shot,3-5s
+106,x-ai/grok-4-fast,4,4,5593,"{""answer"":""4"",""confidence"":4}",,106,{'3'},False,0,few_shot,5-10s
+109,x-ai/grok-4-fast,4,4,5684,"{""answer"":""4"",""confidence"":4}",,109,{'3'},False,0,few_shot,5-10s
+110,x-ai/grok-4-fast,2,4,14426,"{""answer"":""2"",""confidence"":4}
+
+## Explanation
+
+The reasoning process begins by analyzing the question under Iranian law, specifically the Code of Criminal Procedure, which governs judicial authorities for seizures. The question asks about the authority for seizing property or items, a measure often used in investigations or trials.
+
+Next, the options are evaluated: Option 1 (دادگاه) is limited to the trial phase and does not cover preliminary investigations. Option 3 (بازپرس) applies primarily to the investigative stage but excludes other relevant authorities. Option 4 (دادستان) covers prosecutorial oversight but is not exhaustive. Option 2 (حسب مورد بازپرس یا دادستان یا دادگاه) aligns with legal provisions, as Article 99 and related sections of the Code allow seizures by the investigating judge (بازپرس) during inquiries, the prosecutor (دادستان) in supervisory roles, and the court (دادگاه) in adjudicative contexts, depending on the case's stage.
+
+This comprehensive coverage makes Option 2 the most accurate. Confidence is rated at 4 (STRONG) due to clear references in the Code of Criminal Procedure, though slight variations in specific scenarios could introduce minor interpretive nuances.",,110,{'1'},False,0,few_shot,>10s
+111,x-ai/grok-4-fast,1,4,7201,"{""answer"":""1"",""confidence"":4}",,111,{'2'},False,0,few_shot,5-10s
+112,x-ai/grok-4-fast,3,4,7937,"{""answer"":""3"",""confidence"":4}",,112,{'4'},False,0,few_shot,5-10s
+118,x-ai/grok-4-fast,3,4,8872,"{""answer"":""3"",""confidence"":4}",,118,{'2'},False,0,few_shot,5-10s
+119,x-ai/grok-4-fast,1,4,9968,"{""answer"":""1"",""confidence"":4}",,119,{'4'},False,0,few_shot,5-10s
+120,x-ai/grok-4-fast,2,4,4138,"{""answer"":""2"",""confidence"":4}",,120,{'3'},False,0,few_shot,3-5s
+123,x-ai/grok-4-fast,1,5,5134,"{""answer"":""1"",""confidence"":5}
+
+## Explanation
+
+The reasoning process begins by analyzing the question, which asks about the authority of the Head of the Judiciary under the Iranian Constitution that requires consultation. The relevant provision is Article 160 of the Constitution, which specifies that the Head of the Judiciary may delegate full financial and administrative powers to the Minister of Justice only after consultation with the Leader.
+
+Next, each option is evaluated against this article:
+
+- Option 1 (delegating full financial and administrative powers to the Minister of Justice) directly aligns with Article 160, as it explicitly requires consultation.
+- Option 2 (delegating employment powers for non-judges) is covered under Article 157, which allows direct delegation without consultation.
+- Option 3 (changing a judge's position or place of service) falls under Article 157, granting the Head direct authority without mention of consultation.
+- Option 4 (creating necessary structures in the judiciary) is also outlined in Article 157 as a direct power of the Head, with no consultation required.
+
+This comparison confirms that only Option 1 necessitates consultation, leading to its selection. Confidence is rated at 5 (VERY STRONG) due to the unambiguous wording of Article 160, providing a clear and definitive legal basis.",,123,{'3'},False,0,few_shot,5-10s
+128,x-ai/grok-4-fast,2,4,2954,"{""answer"":""2"",""confidence"":4}",,128,{'4'},False,0,few_shot,2-3s
+133,x-ai/grok-4-fast,3,4,3223,"{""answer"":""3"",""confidence"":4}",,133,{'2'},False,0,few_shot,3-5s

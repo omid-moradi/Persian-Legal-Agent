@@ -1,0 +1,258 @@
+﻿id,model,answer,confidence,latency_ms,raw,error,idx,gold_set,is_multi,correct,run_type
+1,x-ai/grok-4-fast,3,4,3992,"{""answer"":""3"",""confidence"":4}",,1,{'3'},False,1,few_shot
+2,x-ai/grok-4-fast,2,3,24837,"{""answer"":""2"",""confidence"":3}",,2,{'2'},False,1,few_shot
+3,x-ai/grok-4-fast,4,4,4155,"{""answer"":""4"",""confidence"":4}
+
+## Explanation
+
+The provided AI-generated answer, {""answer"":""4"",""confidence"":4}, is derived from an analysis of Iranian civil law principles, particularly those outlined in the Iranian Civil Code. The question focuses on possession (تصرف) accompanied by the intention of ownership (قصد تملک) and its potential to establish ownership (تملک). 
+
+First, the options are evaluated against relevant legal provisions: Option 1 suggests possession can constitute ownership without intent, which aligns partially with Article 35 of the Civil Code (presumption of ownership through possession) but does not directly address the query's emphasis on intent. Option 2 claims possession with intent never leads to ownership, which contradicts established doctrines. Option 3 states possession cannot be a factor in ownership acquisition, which is inaccurate given its role in various scenarios. Option 4 posits that possession may alone cause ownership in certain cases, which is supported by concepts such as ""تصرف مالکانه"" (possessory acts as ownership) and specific acquisition rules in Articles 140–142 (e.g., for lost property or prescriptive rights under Islamic jurisprudence integrated into Iranian law).
+
+This leads to the selection of option 4 as the correct choice, as it accurately reflects instances where",,3,{'2'},False,0,few_shot
+4,x-ai/grok-4-fast,4,4,6205,"{""answer"":""4"",""confidence"":4}",,4,{'4'},False,1,few_shot
+5,x-ai/grok-4-fast,3,4,4152,"{""answer"":""3"",""confidence"":4}",,5,{'3'},False,1,few_shot
+6,x-ai/grok-4-fast,1,3,24092,"{""answer"":""1"",""confidence"":3}",,6,{'3'},False,0,few_shot
+7,x-ai/grok-4-fast,1,4,10130,"{""answer"":""1"",""confidence"":4}",,7,{'1'},False,1,few_shot
+8,x-ai/grok-4-fast,2,4,5821,"{""answer"":""2"",""confidence"":4}",,8,{'4'},False,0,few_shot
+9,x-ai/grok-4-fast,3,3,50659,"{""answer"":""3"",""confidence"":3}
+
+## Explanation
+
+The provided answer identifies",,9,{'1'},False,0,few_shot
+10,x-ai/grok-4-fast,3,4,4824,"{""answer"":""3"",""confidence"":4}",,10,{'3'},False,1,few_shot
+11,x-ai/grok-4-fast,4,3,5229,"{""answer"":""4"",""confidence"":3}",,11,{'4'},False,1,few_shot
+12,x-ai/grok-4-fast,4,3,2517,"{""answer"":""4"",""confidence"":3}",,12,{'4'},False,1,few_shot
+13,x-ai/grok-4-fast,4,3,22469,"{""answer"":""4"",""confidence"":3}",,13,{'1'},False,0,few_shot
+14,x-ai/grok-4-fast,4,4,4335,"{""answer"":""4"",""confidence"":4}",,14,{'4'},False,1,few_shot
+15,x-ai/grok-4-fast,2,5,3534,"{""answer"":""2"",""confidence"":5}
+
+## Explanation
+
+The task requires identifying the incorrect statement about creators' rights under Iranian Copyright Law (قانون حمایت از حقوق مؤلفان، مصنفان و هنرمندان). The analysis evaluates each option against relevant provisions:
+
+- Option 1 aligns with Article 4, which defines exclusive economic rights including exploitation, offering, and performance of the work, making it correct.
+- Option 3 corresponds to Article 4, stipulating that moral rights (e.g., attribution and integrity) are personal, perpetual, and non-transferable, confirming its accuracy.
+- Option 4 reflects Article 2, which classifies joint works as those where individual contributions are inseparable and not distinctly identifiable, rendering it correct.
+- Option 2 misstates the law under Article 8, which permits quotation and citation for scientific, literary, or educational purposes but imposes conditions such as proportionality, non-competitive use, source attribution, and avoidance of prejudice to the author's interests; the phrase ""without any conditions"" is inaccurate.
+
+Thus, Option 2 is the incorrect statement. Confidence is rated at 5 due to the unambiguous application of statutory text.",,15,{'2'},False,1,few_shot
+16,x-ai/grok-4-fast,1,4,3973,"{""answer"":""1"",""confidence"":4}",,16,{'1'},False,1,few_shot
+17,x-ai/grok-4-fast,3,4,9510,"{""answer"":""3"",""confidence"":4}
+
+## Explanation
+
+The provided answer selects option 3 as the correct statement regarding the rejection of inheritance under Iranian law, specifically based on the Civil Code and the Law on Succession Affairs. The evaluation process involves assessing each option against relevant legal provisions:
+
+- Option 1 is incorrect because Iranian law, per Article 867 of the Civil Code, permits absolute rejection of inheritance (رد مطلق ترکه) if done explicitly within the specified period, while conditional rejection is not recognized.
+- Option 2 is accurate in principle, as the right to reject inheritance is personal and non-transferable (including to the heir's own heirs), but it is not selected as the primary correct answer due to the question's focus on procedural aspects.
+- Option 3 aligns directly with Article 238 of the Law on Succession Affairs (قانون امور حسبی), which states that if an inventory of the inheritance (تحریر ترکه) is conducted, the one-month period for rejection begins from the date of notification of the inventory's completion, making it the most precise and standard interpretation.
+- Option 4 is incorrect because rejection is an individual decision for each heir; under Article 867 of the Civil Code, only if all heirs reject does the inheritance",,17,{'3'},False,1,few_shot
+18,x-ai/grok-4-fast,3,5,4909,"{""answer"":""3"",""confidence"":5}",,18,{'1'},False,0,few_shot
+19,x-ai/grok-4-fast,2,4,3607,"{""answer"":""2"",""confidence"":4}",,19,{'2'},False,1,few_shot
+20,x-ai/grok-4-fast,4,5,3129,"{""answer"":""4"",""confidence"":5}",,20,{'4'},False,1,few_shot
+21,x-ai/grok-4-fast,2,4,2435,"{""answer"":""2"",""confidence"":4}",,21,{'2'},False,1,few_shot
+22,x-ai/grok-4-fast,1,4,2840,"{""answer"":""1"",""confidence"":4}",,22,{'3'},False,0,few_shot
+23,x-ai/grok-4-fast,3,4,11014,"{""answer"":""3"",""confidence"":4}",,23,{'3'},False,1,few_shot
+24,x-ai/grok-4-fast,1,4,5317,"{""answer"":""1"",""confidence"":4}",,24,{'1'},False,1,few_shot
+25,x-ai/grok-4-fast,2,4,10021,"{""answer"":""2"",""confidence"":4}",,25,{'4'},False,0,few_shot
+26,x-ai/grok-4-fast,3,4,3802,"{""answer"":""3"",""confidence"":4}",,26,{'4'},False,0,few_shot
+27,x-ai/grok-4-fast,2,4,3019,"{""answer"":""2"",""confidence"":4}",,27,{'4'},False,0,few_shot
+28,x-ai/grok-4-fast,3,4,5050,"{""answer"":""3"",""confidence"":4}",,28,{'1'},False,0,few_shot
+29,x-ai/grok-4-fast,3,4,3636,"{""answer"":""3"",""confidence"":4}",,29,{'3'},False,1,few_shot
+30,x-ai/grok-4-fast,2,4,18936,"{""answer"":""2"",""confidence"":4}
+
+## Explanation
+
+The provided answer derives from an analysis of Iranian civil procedure law, specifically Article 366",,30,{'1'},False,0,few_shot
+31,x-ai/grok-4-fast,1,4,6888,"{""answer"":""1"",""confidence"":4}",,31,{'1'},False,1,few_shot
+32,x-ai/grok-4-fast,1,4,3275,"{""answer"":""1"",""confidence"":4}",,32,{'1'},False,1,few_shot
+33,x-ai/grok-4-fast,1,4,5958,"{""answer"":""1"",""confidence"":4}",,33,{'4'},False,0,few_shot
+34,x-ai/grok-4-fast,4,3,8867,"{""answer"":""4"",""confidence"":3}",,34,{'2'},False,0,few_shot
+35,x-ai/grok-4-fast,2,4,5452,"{""answer"":""2"",""confidence"":4}",,35,{'1'},False,0,few_shot
+36,x-ai/grok-4-fast,4,4,13020,"{""answer"":""4"",""confidence"":4}",,36,{'1'},False,0,few_shot
+37,x-ai/grok-4-fast,2,5,2209,"{""answer"":""2"",""confidence"":5}",,37,{'4'},False,0,few_shot
+38,x-ai/grok-4-fast,3,3,6717,"{""answer"":""3"",""confidence"":3}",,38,{'2'},False,0,few_shot
+39,x-ai/grok-4-fast,3,3,8447,"{""answer"":""3"",""confidence"":3}",,39,{'3'},False,1,few_shot
+40,x-ai/grok-4-fast,4,4,31558,"{""answer"":""4"",""confidence"":4}",,40,{'1'},False,0,few_shot
+41,x-ai/grok-4-fast,1,3,3200,"{""answer"":""1"",""confidence"":3}",,41,{'4'},False,0,few_shot
+42,x-ai/grok-4-fast,1,4,2722,"{""answer"":""1"",""confidence"":4}",,42,{'2'},False,0,few_shot
+43,x-ai/grok-4-fast,2,4,2638,"{""answer"":""2"",""confidence"":4}",,43,{'1'},False,0,few_shot
+44,x-ai/grok-4-fast,3,4,2365,"{""answer"":""3"",""confidence"":4}",,44,{'3'},False,1,few_shot
+45,x-ai/grok-4-fast,4,4,3548,"{""answer"":""4"",""confidence"":4}",,45,{'4'},False,1,few_shot
+46,x-ai/grok-4-fast,1,4,4312,"{""answer"":""1"",""confidence"":4}",,46,{'1'},False,1,few_shot
+47,x-ai/grok-4-fast,2,3,5304,"{""answer"":""2"",""confidence"":3}",,47,{'2'},False,1,few_shot
+48,x-ai/grok-4-fast,2,4,2496,"{""answer"":""2"",""confidence"":4}",,48,{'1'},False,0,few_shot
+49,x-ai/grok-4-fast,3,4,5095,"{""answer"":""3"",""confidence"":4}",,49,{'1'},False,0,few_shot
+50,x-ai/grok-4-fast,3,4,3980,"{""answer"":""3"",""confidence"":4}",,50,{'3'},False,1,few_shot
+51,x-ai/grok-4-fast,3,4,2881,"{""answer"":""3"",""confidence"":4}",,51,{'3'},False,1,few_shot
+52,x-ai/grok-4-fast,4,3,24797,"{""answer"":""4"",""confidence"":3}",,52,"{'4', '2'}",True,1,few_shot
+53,x-ai/grok-4-fast,1,4,5032,"{""answer"":""1"",""confidence"":4}",,53,{'2'},False,0,few_shot
+54,x-ai/grok-4-fast,2,4,7654,"{""answer"":""2"",""confidence"":4}",,54,{'3'},False,0,few_shot
+55,x-ai/grok-4-fast,1,4,4444,"{""answer"":""1"",""confidence"":4}",,55,{'4'},False,0,few_shot
+56,x-ai/grok-4-fast,2,4,2718,"{""answer"":""2"",""confidence"":4}",,56,{'2'},False,1,few_shot
+57,x-ai/grok-4-fast,3,3,15299,"{""answer"":""3"",""confidence"":3}
+
+## Explanation
+
+The provided answer identifies option 3 as the legal act that is not enforceable under Iranian bankruptcy law, specifically the Commercial Code. After the bankruptcy ruling becomes final, the bankrupt trader loses the right to administer or dispose of their own property without authorization from the trustee or court, as outlined in articles 412 and 416 of the Commercial Code. This renders any unauthorized disposition of assets null and void.
+
+- Option 1 involves a personal employment contract, which constitutes a personal act rather than a disposition of assets, making it enforceable.
+- Option 2 pertains to the sale of a car belonging to a third party (the principal, or ""مولی‌علیه""), where the bankrupt acts as an agent. Such actions on behalf of others remain valid unless the principal revokes the authority, as bankruptcy primarily restricts dealings with the bankrupt's own property.
+- Option 3 involves granting a one-year usufruct right over the bankrupt's residential apartment to a dependent relative, which qualifies as a disposition of the bankrupt's assets. Even for dependents, this requires court or trustee approval to avoid diminishing the bankruptcy estate, rendering it unenforceable.
+- Option 4 concerns accepting a gratuitous settlement of interests in property belonging to the bankrupt's brother",,57,{'3'},False,1,few_shot
+58,x-ai/grok-4-fast,3,4,3466,"{""answer"":""3"",""confidence"":4}",,58,{'4'},False,0,few_shot
+59,x-ai/grok-4-fast,3,4,11720,"{""answer"":""3"",""confidence"":4}
+
+## Explanation
+
+The provided AI-generated answer, {""answer"":""3"",""confidence"":4}, is based on an analysis of the Iranian Commercial Code, specifically provisions related to joint-stock companies (Articles 211–313). The question asks which statement about temporary share certificates (گواهینامه موقت سهم) is correct. Each option was evaluated against relevant legal articles:
+
+- Option 1 refers to the issuance of temporary certificates before company registration, which aligns with Article 37, requiring the board to issue them to subscribers after the constitutive general assembly but before registration. However, the phrasing ""صاحبان سهام"" (shareholders) may be imprecise, as subscribers are not full shareholders until registration.
+
+- Option 2 describes the certificate as a negotiable document indicating share numbers, which is partially accurate under Article 40, as it is transferable by endorsement. Yet, it functions more as a provisional right rather than a fully negotiable instrument like final shares.
+
+- Options 3 and 4 address liability for unpaid nominal share value upon transfer. Article 42 of the Commercial Code stipulates that the transferor and transferee of partly paid shares (including via temporary certificates) are ""متضامناً مسئول"" (jointly and sever",,59,{'2'},False,0,few_shot
+60,x-ai/grok-4-fast,2,4,2335,"{""answer"":""2"",""confidence"":4}",,60,{'1'},False,0,few_shot
+81,x-ai/grok-4-fast,1,4,4157,"{""answer"":""1"",""confidence"":4}",,81,{'1'},False,1,few_shot
+82,x-ai/grok-4-fast,3,4,3160,"{""answer"":""3"",""confidence"":4}",,82,{'3'},False,1,few_shot
+83,x-ai/grok-4-fast,1,4,4770,"{""answer"":""1"",""confidence"":4}",,83,{'1'},False,1,few_shot
+84,x-ai/grok-4-fast,1,4,5636,"{""answer"":""1"",""confidence"":4}",,84,{'4'},False,0,few_shot
+85,x-ai/grok-4-fast,2,4,5803,"{""answer"":""2"",""confidence"":4}",,85,{'2'},False,1,few_shot
+86,x-ai/grok-4-fast,1,4,4349,"{""answer"":""1"",""confidence"":4}",,86,{'3'},False,0,few_shot
+87,x-ai/grok-4-fast,3,4,3459,"{""answer"":""3"",""confidence"":4}",,87,{'3'},False,1,few_shot
+88,x-ai/grok-4-fast,1,5,2259,"{""answer"":""1"",""confidence"":5}",,88,{'1'},False,1,few_shot
+89,x-ai/grok-4-fast,1,3,22364,"{""answer"":""1"",""confidence"":3}
+
+## Explanation
+
+The provided answer selects option 1 based on key principles in the Iranian Islamic Penal Code, particularly Article 134, which governs the multiplicity of crimes (تعدد جرم). Non-intentional crimes, such as crime ""A"" (punishable by 2 to 10 years imprisonment), are explicitly excluded from the multiplicity rules under Article 134, paragraph 5, requiring separate punishment according to their own provisions. For non-intentional offenses, courts typically impose the minimum punishment unless aggravating circumstances apply, aligning with option 1's treatment of ""A"" at the minimum.
+
+For the intentional crimes ""B"" (6 months imprisonment), ""C"" (1 to 2 million Rials fine), and ""D"" (up to 99 lashes), all classified as ta'zir offenses, Article 134 applies. This article mandates imposing the full punishment for the most severe crime among them (likely ""B"") and limits punishments for the others to their respective maxima, with the total not exceeding the primary punishment after conversion if types differ. Option 1's reference to applying punishments within the range (from average of minimum and maximum up to the maximum) reflects the judicial discretion in ta'zir sentencing under multiplicity,",,89,set(),False,0,few_shot
+90,x-ai/grok-4-fast,4,4,3767,"{""answer"":""4"",""confidence"":4}",,90,{'3'},False,0,few_shot
+91,x-ai/grok-4-fast,1,4,5489,"{""answer"":""1"",""confidence"":4}",,91,{'1'},False,1,few_shot
+92,x-ai/grok-4-fast,3,4,2425,"{""answer"":""3"",""confidence"":4}",,92,{'3'},False,1,few_shot
+93,x-ai/grok-4-fast,4,4,5635,"{""answer"":""4"",""confidence"":4}",,93,{'1'},False,0,few_shot
+94,x-ai/grok-4-fast,2,3,5925,"{""answer"":""2"",""confidence"":3}
+
+## Explanation
+
+The provided answer identifies option 2 (""سرقت رایانه ای"") as the most applicable crime under Iranian law, specifically the Computer Crimes Law, which addresses unauthorized access and theft of digital data. The malware's primary function is to exfiltrate all system information without permission, aligning directly with the definition of computer theft, as it involves illicit acquisition of data rather than physical damage or actual audio interception. Although the malware disguises itself as a sound recorder, no explicit audio capture or eavesdropping occurs, ruling out ""شنود غیر مجاز"" in options 3 and 4. Option 1 is excluded due to the absence of any destructive elements like data alteration or system impairment. This interpretation relies on standard provisions in Iranian cyber law, such as those prohibiting unauthorized data extraction, leading to a moderate confidence level of 3, as the disguise element introduces minor interpretive ambiguity without clear precedent for combined charges.",,94,{'2'},False,1,few_shot
+95,x-ai/grok-4-fast,4,4,3127,"{""answer"":""4"",""confidence"":4}",,95,{'2'},False,0,few_shot
+96,x-ai/grok-4-fast,3,4,3716,"{""answer"":""3"",""confidence"":4}",,96,{'1'},False,0,few_shot
+97,x-ai/grok-4-fast,2,4,4420,"{""answer"":""2"",""confidence"":4}
+
+## Explanation
+
+The reasoning process begins by analyzing the question under Iranian law, specifically Article 1 of the Law on Fraud, which defines fraud as the use of deceptive means to unlawfully obtain another's property. The task requires identifying the option where such deception is absent, thus exempting the person from fraud punishment.
+
+Options are evaluated as follows:
+
+- Option 1 involves collusion (تبانی) between parties to file false lawsuits and deprive a third party of property, which constitutes deceptive means and qualifies as fraud.
+- Option 2 describes transferring benefits of rented property to another, a potentially legitimate or contractual act without any element of deception or intent to defraud, making it a civil matter rather than criminal fraud.
+- Option 3 entails obtaining a checkbook through fraudulent methods disproportionate to financial status, directly involving deception to gain undue benefits, thus falling under fraud.
+- Option 4 refers to entering a lawsuit as a third party due to collusion with one side to seize another's property, which involves manipulative deception in legal proceedings and is punishable as fraud.
+
+Based on this, Option 2 lacks the required deceptive element, leading to the selection of ""2"" as the answer. Confidence is rated at 4, reflecting strong alignment with the clear legal",,97,{'3'},False,0,few_shot
+98,x-ai/grok-4-fast,1,4,7136,"{""answer"":""1"",""confidence"":4}",,98,{'4'},False,0,few_shot
+99,x-ai/grok-4-fast,2,3,8646,"{""answer"":""2"",""confidence"":3}",,99,{'2'},False,1,few_shot
+100,x-ai/grok-4-fast,2,3,13047,"{""answer"":""2"",""confidence"":3}",,100,{'4'},False,0,few_shot
+101,x-ai/grok-4-fast,2,3,3967,"{""answer"":""2"",""confidence"":3}
+
+## Explanation
+
+The reasoning process begins by analyzing the question under Iranian law, specifically the jurisdiction for unintentional homicide (qatl-e khata) resulting from traffic accidents, as defined in the Islamic Penal Code. Article 302 of the Code addresses unintentional homicide, which carries penalties but does not involve qisas (retaliation), distinguishing it from intentional crimes.
+
+Next, the structure of Iranian criminal courts is considered: Criminal Court One handles severe offenses like intentional murder, while Criminal Court Two addresses less serious crimes, including unintentional homicides from traffic accidents. This aligns with procedural laws assigning such cases to Criminal Court Two for investigation and ruling.
+
+The options are then evaluated: Option 1 (Court of Peace) applies to minor civil matters, not criminal cases; Option 3 (Criminal Court One) is reserved for graver offenses; and Option 4 (Dispute Resolution Council) deals with non-criminal disputes. Thus, Option 2 (Criminal Court Two) matches the legal criteria.
+
+Finally, confidence is assessed based on the clarity of the Penal Code and standard interpretations, rated as moderate (level 3) due to reliance on general knowledge without direct access to the latest precedents.",,101,{'1'},False,0,few_shot
+102,x-ai/grok-4-fast,4,4,2817,"{""answer"":""4"",""confidence"":4}",,102,{'2'},False,0,few_shot
+103,x-ai/grok-4-fast,4,4,23314,"{""answer"":""4"",""confidence"":4}
+
+## Explanation
+
+The provided answer identifies option 4 as the correct choice based on provisions in the Iranian Code of Criminal Procedure (قانون آیین دادرسی کیفری مصوب ۱۳۹۲). The question concerns the absence of ""جلب مطلق و بدون شرط"" (absolute and unconditional arrest without prior summons), which applies specifically to the most severe crimes.
+
+Under Article 217 and related provisions (e.g., Articles 216–219), direct issuance of an arrest warrant without summons is permitted without additional conditions for crimes punishable by death (سلب حیات, option 1), life imprisonment (حبس ابد, option 2), or qisas punishments including amputation (قطع عضو, option 3), as these are treated as inherently high-risk, allowing presumed necessity.
+
+For ta'zir crimes of degrees 2 and 3 (option 4, with punishments of 10–25 years imprisonment), while temporary detention is possible under Article 237 for degrees 1–3, the arrest warrant requires prior summons or justification such as flight risk or evasion (per Article 219). Thus, ""جلب مطلق"" without conditions does not apply, making option 4 the exception.
+
+Confidence level",,103,{'4'},False,1,few_shot
+104,x-ai/grok-4-fast,1,4,3670,"{""answer"":""1"",""confidence"":4}",,104,{'1'},False,1,few_shot
+105,x-ai/grok-4-fast,2,4,3616,"{""answer"":""2"",""confidence"":4}",,105,{'1'},False,0,few_shot
+106,x-ai/grok-4-fast,4,4,5593,"{""answer"":""4"",""confidence"":4}",,106,{'3'},False,0,few_shot
+107,x-ai/grok-4-fast,2,4,2151,"{""answer"":""2"",""confidence"":4}",,107,{'2'},False,1,few_shot
+108,x-ai/grok-4-fast,4,5,4142,"{""answer"":""4"",""confidence"":5}",,108,{'4'},False,1,few_shot
+109,x-ai/grok-4-fast,4,4,5684,"{""answer"":""4"",""confidence"":4}",,109,{'3'},False,0,few_shot
+110,x-ai/grok-4-fast,2,4,14426,"{""answer"":""2"",""confidence"":4}
+
+## Explanation
+
+The reasoning process begins by analyzing the question under Iranian law, specifically the Code of Criminal Procedure, which governs judicial authorities for seizures. The question asks about the authority for seizing property or items, a measure often used in investigations or trials.
+
+Next, the options are evaluated: Option 1 (دادگاه) is limited to the trial phase and does not cover preliminary investigations. Option 3 (بازپرس) applies primarily to the investigative stage but excludes other relevant authorities. Option 4 (دادستان) covers prosecutorial oversight but is not exhaustive. Option 2 (حسب مورد بازپرس یا دادستان یا دادگاه) aligns with legal provisions, as Article 99 and related sections of the Code allow seizures by the investigating judge (بازپرس) during inquiries, the prosecutor (دادستان) in supervisory roles, and the court (دادگاه) in adjudicative contexts, depending on the case's stage.
+
+This comprehensive coverage makes Option 2 the most accurate. Confidence is rated at 4 (STRONG) due to clear references in the Code of Criminal Procedure, though slight variations in specific scenarios could introduce minor interpretive nuances.",,110,{'1'},False,0,few_shot
+111,x-ai/grok-4-fast,1,4,7201,"{""answer"":""1"",""confidence"":4}",,111,{'2'},False,0,few_shot
+112,x-ai/grok-4-fast,3,4,7937,"{""answer"":""3"",""confidence"":4}",,112,{'4'},False,0,few_shot
+113,x-ai/grok-4-fast,1,5,2809,"{""answer"":""1"",""confidence"":5}",,113,{'1'},False,1,few_shot
+114,x-ai/grok-4-fast,3,4,3664,"{""answer"":""3"",""confidence"":4}",,114,{'3'},False,1,few_shot
+115,x-ai/grok-4-fast,2,4,4079,"{""answer"":""2"",""confidence"":4}",,115,{'2'},False,1,few_shot
+116,x-ai/grok-4-fast,4,4,8918,"{""answer"":""4"",""confidence"":4}
+
+## Explanation
+
+The provided answer derives from an analysis of the Iranian Code of Criminal Procedure, particularly provisions related to alternatives to detention for ta'ziri crimes. The question focuses on scenarios where a judicial authority may issue only a judicial supervision order upon provision of a guarantee for compensating damages, as outlined in relevant articles such as Article 242.
+
+First, the degrees of ta'ziri crimes are defined in Article 19 of the Islamic Penal Code: degree 6 involves punishments like imprisonment from over 6 months to 2 years; degree 7 covers 91 days to 6 months; and degree 8 includes up to 3 months or lighter penalties. Article 237 of the Code of Criminal Procedure specifies that temporary detention is generally not principal for degrees 5–8 but can be exceptional based on circumstances.
+
+Article 242 allows judicial supervision as an alternative to detention for ta'ziri crimes of degrees 6, 7, and 8, with the provision of a guarantee for damages being a key condition, especially to ensure victim compensation and accused compliance. However, for degree 6 crimes, which are relatively more serious, detention may still be required in certain cases unless the guarantee sufficiently mitigates risks, whereas for",,116,{'4'},False,1,few_shot
+117,x-ai/grok-4-fast,3,4,12693,"{""answer"":""3"",""confidence"":4}",,117,{'3'},False,1,few_shot
+118,x-ai/grok-4-fast,3,4,8872,"{""answer"":""3"",""confidence"":4}",,118,{'2'},False,0,few_shot
+119,x-ai/grok-4-fast,1,4,9968,"{""answer"":""1"",""confidence"":4}",,119,{'4'},False,0,few_shot
+120,x-ai/grok-4-fast,2,4,4138,"{""answer"":""2"",""confidence"":4}",,120,{'3'},False,0,few_shot
+121,x-ai/grok-4-fast,2,5,1457,"{""answer"":""2"",""confidence"":5}",,121,{'2'},False,1,few_shot
+122,x-ai/grok-4-fast,4,4,3219,"{""answer"":""4"",""confidence"":4}",,122,{'4'},False,1,few_shot
+123,x-ai/grok-4-fast,1,5,5134,"{""answer"":""1"",""confidence"":5}
+
+## Explanation
+
+The reasoning process begins by analyzing the question, which asks about the authority of the Head of the Judiciary under the Iranian Constitution that requires consultation. The relevant provision is Article 160 of the Constitution, which specifies that the Head of the Judiciary may delegate full financial and administrative powers to the Minister of Justice only after consultation with the Leader.
+
+Next, each option is evaluated against this article:
+
+- Option 1 (delegating full financial and administrative powers to the Minister of Justice) directly aligns with Article 160, as it explicitly requires consultation.
+- Option 2 (delegating employment powers for non-judges) is covered under Article 157, which allows direct delegation without consultation.
+- Option 3 (changing a judge's position or place of service) falls under Article 157, granting the Head direct authority without mention of consultation.
+- Option 4 (creating necessary structures in the judiciary) is also outlined in Article 157 as a direct power of the Head, with no consultation required.
+
+This comparison confirms that only Option 1 necessitates consultation, leading to its selection. Confidence is rated at 5 (VERY STRONG) due to the unambiguous wording of Article 160, providing a clear and definitive legal basis.",,123,{'3'},False,0,few_shot
+124,x-ai/grok-4-fast,1,5,5850,"{""answer"":""1"",""confidence"":5}",,124,{'1'},False,1,few_shot
+125,x-ai/grok-4-fast,1,5,2502,"{""answer"":""1"",""confidence"":5}",,125,{'1'},False,1,few_shot
+126,x-ai/grok-4-fast,2,5,3587,"{""answer"":""2"",""confidence"":5}",,126,{'2'},False,1,few_shot
+127,x-ai/grok-4-fast,3,4,3098,"{""answer"":""3"",""confidence"":4}",,127,{'3'},False,1,few_shot
+128,x-ai/grok-4-fast,2,4,2954,"{""answer"":""2"",""confidence"":4}",,128,{'4'},False,0,few_shot
+129,x-ai/grok-4-fast,4,4,3807,"{""answer"":""4"",""confidence"":4}",,129,{'4'},False,1,few_shot
+130,x-ai/grok-4-fast,3,3,17235,"{""answer"":""3"",""confidence"":3}
+
+## Explanation
+
+The reasoning process begins by analyzing the question, which asks for the specific case in the Iranian Constitution where the prohibition of discrimination (mamnou'iyat tab'iz) is explicitly stated among the given options. The Iranian Constitution, particularly Article 19, establishes general equality among citizens regardless of ethnicity, race, language, or similar factors, implying a prohibition of discrimination in social, economic, and other rights. However, the options focus on specific rights, requiring identification of the most directly applicable context.
+
+Next, each option is evaluated against relevant constitutional articles:
+
+- Option 1 (having housing appropriate to needs) relates to Article 31, which guarantees housing as a right but does not explicitly mention prohibition of discrimination.
+- Option 2 (exploiting natural resources) corresponds to Articles 45 and 47, which address state control and private ownership of resources, without explicit reference to discrimination.
+- Option 3 (enjoying public education and health) aligns with Articles 29, 30, and 43, which mandate the government's provision of social security, free education, and medical care for all citizens. These articles, combined with the overarching equality principle in Article 19 and Article 3 (principle",,130,{'2'},False,0,few_shot
+131,x-ai/grok-4-fast,1,5,2122,"{""answer"":""1"",""confidence"":5}",,131,{'1'},False,1,few_shot
+132,x-ai/grok-4-fast,3,4,2987,"{""answer"":""3"",""confidence"":4}",,132,{'3'},False,1,few_shot
+133,x-ai/grok-4-fast,3,4,3223,"{""answer"":""3"",""confidence"":4}",,133,{'2'},False,0,few_shot
+134,x-ai/grok-4-fast,4,5,2318,"{""answer"":""4"",""confidence"":5}",,134,{'4'},False,1,few_shot
+135,x-ai/grok-4-fast,1,4,5451,"{""answer"":""1"",""confidence"":4}",,135,{'1'},False,1,few_shot
+136,x-ai/grok-4-fast,3,3,3443,"{""answer"":""3"",""confidence"":3}",,136,{'3'},False,1,few_shot
+137,x-ai/grok-4-fast,2,3,4752,"{""answer"":""2"",""confidence"":3}",,137,{'2'},False,1,few_shot
+138,x-ai/grok-4-fast,3,5,3033,"{""answer"":""3"",""confidence"":5}",,138,{'3'},False,1,few_shot
+139,x-ai/grok-4-fast,1,4,3005,"{""answer"":""1"",""confidence"":4}",,139,{'1'},False,1,few_shot
+140,x-ai/grok-4-fast,4,3,3799,"{""answer"":""4"",""confidence"":3}",,140,{'4'},False,1,few_shot
