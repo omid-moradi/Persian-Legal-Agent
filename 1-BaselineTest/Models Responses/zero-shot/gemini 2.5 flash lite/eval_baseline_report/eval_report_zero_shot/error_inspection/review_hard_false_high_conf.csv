@@ -1,0 +1,187 @@
+﻿id,model,answer,confidence,latency_ms,raw,error,idx,gold_set,is_multi,correct,run_type,lat_bucket
+3,google/gemini-2.5-flash-lite,4,4.0,661,"```json
+{""answer"":""4"",""confidence"":4}
+```",,3,{'2'},False,0,zero_shot,<=1s
+4,google/gemini-2.5-flash-lite,2,4.0,762,"```json
+{""answer"": ""2"", ""confidence"": 4}
+```",,4,{'4'},False,0,zero_shot,<=1s
+5,google/gemini-2.5-flash-lite,1,4.0,620,"```json
+{""answer"":""1"",""confidence"":4}
+```",,5,{'3'},False,0,zero_shot,<=1s
+6,google/gemini-2.5-flash-lite,2,4.0,550,"```json
+{""answer"":""2"",""confidence"":4}
+```",,6,{'3'},False,0,zero_shot,<=1s
+8,google/gemini-2.5-flash-lite,2,4.0,560,"```json
+{
+""answer"": ""2"",
+""confidence"": 4
+}
+```",,8,{'4'},False,0,zero_shot,<=1s
+9,google/gemini-2.5-flash-lite,2,4.0,559,"```json
+{""answer"":""2"",""confidence"":4}
+```",,9,{'1'},False,0,zero_shot,<=1s
+10,google/gemini-2.5-flash-lite,4,4.0,569,"```json
+{""answer"": ""4"", ""confidence"": 4}
+```",,10,{'3'},False,0,zero_shot,<=1s
+11,google/gemini-2.5-flash-lite,2,4.0,587,"```json
+{""answer"": ""2"", ""confidence"": 4}
+```",,11,{'4'},False,0,zero_shot,<=1s
+18,google/gemini-2.5-flash-lite,2,4.0,668,"```json
+{""answer"":""2"",""confidence"":4}
+```",,18,{'1'},False,0,zero_shot,<=1s
+19,google/gemini-2.5-flash-lite,3,4.0,557,"```json
+{""answer"": ""3"", ""confidence"": 4}
+```",,19,{'2'},False,0,zero_shot,<=1s
+21,google/gemini-2.5-flash-lite,4,4.0,566,"```json
+{""answer"":""4"",""confidence"":4}
+```",,21,{'2'},False,0,zero_shot,<=1s
+22,google/gemini-2.5-flash-lite,4,4.0,536,"```json
+{""answer"":""4"",""confidence"":4}
+```",,22,{'3'},False,0,zero_shot,<=1s
+23,google/gemini-2.5-flash-lite,4,4.0,586,"```json
+{""answer"":""4"",""confidence"":4}
+```",,23,{'3'},False,0,zero_shot,<=1s
+25,google/gemini-2.5-flash-lite,3,4.0,891,"```json
+{""answer"": ""3"", ""confidence"": 4}
+```",,25,{'4'},False,0,zero_shot,<=1s
+26,google/gemini-2.5-flash-lite,2,4.0,517,"```json
+{""answer"":""2"",""confidence"":4}
+```",,26,{'4'},False,0,zero_shot,<=1s
+27,google/gemini-2.5-flash-lite,2,4.0,568,"```json
+{""answer"": ""2"", ""confidence"": 4}
+```",,27,{'4'},False,0,zero_shot,<=1s
+28,google/gemini-2.5-flash-lite,3,4.0,536,"```json
+{""answer"":""3"",""confidence"":4}
+```",,28,{'1'},False,0,zero_shot,<=1s
+30,google/gemini-2.5-flash-lite,2,4.0,639,"```json
+{""answer"":""2"",""confidence"":4}
+```",,30,{'1'},False,0,zero_shot,<=1s
+33,google/gemini-2.5-flash-lite,1,4.0,614,"```json
+{""answer"":""1"",""confidence"":4}
+```",,33,{'4'},False,0,zero_shot,<=1s
+34,google/gemini-2.5-flash-lite,4,4.0,477,"```json
+{""answer"":""4"",""confidence"":4}
+```",,34,{'2'},False,0,zero_shot,<=1s
+35,google/gemini-2.5-flash-lite,3,4.0,743,"```json
+{""answer"":""3"",""confidence"":4}
+```",,35,{'1'},False,0,zero_shot,<=1s
+37,google/gemini-2.5-flash-lite,2,4.0,546,"```json
+{""answer"": ""2"", ""confidence"": 4}
+```",,37,{'4'},False,0,zero_shot,<=1s
+38,google/gemini-2.5-flash-lite,3,4.0,526,"```json
+{""answer"": ""3"", ""confidence"": 4}
+```",,38,{'2'},False,0,zero_shot,<=1s
+40,google/gemini-2.5-flash-lite,2,4.0,634,"```json
+{""answer"": ""2"", ""confidence"": 4}
+```",,40,{'1'},False,0,zero_shot,<=1s
+41,google/gemini-2.5-flash-lite,1,4.0,533,"```json
+{""answer"":""1"",""confidence"":4}
+```",,41,{'4'},False,0,zero_shot,<=1s
+48,google/gemini-2.5-flash-lite,2,4.0,664,"```json
+{""answer"": ""2"", ""confidence"": 4}
+```",,48,{'1'},False,0,zero_shot,<=1s
+52,google/gemini-2.5-flash-lite,3,4.0,533,"```json
+{""answer"": ""3"", ""confidence"": 4}
+```",,52,"{'2', '4'}",True,0,zero_shot,<=1s
+53,google/gemini-2.5-flash-lite,4,4.0,554,"```json
+{""answer"": ""4"", ""confidence"": 4}
+```",,53,{'2'},False,0,zero_shot,<=1s
+54,google/gemini-2.5-flash-lite,2,4.0,559,"```json
+{""answer"":""2"",""confidence"":4}
+```",,54,{'3'},False,0,zero_shot,<=1s
+55,google/gemini-2.5-flash-lite,2,4.0,533,"```json
+{""answer"":""2"",""confidence"":4}
+```",,55,{'4'},False,0,zero_shot,<=1s
+57,google/gemini-2.5-flash-lite,2,4.0,508,"```json
+{""answer"":""2"",""confidence"":4}
+```",,57,{'3'},False,0,zero_shot,<=1s
+59,google/gemini-2.5-flash-lite,3,4.0,512,"```json
+{""answer"":""3"",""confidence"":4}
+```",,59,{'2'},False,0,zero_shot,<=1s
+60,google/gemini-2.5-flash-lite,2,4.0,499,"```json
+{""answer"": ""2"", ""confidence"": 4}
+```",,60,{'1'},False,0,zero_shot,<=1s
+81,google/gemini-2.5-flash-lite,2,4.0,529,"```json
+{""answer"": ""2"", ""confidence"": 4}
+```",,81,{'1'},False,0,zero_shot,<=1s
+82,google/gemini-2.5-flash-lite,4,5.0,532,"```json
+{""answer"":""4"",""confidence"":5}
+```",,82,{'3'},False,0,zero_shot,<=1s
+84,google/gemini-2.5-flash-lite,1,4.0,498,"```json
+{""answer"": ""1"", ""confidence"": 4}
+```",,84,{'4'},False,0,zero_shot,<=1s
+85,google/gemini-2.5-flash-lite,3,4.0,598,"```json
+{""answer"": ""3"", ""confidence"": 4}
+```",,85,{'2'},False,0,zero_shot,<=1s
+86,google/gemini-2.5-flash-lite,1,4.0,576,"```json
+{""answer"":""1"",""confidence"":4}
+```",,86,{'3'},False,0,zero_shot,<=1s
+90,google/gemini-2.5-flash-lite,4,4.0,601,"```json
+{""answer"":""4"",""confidence"":4}
+```",,90,{'3'},False,0,zero_shot,<=1s
+91,google/gemini-2.5-flash-lite,4,4.0,1261,"در این مورد، «الف» قصد انجام عملی مجرمانه (حفاری و کاوش به قصد به دست آوردن اموال تاریخی) را داشته است، اما به دلیل عدم حصول نتیجه (عدم به دست آوردن مال تاریخی)، جرم به طور کامل واقع نشده است. این وضعیت مصداق «شروع به جرم» است. طبق ماده 41 قانون مجازات اسلامی، هر کس قصد ارتکاب جرمی کند و اقدامات لازمی را برای تحقق آن شروع کند، اگر اقدامات وی مؤثر واقع نشود یا به علت خارجی مانع از وقوع جرم شود، عمل وی شروع به جرم محسوب می‌شود. در اینجا، حفاری و کاوش، اقدام لازم برای تحصیل مال تاریخی بوده است.
+
+بنابراین، گزینه 4 صحیح است.
+
+{""answer"":""4"",""confidence"":4}",,91,{'1'},False,0,zero_shot,1-2s
+92,google/gemini-2.5-flash-lite,1,4.0,553,"```json
+{""answer"":""1"",""confidence"":4}
+```",,92,{'3'},False,0,zero_shot,<=1s
+93,google/gemini-2.5-flash-lite,4,4.0,529,"```json
+{""answer"":""4"",""confidence"":4}
+```",,93,{'1'},False,0,zero_shot,<=1s
+94,google/gemini-2.5-flash-lite,3,4.0,523,"```json
+{""answer"":""3"",""confidence"":4}
+```",,94,{'2'},False,0,zero_shot,<=1s
+95,google/gemini-2.5-flash-lite,4,4.0,541,"{
+""answer"": ""4"",
+""confidence"": 4
+}",,95,{'2'},False,0,zero_shot,<=1s
+97,google/gemini-2.5-flash-lite,2,4.0,652,"```json
+{""answer"":""2"",""confidence"":4}
+```",,97,{'3'},False,0,zero_shot,<=1s
+98,google/gemini-2.5-flash-lite,1,4.0,814,"```json
+{""answer"": ""1"", ""confidence"": 4}
+```",,98,{'4'},False,0,zero_shot,<=1s
+99,google/gemini-2.5-flash-lite,4,4.0,689,"```json
+{""answer"":""4"",""confidence"":4}
+```",,99,{'2'},False,0,zero_shot,<=1s
+100,google/gemini-2.5-flash-lite,2,4.0,677,"```json
+{""answer"": ""2"", ""confidence"": 4}
+```",,100,{'4'},False,0,zero_shot,<=1s
+101,google/gemini-2.5-flash-lite,2,4.0,568,"```json
+{""answer"":""2"",""confidence"":4}
+```",,101,{'1'},False,0,zero_shot,<=1s
+105,google/gemini-2.5-flash-lite,2,4.0,561,"```json
+{""answer"": ""2"", ""confidence"": 4}
+```",,105,{'1'},False,0,zero_shot,<=1s
+110,google/gemini-2.5-flash-lite,2,4.0,534,"```json
+{""answer"":""2"",""confidence"":4}
+```",,110,{'1'},False,0,zero_shot,<=1s
+111,google/gemini-2.5-flash-lite,1,4.0,518,"```json
+{""answer"":""1"",""confidence"":4}
+```",,111,{'2'},False,0,zero_shot,<=1s
+112,google/gemini-2.5-flash-lite,3,4.0,512,"```json
+{""answer"":""3"",""confidence"":4}
+```",,112,{'4'},False,0,zero_shot,<=1s
+116,google/gemini-2.5-flash-lite,1,4.0,526,"```json
+{""answer"":""1"",""confidence"":4}
+```",,116,{'4'},False,0,zero_shot,<=1s
+117,google/gemini-2.5-flash-lite,1,4.0,537,"```json
+{""answer"": ""1"", ""confidence"": 4}
+```",,117,{'3'},False,0,zero_shot,<=1s
+124,google/gemini-2.5-flash-lite,2,4.0,572,"```json
+{""answer"":""2"",""confidence"":4}
+```",,124,{'1'},False,0,zero_shot,<=1s
+128,google/gemini-2.5-flash-lite,3,4.0,508,"```json
+{""answer"":""3"",""confidence"":4}
+```",,128,{'4'},False,0,zero_shot,<=1s
+129,google/gemini-2.5-flash-lite,1,5.0,1119,"```json
+{""answer"":""1"",""confidence"":5}
+```",,129,{'4'},False,0,zero_shot,1-2s
+130,google/gemini-2.5-flash-lite,3,4.0,614,"```json
+{""answer"": ""3"", ""confidence"": 4}
+```",,130,{'2'},False,0,zero_shot,<=1s
+137,google/gemini-2.5-flash-lite,1,4.0,579,"```json
+{""answer"": ""1"", ""confidence"": 4}
+```",,137,{'2'},False,0,zero_shot,<=1s
