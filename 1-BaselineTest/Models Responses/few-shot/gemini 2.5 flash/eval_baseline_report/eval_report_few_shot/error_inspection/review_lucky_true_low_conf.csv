@@ -1,0 +1,3 @@
+﻿id,model,answer,confidence,latency_ms,raw,error,idx,gold_set,is_multi,correct,run_type,lat_bucket
+13,google/gemini-2.5-flash,1,2,460,"{""answer"":""1"",""confidence"":2}",,13,{'1'},False,1,few_shot,<=1s
+95,google/gemini-2.5-flash,2,2,1411,"{""answer"":""2"",""confidence"":2}",,95,{'2'},False,1,few_shot,1-2s
