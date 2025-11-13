@@ -1,0 +1,6 @@
+﻿run,mean_len_correct,mean_len_incorrect,delta
+run1,29.91,31.41,1.5
+run2,31.64,34.0,2.36
+run3,33.09,36.05,2.96
+run4,35.91,37.95,2.04
+run5,34.45,40.91,6.45
