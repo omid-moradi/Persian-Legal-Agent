@@ -1,0 +1,15 @@
+﻿Model,Confidence Mean,Latency Mean (ms),Accuracy (%)
+Claude Haiku 4.5,3.95,1138,41.7
+DeepSeek R1T2 Chimera,3.56,18563,49.2
+DeepSeek V32 Exp,3.86,1978,47.5
+Gemini 2.5 Flash,4.01,614,48.3
+Gemini 2.5 Flash Lite,4.02,612,48.3
+GPT-4.1 Mini,4.04,983,40
+GPT-4o Mini,3.99,767,45
+GPT-OSS 20,4.16,5563,32.5
+GPT-OSS 120,4.08,6043,32.5
+Grok 4 Fast,4.12,6871,44.2
+Llama 4 Maverick,4.21,685,42.5
+Llama 4 Scout,4.13,766,42.5
+Qwen3-80,4.18,1044,45.8
+Qwen3-235,4.09,1803,52.5

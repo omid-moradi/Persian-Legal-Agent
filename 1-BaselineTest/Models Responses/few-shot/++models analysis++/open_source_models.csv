@@ -1,0 +1,9 @@
+﻿Model,Confidence Mean,Latency Mean (ms),Accuracy (%)
+deepseek r1t2 chimera,3.24,14187,45
+deepSeek v32 exp,3.87,1907,43.3
+gpt oss 20,4.16,5193,39.2
+gpt oss 120,3.85,5082,37.5
+llama 4 maverick,3.98,712,45.8
+llama 4 scout,4.34,657,38.3
+qwen3 80,3.85,1641,44.2
+qwen3 235,3.92,2048,45.8
