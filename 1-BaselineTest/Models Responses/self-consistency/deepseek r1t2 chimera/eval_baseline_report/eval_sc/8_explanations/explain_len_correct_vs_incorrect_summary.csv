@@ -1,0 +1,6 @@
+﻿run,mean_len_correct,mean_len_incorrect,delta_inc_minus_corr
+run1,41.84,38.68,-3.17
+run2,37.17,33.57,-3.6
+run3,32.05,29.52,-2.53
+run4,30.0,28.18,-1.82
+run5,31.67,26.73,-4.94
