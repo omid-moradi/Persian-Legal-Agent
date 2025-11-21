@@ -1,0 +1,71 @@
+% !TEX program = xelatex
+\documentclass[12pt,a4paper]{report}
+
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{xepersian}
+
+\geometry{top=3cm, bottom=3cm, left=2.5cm, right=3cm}
+
+% تنظیم فاصله بعد از عنوان‌ها
+\titlespacing*{\section}{0pt}{2ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+\titlespacing*{\subsection}{0pt}{1.8ex plus 1ex minus .2ex}{1ex plus .2ex}
+
+% فونت فارسی ۱۴ و انگلیسی ۱۲
+\settextfont[
+Path = C:/USERS/SAZGAR/APPDATA/LOCAL/MICROSOFT/WINDOWS/FONTS/,
+BoldFont = IRNAZANIN.TTF,
+Scale = 1.166
+]{IRNAZANIN.TTF}
+\setlatintextfont[Scale=1]{Times New Roman}
+
+\linespread{1.5}
+
+\begin{document}
+	
+	\chapter{تحلیل عملکرد مدل‌های زبانی در حالت \lr{Zero-shot}}
+	
+	در گام نخست این پژوهش، عملکرد ذاتی \lr{(Baseline Performance)} چهارده مدل زبانی بزرگ در پاسخ به \lr{120} سوال از آزمون وکالت سال ۱۴۰۳ را مورد ارزیابی قرار داد. این آزمایش در حالت \lr{Zero-Shot}، یعنی بدون ارائه هرگونه مثال یا راهنمایی \lr{(In-context Learning)}، انجام شد تا دانش درونی و توانایی استدلال خام مدل‌ها بدون دسترسی به منابع خارجی سنجیده شود[1].
+	
+	شکل \ref{fig:zero-shot-acc} مقایسه دقت مدل‌ها را با تفکیک دو گروه متن‌باز \lr{(Open Source)} و تجاری \lr{(Closed Source)} نمایش می‌دهد. نتایج نشان‌دهنده یک عملکرد کلی متوسط است که در آن هیچ مدلی نتوانست به دقت چشمگیری دست یابد. مدل متن‌باز \lr{Qwen3-235} با کسب دقت \lr{\%52.5} به طور غیرمنتظره‌ای در جایگاه نخست قرار گرفت و فرضیه برتری مطلق مدل‌های تجاری را به چالش کشید. پس از آن، مدل‌های \lr{DeepSeek-R1-T2-Chimera} (با دقت \lr{\%49.2}) و \lr{Gemini 2.5 Flash} (با دقت \lr{\%48.3}) به ترتیب در رتبه‌های دوم و سوم قرار گرفتند. در مقابل، مدل‌های خانواده \lr{GPT-OSS} با دقت تنها \lr{\%32.5} در انتهای جدول جای گرفتند که بیانگر کمبود داده‌های حقوقی فارسی در فرآیند پیش‌آموزش آن‌هاست.
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.8\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot/++models analysis++/zero-shot-acc.png}
+		\caption{مقایسه دقت مدل‌ها در حالت \lr{Zero-shot} با تفکیک مدل‌های متن‌باز و تجاری.}
+		\label{fig:zero-shot-acc}
+	\end{figure}
+	
+	برای کاربردهای عملی، سرعت پاسخ‌دهی یک عامل تعیین‌کننده است. شکل \ref{fig:latency} زمان پاسخ‌دهی \lr{(Latency)} مدل‌ها را به میلی‌ثانیه نشان می‌دهد. یک شکاف عملکردی عظیم در این بخش مشاهده می‌شود؛ مدل \lr{DeepSeek-R1-T2-Chimera} با وجود دقت بالا، تأخیری معادل \lr{18.5} ثانیه داشت که آن را برای کاربردهای بلادرنگ نامناسب می‌سازد. در مقابل، خانواده مدل‌هایی مانند \lr{Gemini 2.5} و \lr{Llama 4} با سرعتی نزدیک به \lr{600} تا \lr{700} میلی‌ثانیه، کارایی زمانی بسیار بهتری را به نمایش گذاشتند. این اختلاف چشمگیر در سرعت، احتمالاً به دلیل تفاوت در پیچیدگی معماری و بهینه‌سازی‌های استنتاجی \lr{(Inference Optimization)} است[2].
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.8\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot/++models analysis++/zero shot latency.png}
+		\caption{میانگین زمان پاسخ‌دهی \lr{(Latency)} مدل‌ها به میلی‌ثانیه.}
+		\label{fig:latency}
+	\end{figure}
+	
+	شکل \ref{fig:speed-acc} رابطه بین دو معیار کلیدی سرعت و دقت را در یک نمودار پراکندگی به تصویر می‌کشد. این نمودار به وضوح نشان می‌دهد که مدل \lr{Qwen3-235} (نقطه بالا و سمت چپ) بهترین تعادل \lr{(Trade-off)} را میان این دو معیار برقرار کرده است. خوشه‌ای از مدل‌ها مانند \lr{Gemini 2.5 Flash} نیز در ناحیه «دقت بالا و سرعت بالا» قرار دارند که آن‌ها را به گزینه‌هایی کارآمد برای پیاده‌سازی تبدیل می‌کند.
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.8\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot/++models analysis++/speed vs acc.png}
+		\caption{نمودار پراکندگی دقت (محور عمودی) در برابر تأخیر (محور افقی)؛ رابطه بین تأخیر پاسخ‌دهی و دقت مدل‌ها.}
+		\label{fig:speed-acc}
+	\end{figure}
+	
+	در نهایت، شکل \ref{fig:confidence} به بررسی کالیبراسیون اطمینان مدل‌ها می‌پردازد. یکی از چالش‌های جدی در استفاده از مدل‌های زبانی، پدیده «توهم با اطمینان بالا» \lr{(High-confidence Hallucination)} است[3]. مقایسه این نمودار با نمودار دقت (شکل \ref{fig:zero-shot-acc}) یک عدم تطابق نگران‌کننده را آشکار می‌سازد. برای مثال، مدل \lr{Llama 4 Maverick} با وجود دقت متوسط (برابر با \lr{\%42.5})، بالاترین امتیاز اطمینان (\lr{4.21}) را به خود اختصاص داده است. این رفتار که به عنوان «اعتماد به نفس کاذب» شناخته می‌شود، در حوزه‌های حساس مانند حقوق بسیار خطرناک است. در مقابل، مدل \lr{DeepSeek-R1-T2} با ثبت کمترین امتیاز اطمینان (\lr{3.56})، دقت بالایی را کسب کرد که نشان‌دهنده کالیبراسیون بهتر و توانایی مدل در تشخیص عدم قطعیت‌های خود است.
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.8\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot/++models analysis++/zero shot confidene.png}
+		\caption{میانگین امتیاز اطمینان \lr{(Confidence Score)} مدل‌ها.}
+		\label{fig:confidence}
+	\end{figure}
+	
+	در مجموع، نتایج فاز \lr{Zero-shot} نشان داد که دانش پارامتریک مدل‌ها به تنهایی برای پاسخگویی قابل اتکا به سوالات پیچیده حقوقی کافی نیست و این امر ضرورت بررسی روش‌های پیشرفته‌تری مانند \lr{Chain-of-Thought} و \lr{Retrieval-Augmented Generation (RAG)} را که در فازهای بعدی این پژوهش به آن‌ها پرداخته می‌شود، بیش از پیش آشکار می‌سازد.
+	
+\end{document}
