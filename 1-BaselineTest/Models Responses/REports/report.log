@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.11.21)  22 NOV 2025 12:55
+This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.11.21)  22 NOV 2025 16:22
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -590,13 +590,17 @@ LaTeX Font Info:    ... okay on input line 27.
 
 فصل 1.
 LaTeX Font Info:    Font shape `TU/IRNAZANIN.TTF(0)/m/n' will be
-(Font)              scaled to size 29.01009pt on input line 29.
+(Font)              scaled to size 29.01009pt on input line 30.
 LaTeX Font Info:    Font shape `TU/IRNAZANIN.TTF(0)/b/n' will be
-(Font)              scaled to size 29.01009pt on input line 29.
+(Font)              scaled to size 29.01009pt on input line 30.
+LaTeX Font Info:    Font shape `TU/IRNAZANIN.TTF(0)/m/n' will be
+(Font)              scaled to size 20.14848pt on input line 32.
+LaTeX Font Info:    Font shape `TU/IRNAZANIN.TTF(0)/b/n' will be
+(Font)              scaled to size 20.14848pt on input line 32.
 LaTeX Font Info:    Font shape `TU/TimesNewRoman(0)/b/n' will be
-(Font)              scaled to size 24.88pt on input line 29.
+(Font)              scaled to size 17.28pt on input line 32.
 LaTeX Font Info:    Font shape `TU/TimesNewRoman(0)/m/n' will be
-(Font)              scaled to size 12.0pt on input line 31.
+(Font)              scaled to size 12.0pt on input line 34.
 File: F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot/++models anal
 ysis++/zero-shot-acc.png Graphic file (type bmp)
 <F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot/++models analysis+
@@ -628,12 +632,6 @@ ysis++/zero shot confidene.png Graphic file (type bmp)
 
 
 [4]
-LaTeX Font Info:    Font shape `TU/IRNAZANIN.TTF(0)/m/n' will be
-(Font)              scaled to size 20.14848pt on input line 72.
-LaTeX Font Info:    Font shape `TU/IRNAZANIN.TTF(0)/b/n' will be
-(Font)              scaled to size 20.14848pt on input line 72.
-LaTeX Font Info:    Font shape `TU/TimesNewRoman(0)/b/n' will be
-(Font)              scaled to size 17.28pt on input line 72.
 File: F:/Thesis/project/1-BaselineTest/Models Responses/few-shot/++models analy
 sis++/few_shot_accuracy.png Graphic file (type bmp)
 <F:/Thesis/project/1-BaselineTest/Models Responses/few-shot/++models analysis++
@@ -670,7 +668,7 @@ sis++/Grouped Bar.png Graphic file (type bmp)
 
 [9]
 LaTeX Font Info:    Font shape `TU/IRNAZANIN.TTF(0)/b/n' will be
-(Font)              scaled to size 13.992pt on input line 129.
+(Font)              scaled to size 13.992pt on input line 132.
 File: F:/Thesis/project/1-BaselineTest/Models Responses/few-shot/++models analy
 sis++/delta.png Graphic file (type bmp)
 <F:/Thesis/project/1-BaselineTest/Models Responses/few-shot/++models analysis++
@@ -678,7 +676,7 @@ sis++/delta.png Graphic file (type bmp)
 
 
 [10]
-Underfull \hbox (badness 10000) in paragraph at lines 143--143
+Underfull \hbox (badness 10000) in paragraph at lines 146--146
 []|[]\TU/IRNAZANIN.TTF(0)/b/n/17.28 رویکرد []\TU/TimesNewRoman(0)/b/n/17.28 Zer
 o-shot Chain of Thought (Explain-to-[][] 
  []
@@ -744,20 +742,81 @@ nalysis++/Heatmap(Models × Metrics).png>
 
 
 [18]
+File: F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++mode
+ls analysis++/few_shot_cot _e2p.png Graphic file (type bmp)
+<F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++models an
+alysis++/few_shot_cot _e2p.png>
 
-[19] (./report.aux)
+
+[19]
+File: F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++mode
+ls analysis++/latency.png Graphic file (type bmp)
+<F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++models an
+alysis++/latency.png>
+
+
+[20]
+File: F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++mode
+ls analysis++/speed vs acc.png Graphic file (type bmp)
+<F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++models an
+alysis++/speed vs acc.png>
+
+
+[21]
+File: F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++mode
+ls analysis++/confidence.png Graphic file (type bmp)
+<F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++models an
+alysis++/confidence.png>
+
+
+[22]
+File: F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++mode
+ls analysis++/explain len.png Graphic file (type bmp)
+<F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++models an
+alysis++/explain len.png>
+
+
+[23]
+File: F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++mode
+ls analysis++/completion.png Graphic file (type bmp)
+<F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++models an
+alysis++/completion.png>
+
+
+[24]
+File: F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++mode
+ls analysis++/Token Efficiency.png Graphic file (type bmp)
+<F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++models an
+alysis++/Token Efficiency.png>
+
+
+[25]
+File: F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++mode
+ls analysis++/Stability of Reasoning (Delta Chart).png Graphic file (type bmp)
+<F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++models an
+alysis++/Stability of Reasoning (Delta Chart).png>
+
+
+[26]
+File: F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++mode
+ls analysis++/Heatmap(Models × Metrics).png Graphic file (type bmp)
+<F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++models an
+alysis++/Heatmap(Models × Metrics).png>
+
+
+[27] (./report.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 8102 strings out of 473832
- 227410 string characters out of 5733157
+ 8188 strings out of 473832
+ 236255 string characters out of 5733157
  629683 words of memory out of 5000000
- 31028 multiletter control sequences out of 15000+600000
- 559077 words of font info for 66 fonts, out of 8000000 for 9000
+ 31112 multiletter control sequences out of 15000+600000
+ 559069 words of font info for 65 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  94i,5n,107p,1183b,274s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on report.pdf (19 pages).
+Output written on report.pdf (27 pages).
