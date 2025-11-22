@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.11.21)  21 NOV 2025 23:26
+This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.11.21)  22 NOV 2025 12:55
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -607,13 +607,6 @@ ysis++/zero-shot-acc.png Graphic file (type bmp)
 
 
 ]
-Overfull \hbox (11.96269pt too wide) in paragraph at lines 42--43
-[]\TU/IRNAZANIN.TTF(0)/m/n/12 مدل []\TU/TimesNewRoman(0)/m/n/12 DeepSeek-R1-T2-
-Chimera[] \TU/IRNAZANIN.TTF(0)/m/n/12 با وجود دقت بالا، تأخیری معادل []\TU/Time
-sNewRoman(0)/m/n/12 18.5[] \TU/IRNAZANIN.TTF(0)/m/n/12 ثانیه داشت که آن را برای
- کاربردهای[]
- []
-
 File: F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot/++models anal
 ysis++/zero shot latency.png Graphic file (type bmp)
 <F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot/++models analysis+
@@ -628,12 +621,6 @@ ysis++/speed vs acc.png Graphic file (type bmp)
 
 
 [3]
-Overfull \hbox (5.37892pt too wide) in paragraph at lines 60--61
-[]\TU/IRNAZANIN.TTF(0)/m/n/12 ([]\TU/TimesNewRoman(0)/m/n/12 3.56[]\TU/IRNAZANI
-N.TTF(0)/m/n/12 )، دقت بالایی را کسب کرد که نشان‌دهنده کالیبراسیون بهتر و توانا
-یی مدل در تشخیص عدم قطعیت‌های[]
- []
-
 File: F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot/++models anal
 ysis++/zero shot confidene.png Graphic file (type bmp)
 <F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot/++models analysis+
@@ -641,20 +628,136 @@ ysis++/zero shot confidene.png Graphic file (type bmp)
 
 
 [4]
+LaTeX Font Info:    Font shape `TU/IRNAZANIN.TTF(0)/m/n' will be
+(Font)              scaled to size 20.14848pt on input line 72.
+LaTeX Font Info:    Font shape `TU/IRNAZANIN.TTF(0)/b/n' will be
+(Font)              scaled to size 20.14848pt on input line 72.
+LaTeX Font Info:    Font shape `TU/TimesNewRoman(0)/b/n' will be
+(Font)              scaled to size 17.28pt on input line 72.
+File: F:/Thesis/project/1-BaselineTest/Models Responses/few-shot/++models analy
+sis++/few_shot_accuracy.png Graphic file (type bmp)
+<F:/Thesis/project/1-BaselineTest/Models Responses/few-shot/++models analysis++
+/few_shot_accuracy.png>
 
-[5] (./report.aux)
+
+[5]
+File: F:/Thesis/project/1-BaselineTest/Models Responses/few-shot/++models analy
+sis++/few shot latency.png Graphic file (type bmp)
+<F:/Thesis/project/1-BaselineTest/Models Responses/few-shot/++models analysis++
+/few shot latency.png>
+
+
+[6]
+File: F:/Thesis/project/1-BaselineTest/Models Responses/few-shot/++models analy
+sis++/speed vs acc.png Graphic file (type bmp)
+<F:/Thesis/project/1-BaselineTest/Models Responses/few-shot/++models analysis++
+/speed vs acc.png>
+
+
+[7]
+File: F:/Thesis/project/1-BaselineTest/Models Responses/few-shot/++models analy
+sis++/few shot confidene.png Graphic file (type bmp)
+<F:/Thesis/project/1-BaselineTest/Models Responses/few-shot/++models analysis++
+/few shot confidene.png>
+
+
+[8]
+File: F:/Thesis/project/1-BaselineTest/Models Responses/few-shot/++models analy
+sis++/Grouped Bar.png Graphic file (type bmp)
+<F:/Thesis/project/1-BaselineTest/Models Responses/few-shot/++models analysis++
+/Grouped Bar.png>
+
+
+[9]
+LaTeX Font Info:    Font shape `TU/IRNAZANIN.TTF(0)/b/n' will be
+(Font)              scaled to size 13.992pt on input line 129.
+File: F:/Thesis/project/1-BaselineTest/Models Responses/few-shot/++models analy
+sis++/delta.png Graphic file (type bmp)
+<F:/Thesis/project/1-BaselineTest/Models Responses/few-shot/++models analysis++
+/delta.png>
+
+
+[10]
+Underfull \hbox (badness 10000) in paragraph at lines 143--143
+[]|[]\TU/IRNAZANIN.TTF(0)/b/n/17.28 رویکرد []\TU/TimesNewRoman(0)/b/n/17.28 Zer
+o-shot Chain of Thought (Explain-to-[][] 
+ []
+
+File: F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++mod
+els analysis++/zero_shot_cot_e2p.png Graphic file (type bmp)
+<F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++models a
+nalysis++/zero_shot_cot_e2p.png>
+
+
+[11]
+File: F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++mod
+els analysis++/latency.png Graphic file (type bmp)
+<F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++models a
+nalysis++/latency.png>
+
+
+[12]
+File: F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++mod
+els analysis++/speed vs acc.png Graphic file (type bmp)
+<F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++models a
+nalysis++/speed vs acc.png>
+
+
+[13]
+File: F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++mod
+els analysis++/confidence.png Graphic file (type bmp)
+<F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++models a
+nalysis++/confidence.png>
+
+
+[14]
+File: F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++mod
+els analysis++/Completion.png Graphic file (type bmp)
+<F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++models a
+nalysis++/Completion.png>
+File: F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++mod
+els analysis++/explain len.png Graphic file (type bmp)
+<F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++models a
+nalysis++/explain len.png>
+
+
+[15]
+File: F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++mod
+els analysis++/Token Efficiency.png Graphic file (type bmp)
+<F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++models a
+nalysis++/Token Efficiency.png>
+
+
+[16]
+File: F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++mod
+els analysis++/Stability of Reasoning (Delta Chart).png Graphic file (type bmp)
+
+<F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++models a
+nalysis++/Stability of Reasoning (Delta Chart).png>
+
+
+[17]
+File: F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++mod
+els analysis++/Heatmap(Models × Metrics).png Graphic file (type bmp)
+<F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++models a
+nalysis++/Heatmap(Models × Metrics).png>
+
+
+[18]
+
+[19] (./report.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 7944 strings out of 473832
- 213265 string characters out of 5733157
- 626683 words of memory out of 5000000
- 30886 multiletter control sequences out of 15000+600000
- 559061 words of font info for 64 fonts, out of 8000000 for 9000
+ 8102 strings out of 473832
+ 227410 string characters out of 5733157
+ 629683 words of memory out of 5000000
+ 31028 multiletter control sequences out of 15000+600000
+ 559077 words of font info for 66 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  94i,5n,107p,1183b,274s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on report.pdf (5 pages).
+Output written on report.pdf (19 pages).
