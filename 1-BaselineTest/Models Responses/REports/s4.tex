@@ -1,0 +1,467 @@
+% !TEX program = xelatex
+\documentclass[12pt,a4paper]{report}
+
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{xepersian}
+
+\geometry{top=3cm, bottom=3cm, left=2.5cm, right=3cm}
+
+% تنظیم فاصله بعد از عنوان‌ها
+\titlespacing*{\section}{0pt}{2ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+\titlespacing*{\subsection}{0pt}{1.8ex plus 1ex minus .2ex}{1ex plus .2ex}
+
+% فونت فارسی ۱۴ و انگلیسی ۱۲
+\settextfont[
+Path = C:/USERS/SAZGAR/APPDATA/LOCAL/MICROSOFT/WINDOWS/FONTS/,
+BoldFont = IRNAZANIN.TTF,
+Scale = 1.166
+]{IRNAZANIN.TTF}
+\setlatintextfont[Scale=1]{Times New Roman}
+
+\linespread{1.5}
+
+\begin{document}
+	\sloppy
+	
+	% ----------- فصل بدون شماره -----------
+	\chapter*{\bfseries فصل ۴: نتایج}
+	\addcontentsline{toc}{chapter}{فصل ۴: نتایج}
+	
+	\vspace{-2.5em}
+	\noindent\rule{\textwidth}{0.8pt}
+	\vspace{0.2em}  
+	
+	\section{رویکرد \lr{Zero-shot}}
+	
+	در گام نخست این پژوهش، عملکرد ذاتی \lr{(Baseline Performance)} چهارده مدل زبانی بزرگ در پاسخ به \lr{120} سوال از آزمون وکالت سال ۱۴۰۳ را مورد ارزیابی قرار داد. این آزمایش در حالت \lr{Zero-Shot}، یعنی بدون ارائه هرگونه مثال یا راهنمایی \lr{(In-context Learning)}، انجام شد تا دانش درونی و توانایی استدلال خام مدل‌ها بدون دسترسی به منابع خارجی سنجیده شود[1].
+	
+	شکل \ref{fig:zero-shot-acc} مقایسه دقت مدل‌ها را با تفکیک دو گروه متن‌باز \lr{(Open Source)} و تجاری \lr{(Closed Source)} نمایش می‌دهد. نتایج نشان‌دهنده یک عملکرد کلی متوسط است که در آن هیچ مدلی نتوانست به دقت چشمگیری دست یابد. مدل متن‌باز \lr{Qwen3-235} با کسب دقت \lr{\%52.5} به طور غیرمنتظره‌ای در جایگاه نخست قرار گرفت و فرضیه برتری مطلق مدل‌های تجاری را به چالش کشید. پس از آن، مدل‌های \lr{DeepSeek-R1-T2-Chimera} (با دقت \lr{\%49.2}) و \lr{Gemini 2.5 Flash} (با دقت \lr{\%48.3}) به ترتیب در رتبه‌های دوم و سوم قرار گرفتند. در مقابل، مدل‌های خانواده \lr{GPT-OSS} با دقت تنها \lr{\%32.5} در انتهای جدول جای گرفتند که بیانگر کمبود داده‌های حقوقی فارسی در فرآیند پیش‌آموزش آن‌هاست.
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.8\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot/++models analysis++/zero-shot-acc.png}
+		\caption{مقایسه دقت مدل‌ها در حالت \lr{Zero-shot} با تفکیک مدل‌های متن‌باز و تجاری.}
+		\label{fig:zero-shot-acc}
+	\end{figure}
+	
+	برای کاربردهای عملی، سرعت پاسخ‌دهی یک عامل تعیین‌کننده است. شکل \ref{fig:latency} زمان پاسخ‌دهی \lr{(Latency)} مدل‌ها را به میلی‌ثانیه نشان می‌دهد. یک شکاف عملکردی عظیم در این بخش مشاهده می‌شود؛ مدل \lr{DeepSeek-R1-T2-Chimera} با وجود دقت بالا، تأخیری معادل \lr{18.5} ثانیه داشت که آن را برای کاربردهای بلادرنگ نامناسب می‌سازد. در مقابل، خانواده مدل‌هایی مانند \lr{Gemini 2.5} و \lr{Llama 4} با سرعتی نزدیک به \lr{600} تا \lr{700} میلی‌ثانیه، کارایی زمانی بسیار بهتری را به نمایش گذاشتند. این اختلاف چشمگیر در سرعت، احتمالاً به دلیل تفاوت در پیچیدگی معماری و بهینه‌سازی‌های استنتاجی (\lr{Inference Optimization}) است[2].
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.8\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot/++models analysis++/zero shot latency.png}
+		\caption{میانگین زمان پاسخ‌دهی \lr{(Latency)} مدل‌ها به میلی‌ثانیه.}
+		\label{fig:latency}
+	\end{figure}
+	
+	شکل \ref{fig:speed-acc} رابطه بین دو معیار کلیدی سرعت و دقت را در یک نمودار پراکندگی به تصویر می‌کشد. این نمودار به وضوح نشان می‌دهد که مدل \lr{Qwen3-235} (نقطه بالا و سمت چپ) بهترین تعادل \lr{(Trade-off)} را میان این دو معیار برقرار کرده است. خوشه‌ای از مدل‌ها مانند \lr{Gemini 2.5 Flash} نیز در ناحیه «دقت بالا و سرعت بالا» قرار دارند که آن‌ها را به گزینه‌هایی کارآمد برای پیاده‌سازی تبدیل می‌کند.
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.8\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot/++models analysis++/speed vs acc.png}
+		\caption{نمودار پراکندگی دقت (محور عمودی) در برابر تأخیر (محور افقی)؛ رابطه بین تأخیر پاسخ‌دهی و دقت مدل‌ها.}
+		\label{fig:speed-acc}
+	\end{figure}
+	
+	در نهایت، شکل \ref{fig:confidence} به بررسی کالیبراسیون اطمینان مدل‌ها می‌پردازد. یکی از چالش‌های جدی در استفاده از مدل‌های زبانی، پدیده «توهم با اطمینان بالا» \lr{(High-confidence Hallucination)} است[3]. مقایسه این نمودار با نمودار دقت (شکل \ref{fig:zero-shot-acc}) یک عدم تطابق نگران‌کننده را آشکار می‌سازد. برای مثال، مدل \lr{Llama 4 Maverick} با وجود دقت متوسط (برابر با \lr{\%42.5})، بالاترین امتیاز اطمینان (\lr{4.21}) را به خود اختصاص داده است. این رفتار که به عنوان «اعتماد به نفس کاذب» شناخته می‌شود، در حوزه‌های حساس مانند حقوق بسیار خطرناک است. در مقابل، مدل \lr{DeepSeek-R1-T2} با ثبت کمترین امتیاز اطمینان (\lr{3.56})، دقت بالایی را کسب کرد که نشان‌دهنده کالیبراسیون بهتر و توانایی مدل در تشخیص عدم قطعیت‌های خود است[4].
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.8\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot/++models analysis++/zero shot confidene.png}
+		\caption{میانگین امتیاز اطمینان \lr{(Confidence Score)} مدل‌ها.}
+		\label{fig:confidence}
+	\end{figure}
+	
+	در مجموع، نتایج فاز \lr{Zero-shot} نشان داد که دانش پارامتریک مدل‌ها به تنهایی برای پاسخگویی قابل اتکا به سوالات پیچیده حقوقی کافی نیست و این امر ضرورت بررسی روش‌های پیشرفته‌تری مانند \lr{Chain-of-Thought} و \lr{Retrieval-Augmented Generation (RAG)} را که در فازهای بعدی این پژوهش به آن‌ها پرداخته می‌شود، بیش از پیش آشکار می‌سازد.
+	
+	
+\section{رویکرد \lr{Few-shot}}
+
+در گام دوم ارزیابی، تأثیر یادگیری در لحظه \lr{(In-context Learning)} بر توانایی استدلال حقوقی مدل‌ها مورد بررسی قرار گرفت. در رویکرد \lr{Few-shot}، به هر مدل \lr{6} نمونه سوال حل‌شده (شامل سوال، گزینه صحیح و استدلال مختصر) به عنوان ورودی \lr{(Prompt)} داده شد تا الگوی پاسخگویی را فراگیرد[1]. هدف از این آزمایش، سنجش این فرضیه بود که آیا ارائه نمونه‌های مشابه می‌تواند شکاف دانش مشاهده شده در حالت \lr{Zero-shot} را کاهش دهد یا خیر.
+
+شکل \ref{fig:few-shot-acc} مقایسه دقت مدل‌ها را در حالت \lr{Few-shot} نشان می‌دهد. برخلاف حالت \lr{Zero-shot} که مدل‌های متن‌باز پیشتاز بودند، در اینجا مدل تجاری \lr{Gemini 2.5 Flash} با جهشی قابل توجه به دقت \lr{\%55.0} دست یافت و رتبه نخست را کسب کرد. مدل \lr{Grok 4 Fast} نیز با دقت \lr{\%54.2} در جایگاه دوم قرار گرفت. این تغییر در رتبه‌بندی نشان می‌دهد که مدل‌های تجاری بزرگ‌تر \lr{(Closed Source)} توانایی بالاتری در بهره‌گیری از نمونه‌های آموزشی \lr{(Few-shot prompt)} دارند[5]. در میان مدل‌های متن‌باز، \lr{Llama 4 Maverick} و \lr{Qwen3-235} با دقت برابر \lr{\%45.8} بهترین عملکرد را داشتند، اما همچنان نسبت به رقبای تجاری خود عقب ماندند. مدل‌های خانواده \lr{GPT-OSS} همچنان با دقت‌های زیر \lr{\%40}، عملکرد ضعیف خود را تکرار کردند.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/few-shot/++models analysis++/few_shot_accuracy.png}
+	\caption{مقایسه دقت مدل‌ها در حالت \lr{Few-shot} با تفکیک مدل‌های متن‌باز و تجاری.}
+	\label{fig:few-shot-acc}
+\end{figure}
+
+از نظر کارایی زمانی، نتایج نمایش داده شده در شکل \ref{fig:few-latency} همچنان برتری مطلق مدل‌های سبک‌تر را تایید می‌کند. مدل‌های خانواده \lr{Gemini 2.5} با میانگین زمان پاسخگویی حدود \lr{620} میلی‌ثانیه، سریع‌ترین عملکرد را ثبت کردند. در نقطه مقابل، مدل \lr{DeepSeek-R1-T2-Chimera} با تأخیری بیش از \lr{14} ثانیه، کندترین مدل ارزیابی شده بود. نکته قابل تامل این است که افزودن نمونه‌های \lr{Few-shot} به ورودی مدل (که طول توکن‌های ورودی را افزایش می‌دهد)، تأثیر منفی معناداری بر سرعت مدل‌های بهینه شده (مانند \lr{Gemini} و \lr{Llama}) نداشته است، اما مدل‌های سنگین‌تر را کندتر کرده است[6].
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/few-shot/++models analysis++/few shot latency.png}
+	\caption{میانگین زمان پاسخ‌دهی \lr{(Latency)} مدل‌ها در حالت \lr{Few-shot}.}
+	\label{fig:few-latency}
+\end{figure}
+
+شکل \ref{fig:few-speed-acc} تحلیل جامع‌تری از رابطه میان سرعت و دقت ارائه می‌دهد. در این نمودار پراکندگی، مدل \lr{Gemini 2.5 Flash} (نقطه زرد رنگ در بالا سمت چپ) به عنوان «نقطه طلایی» \lr{(Sweet Spot)} شناخته می‌شود؛ زیرا بالاترین دقت را با یکی از کمترین تأخیرها ترکیب کرده است. این در حالی است که مدل \lr{DeepSeek-R1-T2} (نقطه قرمز سمت راست) علیرغم دقت قابل قبول، به دلیل تأخیر بسیار بالا، از ناحیه کارآمدی خارج شده است. این نمودار به وضوح نشان می‌دهد که برای کاربردهای عملیاتی حقوقی، مدل‌هایی که در نیمه چپ و بالای نمودار قرار دارند (مانند \lr{Gemini} و \lr{Grok})، گزینه‌های برتر هستند.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/few-shot/++models analysis++/speed vs acc.png}
+	\caption{نمودار تعامل سرعت و دقت \lr{(Speed vs Accuracy Trade-off)} در حالت \lr{Few-shot}.}
+	\label{fig:few-speed-acc}
+\end{figure}
+
+نهایتاً، شکل \ref{fig:few-confidence} وضعیت کالیبراسیون اطمینان مدل‌ها را بررسی می‌کند. یک یافته مهم در این بخش، کاهش کلی میانگین اطمینان در برخی مدل‌های دقیق‌تر است. برای مثال، مدل \lr{DeepSeek-R1-T2} میانگین اطمینان خود را به \lr{3.24} کاهش داده است که نشان‌دهنده احتیاط بیشتر مدل در مواجهه با پرامپت‌های طولانی‌تر است. در مقابل، مدل \lr{GPT-4.1 Mini} با وجود دقت پایین (\lr{\%41.7})، به طور نگران‌کننده‌ای بالاترین سطح اطمینان (\lr{4.53}) را گزارش کرده است. این «اطمینان کاذب» \lr{(Overconfidence)} در مدل‌های ضعیف‌تر، ریسک استفاده از آن‌ها را در سامانه‌های حساس حقوقی افزایش می‌دهد، زیرا توانایی تشخیص مرزهای دانش خود را ندارند[7].
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/few-shot/++models analysis++/few shot confidene.png}
+	\caption{میانگین امتیاز اطمینان \lr{(Confidence Score)} مدل‌ها در حالت \lr{Few-shot}.}
+	\label{fig:few-confidence}
+\end{figure}
+
+در مجموع، گذار از \lr{Zero-shot} به \lr{Few-shot} منجر به بهبود عملکرد مدل‌های تجاری (به ویژه \lr{Gemini} و \lr{Grok}) شد، اما مدل‌های متن‌باز تغییر چشمگیری را تجربه نکردند. این امر حاکی از آن است که معماری مدل‌های تجاری احتمالاً برای یادگیری در متن \lr{(In-context Learning)} بهینه‌تر شده است. با این حال، حتی بهترین دقت کسب شده (\lr{\%55}) هنوز برای یک سامانه مشاور حقوقی قابل اتکا کافی نیست و نیاز به روش‌های استدلالی عمیق‌تر (مانند \lr{Chain-of-Thought}) را برجسته می‌کند[8].
+
+\section{‌تأثیر یادگیری در متن \lr{(Zero-shot vs. Few-shot)}}
+
+برای درک دقیق‌تر تأثیر افزودن نمونه‌های آموزشی به ورودی مدل‌ها، مقایسه‌ای مستقیم بین عملکرد \lr{Zero-shot} و \lr{Few-shot} انجام شد.
+
+شکل \ref{fig:grouped-bar} مقایسه پهلو-به-پهلو \lr{(Side-by-Side)} دقت مدل‌ها در دو حالت را نشان می‌دهد. همان‌طور که مشاهده می‌شود، پاسخ مدل‌ها به تکنیک \lr{Few-shot} یکسان نبوده است. مدل‌هایی مانند \lr{Grok 4 Fast} و \lr{Gemini 2.5 Flash} جهش مثبتی را تجربه کرده‌اند که نشان‌دهنده توانایی بالای آن‌ها در انطباق با الگوهای جدید است. در مقابل، برخی مدل‌های قدرتمند در حالت \lr{Zero-shot} مانند \lr{Qwen3-235}، در مواجهه با نمونه‌های \lr{Few-shot} دچار افت عملکرد شده‌اند.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/few-shot/++models analysis++/Grouped Bar.png}
+	\caption{مقایسه دقت مدل‌ها در دو حالت \lr{Zero-shot} (آبی روشن) و \lr{Few-shot} (سرمه‌ای).}
+	\label{fig:grouped-bar}
+\end{figure}
+
+برای کمی‌سازی این تغییرات، شکل \ref{fig:delta} میزان تغییر دقت \lr{(Delta Accuracy)} را به درصد نشان می‌دهد. نتایج شگفت‌انگیز است:
+
+\textbf{بزرگترین برندگان:} مدل \lr{Grok 4 Fast} با \lr{+\%10} افزایش دقت، بیشترین بهره را از نمونه‌های \lr{Few-shot} برده است. پس از آن، مدل‌های خانواده \lr{GPT-OSS} و \lr{Gemini 2.5 Flash} با رشدهای \lr{\%5} تا \lr{\%6.7} قرار دارند. این رشد نشان می‌دهد که این مدل‌ها پتانسیل نهفته‌ای داشتند که با هدایت صحیح \lr{(Prompting)} فعال شده است.
+
+\textbf{بزرگترین بازندگان:} در کمال تعجب، مدل \lr{Qwen3-235} که قهرمان حالت \lr{Zero-shot} بود، با افت \lr{-\%6.7} مواجه شد. همچنین \lr{GPT-4o-mini} (\lr{-\%5}) و \lr{DeepSeek-R1-T2} (\lr{-\%4.2}) نیز عملکرد ضعیف‌تری نشان دادند.
+
+این پدیده که به عنوان «تداخل منفی» \lr{(Negative Transfer)} یا «حواس‌پرتی با نمونه‌ها» شناخته می‌شود، زمانی رخ می‌دهد که نمونه‌های ارائه شده \lr{(Few-shot examples)} با دانش درونی مدل تعارض پیدا می‌کنند یا باعث سردرگمی مدل در تشخیص الگوی اصلی می‌شوند[9]. این یافته مهم نشان می‌دهد که استراتژی \lr{Few-shot} همیشه راهگشا نیست و برای برخی مدل‌ها (به‌ویژه مدل‌های متن‌باز خاص)، تکیه بر دانش درونی \lr{(Zero-shot)} موثرتر است.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.85\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/few-shot/++models analysis++/delta.png}
+	\caption{نمودار تغییرات دقت \lr{(Delta)} مدل‌ها پس از اعمال روش \lr{Few-shot}. مقادیر سبز نشان‌دهنده بهبود و مقادیر قرمز نشان‌دهنده افت عملکرد هستند.}
+	\label{fig:delta}
+\end{figure}
+
+
+\section{رویکرد \lr{Zero-shot Chain of Thought (Explain-to-Predict)}}
+
+در گام سوم ارزیابی، از روش \lr{Explain-to-Predict (E2P)} در قالب \lr{Zero-shot Chain of Thought (CoT)} استفاده شد. در این روش، از مدل خواسته می‌شود پیش از اعلام گزینه نهایی، ابتدا استدلال گام‌به‌گام خود را ارائه دهد. هدف از این آزمایش، بررسی این فرضیه است که آیا وادار کردن مدل به «تفکر صریح» (\lr{Explicit Reasoning}) می‌تواند کیفیت پاسخ‌های حقوقی را بهبود بخشد و شکاف عملکردی مشاهده شده در مراحل قبل را جبران کند یا خیر[8].
+
+شکل \ref{fig:cot-acc} عملکرد مدل‌ها را در این سناریو نمایش می‌دهد. نتایج حاکی از یک جهش عملکردی چشمگیر در برخی مدل‌ها است. مدل \lr{Gemini 2.5 Flash} با ثبت رکورد دقت \lr{\%57.5}، بالاترین عملکرد را در میان تمامی روش‌های تست شده تا کنون (\lr{Zero-shot} و \lr{Few-shot}) به نام خود ثبت کرد. این افزایش دقت نشان می‌دهد که مکانیزم‌های استنتاجی \lr{(Reasoning Capabilities)} در مدل‌های پیشرفته تجاری، با استراتژی \lr{CoT} به خوبی فعال می‌شوند[10].
+
+در سوی دیگر، مدل‌های \lr{Grok 4 Fast} با \lr{\%48.3} و \lr{Qwen3-235} با \lr{\%47.5} در رتبه‌های بعدی قرار گرفتند. نکته قابل توجه، بهبود نسبی عملکرد مدل‌های \lr{GPT-OSS} است که توانستند از قعر جدول فاصله بگیرند (دقت \lr{\%45} برای نسخه \lr{120})، که نشان می‌دهد ضعف دانشی آن‌ها تا حدی با استدلال منطقی قابل جبران است.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++models analysis++/zero_shot_cot_e2p.png}
+	\caption{مقایسه دقت مدل‌ها در روش \lr{Zero-shot Chain of Thought (E2P)}.}
+	\label{fig:cot-acc}
+\end{figure}
+
+فعال‌سازی زنجیره افکار هزینه سنگینی بر کارایی زمانی مدل‌ها تحمیل کرده است. شکل \ref{fig:cot-latency} نشان می‌دهد که میانگین زمان پاسخگویی در اکثر مدل‌ها به شدت افزایش یافته است. مدل \lr{DeepSeek-R1-T2-Chimera} با ثبت میانگین تأخیر خیره‌کننده \lr{20,684} میلی‌ثانیه (بیش از \lr{20} ثانیه)، عملاً برای تعاملات بلادرنگ(realtime) غیرقابل استفاده شده است[2].
+
+با این حال، مدل \lr{Gemini 2.5 Flash Lite} شگفتی‌ساز این بخش است؛ این مدل توانسته با حفظ سرعت بسیار بالا (\lr{841} میلی‌ثانیه)، دقتی قابل قبول (\lr{\%46.7}) ارائه دهد که آن را به کارآمدترین گزینه برای کاربردهای عملی تبدیل می‌کند.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++models analysis++/latency.png}
+	\caption{میانگین زمان پاسخ‌دهی \lr{(Latency)} مدل‌ها در فرآیند تولید استدلال و پاسخ.}
+	\label{fig:cot-latency}
+\end{figure}
+
+نمودار پراکندگی در شکل \ref{fig:cot-speed-acc}، تمایز آشکاری را میان مدل‌ها ترسیم می‌کند. مدل \lr{Gemini 2.5 Flash} به تنهایی در ناحیه «دقت بالا - سرعت بالا» قرار دارد که نشان‌دهنده معماری بهینه آن برای وظایف استدلالی است. در مقابل، مدل‌های \lr{DeepSeek} و \lr{GPT-OSS-20} (نقاط سمت راست نمودار) در ناحیه «ناکارآمد» قرار گرفته‌اند، جایی که افزایش زمان پردازش منجر به بهبود متناسبی در دقت نشده است.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++models analysis++/speed vs acc.png}
+	\caption{نمودار تعامل سرعت و دقت در حالت \lr{Zero-shot CoT}.}
+	\label{fig:cot-speed-acc}
+\end{figure}
+
+شکل \ref{fig:cot-confidence} تغییرات معناداری را در الگوی اطمینان مدل‌ها نشان می‌دهد. برخلاف حالت \lr{Zero-shot} که مدل‌های ضعیف دچار اعتماد‌به‌نفس کاذب بودند، در روش \lr{CoT} شاهد یک «تعدیل اطمینان» هستیم. مدل \lr{Claude Haiku 4.5} با کاهش اطمینان خود به \lr{3.75}، رفتاری محافظه‌کارانه‌تر در پیش گرفته است. در مقابل، مدل \lr{GPT-OSS-20} همچنان با اطمینان بالا (\lr{4.35}) و دقت بسیار پایین (\lr{\%32.5})، بدترین کالیبراسیون را دارد که نشان‌دهنده ناتوانی آن در ارزیابی صحیح استدلال‌های خود است[10].
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++models analysis++/confidence.png}
+	\caption{میانگین امتیاز اطمینان مدل‌ها در روش \lr{Zero-shot CoT}.}
+	\label{fig:cot-confidence}
+\end{figure}
+
+روش \lr{Zero-shot CoT} توانست سقف عملکردی مدل‌ها را به \lr{\%57.5} ارتقا دهد، اما این بهبود به قیمت افزایش چشمگیر زمان پردازش تمام شد. نتایج نشان می‌دهد که «تفکر قبل از پاسخ‌دهی» برای مدل‌های پیشرفته (مانند \lr{Gemini}) بسیار سودمند است، اما برای مدل‌های ضعیف‌تر (مانند \lr{GPT-OSS})، صرفاً منجر به تولید متن بیشتر بدون بهبود دقت می‌شود \lr{(Hallucination Amplification)}.
+
+\subsection{تحلیل عمیق رفتار استدلالی در روش بدون نمونه با استدلال}
+
+در این بخش، به کالبدشکافی دقیق‌تر فرآیند تولید پاسخ می‌پردازیم تا درک کنیم مدل‌ها «چگونه» به پاسخ رسیده‌اند. داده‌های جدید (مانند طول استدلال، مصرف توکن و پایداری) دیدگاه‌های ارزشمندی درباره کیفیت تفکر مدل‌ها ارائه می‌دهند[12].
+
+یکی از شاخص‌های رفتاری مهم در مدل‌های زبانی، رابطه بین «حجم متن تولیدی» و «صحت پاسخ» است. شکل \ref{fig:completion-tokens} میانگین تعداد توکن‌های تولید شده \lr{(Completion Tokens)} را برای پاسخ‌های صحیح (سبز) و نادرست (قرمز) مقایسه می‌کند. در اکثر مدل‌های مورد بررسی، به‌ویژه مدل‌های ضعیف‌تر مانند \lr{GPT-OSS-20} و \lr{Grok 4 Fast}، مشاهده می‌شود که میانگین توکن‌ها در پاسخ‌های نادرست به طور معناداری بیشتر از پاسخ‌های صحیح است. برای مثال، \lr{Grok 4 Fast} در پاسخ‌های نادرست به طور میانگین \lr{1894} توکن تولید کرده است، در حالی که برای پاسخ‌های صحیح \lr{1488} توکن مصرف کرده است. این اختلاف \lr{400} توکنی نشان می‌دهد که مدل وقتی در یافتن مسیر استدلالی صحیح ناتوان است، به «تولید بیهوده متن» (\lr{Verbose Hallucination}) روی می‌آورد و سعی می‌کند با طولانی کردن پاسخ، فقدان منطق صحیح را جبران کند[13]. در مقابل، مدل‌های کارآمدتری مانند \lr{Gemini 2.5 Flash} و \lr{Claude Haiku} رفتار متفاوتی دارند؛ تفاوت حجم توکن در پاسخ‌های درست و غلط آن‌ها بسیار ناچیز است (مثلاً در \lr{Gemini} تنها حدود \lr{2.5} توکن اختلاف وجود دارد: \lr{83.6 vs 81.2}). این «پایداری حجمی» نشان‌دهنده استراتژی استدلالی مشخص و منضبط در این مدل‌هاست.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++models analysis++/Completion.png}
+	\caption{مقایسه میانگین توکن‌های تولید شده در پاسخ‌های صحیح (سبز) و نادرست (قرمز).}
+	\label{fig:completion-tokens}
+\end{figure}
+
+شکل \ref{fig:explain-length} رابطه بین «طول توضیحات» (تعداد کلمات استدلال) و درستی پاسخ را نشان می‌دهد. یک الگوی رفتاری بسیار جالب در اینجا مشاهده می‌شود؛ استدلال‌های طولانی‌تر همیشه بهتر نیستند. مدل \lr{Claude Haiku 4.5} با تولید میانگین \lr{57} کلمه برای پاسخ‌های صحیح و \lr{56} کلمه برای غلط، پایدارترین رفتار را دارد. در مقابل، مدل‌های ضعیف‌تر مانند \lr{Grok 4 Fast} و \lr{Llama 4 Scout} در پاسخ‌های نادرست خود تمایل به تولید متن طولانی‌تری دارند (نقاط قرمز در سمت راست‌تر نمودار)، که این پدیده «پرگویی در شکست» \lr{(Verbosity in Failure)} نامیده می‌شود و نشان‌دهنده تلاش ناموفق مدل برای پوشاندن ضعف استدلالی است.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++models analysis++/explain len.png}
+	\caption{توزیع طول توضیحات \lr{(Explain Length)} برای پاسخ‌های صحیح (سبز) و نادرست (قرمز).}
+	\label{fig:explain-length}
+\end{figure}
+
+برای درک بهتر رابطه بین کارایی و دقت، شکل \ref{fig:token-efficiency} نمودار حبابی کارایی توکن را نمایش می‌دهد که در آن محور افقی «کل توکن‌های مصرفی» و محور عمودی «دقت» است. مدل‌های \lr{Gemini 2.5 Flash} و \lr{Llama 4 Scout} در گوشه بالا-چپ نمودار (خوشه کارآمد) قرار دارند؛ این یعنی آن‌ها با مصرف توکن کمتر (حدود \lr{600-700} توکن)، به دقت بالاتری دست یافته‌اند. این «ادعا در استدلال» نشانه بلوغ مدل در درک حقوقی است. در سوی دیگر، مدل \lr{Grok 4 Fast} (حباب بزرگ در سمت راست) با مصرف میانگین بیش از \lr{2500} توکن، ناکارآمدترین مدل محسوب می‌شود.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++models analysis++/Token Efficiency.png}
+	\caption{نمودار کارایی توکن؛ مدل‌های سمت چپ و بالا کارآمدترین‌ها هستند.}
+	\label{fig:token-efficiency}
+\end{figure}
+
+شکل \ref{fig:stability} شاخص «دلتا طول» (تفاوت طول استدلال در پاسخ‌های غلط نسبت به درست) را نشان می‌دهد که معیاری برای پایداری رفتاری مدل‌هاست. مدل \lr{Llama 4 Scout} وقتی اشتباه می‌کند، به طور میانگین \lr{8} کلمه بیشتر صحبت می‌کند (میله قرمز بلند)، که این یک سیگنال قوی برای تشخیص خطا است. در مقابل، مدل \lr{Claude Haiku 4.5} رفتار معکوسی دارد و در پاسخ‌های غلط کوتاه‌تر صحبت می‌کند (میله سبز منفی)، که نشان‌دهنده «تسلیم شدن سریع» در برابر ابهام است.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++models analysis++/Stability of Reasoning (Delta Chart).png}
+	\caption{نمودار پایداری استدلال (تفاوت طول توضیحات در پاسخ‌های غلط و درست).}
+	\label{fig:stability}
+\end{figure}
+
+نهایتاً، شکل \ref{fig:heatmap} نقشه حرارتی \lr{(Heatmap)} تمامی متریک‌ها را یکجا نمایش می‌دهد و به ما اجازه می‌دهد نقاط قوت و ضعف را در یک نگاه ببینیم. مدل \lr{Gemini 2.5 Flash} با رنگ‌های آبی تیره در ستون‌های \lr{Accuracy} و \lr{Efficiency}، به عنوان «قهرمان تعادل» شناخته می‌شود. در مقابل، مدل \lr{GPT-OSS-20} با رنگ‌های قرمز تیره در ستون‌های \lr{Latency} و \lr{Verbosity}، بدترین عملکرد کلی را دارد.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.9\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/zero-shot-cot-e2p/++models analysis++/Heatmap(Models × Metrics).png}
+	\caption{نقشه حرارتی عملکرد مدل‌ها در تمامی متریک‌های ارزیابی \lr{CoT}.}
+	\label{fig:heatmap}
+\end{figure}
+
+تحلیل‌های عمیق این بخش نشان داد که صرفاً «فعال کردن \lr{CoT}» کافی نیست. مدل‌های برتر (مثل \lr{Gemini}) یاد گرفته‌اند که «کوتاه و گزیده» استدلال کنند، در حالی که مدل‌های ضعیف‌تر در دام «نشخوار فکری» \lr{(Rumination)} و تولید متن‌های طولانی اما بیهوده می‌افتند. برای بهبود سیستم‌های حقوقی، باید مدل‌هایی را انتخاب کرد که تراکم اطلاعاتی \lr{(Information Density)} بالایی در استدلال‌های خود دارند و ستون‌های متوازنی در نمودار توکن دارند.
+
+\section{رویکرد \lr{Few-shot Chain of Thought (Explain-to-Predict)}}
+
+در گام چهارم، ترکیب مثال‌های آموزشی \lr{(Few-shot)} با استدلال گام‌به‌گام \lr{(Chain of Thought)} اعمال شد. هدف از این آزمایش بررسی این فرضیه بود که آیا ارائه «الگوهای استدلالی حل‌شده» به عنوان ورودی، می‌تواند به مدل کمک کند تا فرآیند تفکر حقوقی را بهتر شبیه‌سازی کرده و شکاف عملکردی را کاهش دهد.
+
+شکل \ref{fig:fewcot-acc} نتایج دقت مدل‌ها را در این سناریو نشان می‌دهد. برخلاف انتظارات اولیه، افزودن مثال‌های \lr{Few-shot} به \lr{CoT} منجر به یک جهش عملکردی همگانی نشد. مدل \lr{Gemini 2.5 Flash} با دقت \lr{\%56.7} همچنان جایگاه نخست را حفظ کرده است، اما نسبت به حالت \lr{Zero-shot CoT} (\lr{\%57.5}) افتی جزئی را تجربه کرده که نشان‌دهنده احتمال وقوع «بایاس زمینه» \lr{(Context Bias)} در مدل‌های بزرگ‌تر است. در نقطه مقابل، مدل \lr{Grok 4 Fast} با ثبت جهشی قابل توجه، دقت خود را به \lr{\%54.2} رساند (در مقایسه با \lr{\%48.3} در حالت قبل). این بهبود چشمگیر حاکی از آن است که برخی مدل‌ها برای فعال‌سازی ظرفیت‌های استدلالی خود، وابستگی زیادی به الگوبرداری مستقیم از مثال‌ها دارند[5].
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++models analysis++/few_shot_cot _e2p.png}
+	\caption{مقایسه دقت مدل‌ها در روش \lr{Few-shot CoT (E2P)}.}
+	\label{fig:fewcot-acc}
+\end{figure}
+
+از منظر کارایی زمانی، نتایج شکل \ref{fig:fewcot-latency} نشان می‌دهد که هزینه پردازشی این روش بسیار سنگین است. میانگین تأخیر مدل \lr{DeepSeek-R1-T2} به عدد قابل توجه \lr{19,102} میلی‌ثانیه رسیده است. همچنین، زمان پاسخگویی \lr{Grok 4 Fast} نیز به حدود \lr{11.8} ثانیه افزایش یافته که ناشی از پردازش پرامپت‌های طولانی‌تر و تولید استدلال‌های مفصل‌تر است[2]. با این وجود، خانواده \lr{Gemini 2.5} با حفظ تأخیر زیر یک ثانیه (\lr{986} میلی‌ثانیه)، همچنان تنها مدل‌هایی هستند که توانسته‌اند تعادل بهینه‌ای میان دقت بالا و سرعت پاسخگویی ایجاد کند.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++models analysis++/latency.png}
+	\caption{میانگین زمان پاسخ‌دهی \lr{(Latency)} در روش \lr{Few-shot CoT}.}
+	\label{fig:fewcot-latency}
+\end{figure}
+
+نمودار پراکندگی در شکل \ref{fig:fewcot-speed-acc}، خوشه‌بندی مدل‌ها را شفاف‌تر می‌کند. مدل‌های \lr{Gemini 2.5 Flash} و \lr{Grok 4 Fast} تنها مدل‌هایی هستند که در نیمه بالایی نمودار (ناحیه دقت بالای \lr{\%50}) قرار گرفته‌اند، با این تفاوت بنیادین که \lr{Gemini} در منتهی‌الیه سمت چپ (بسیار سریع) و \lr{Grok} در سمت راست (کند) جای دارند. سایر مدل‌ها مانند خانواده \lr{Llama 4} و \lr{Qwen3} در ناحیه میانی متمرکز شده‌اند که نشان‌دهنده عملکرد متوسط آن‌ها در هر دو شاخص سرعت و دقت است.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++models analysis++/speed vs acc.png}
+	\caption{نمودار تعامل سرعت و دقت در حالت \lr{Few-shot CoT}.}
+	\label{fig:fewcot-speed-acc}
+\end{figure}
+
+در نهایت، بررسی کالیبراسیون اطمینان در شکل \ref{fig:fewcot-confidence} یک هشدار جدی را آشکار می‌کند: افزایش سطح اطمینان کاذب در مدل‌های ضعیف. مدل \lr{GPT-OSS-120} با وجود دقت بسیار پایین (\lr{\%33.3})، میانگین اطمینانی معادل \lr{4.55} (از \lr{5}) گزارش کرده است. این پدیده که می‌توان آن را «توهم دانش» نامید، در روش \lr{Few-shot CoT} تشدید شده است؛ زیرا مدل با تقلید از ساختار ظاهری استدلال‌ها، دچار این تصور غلط می‌شود که پاسخی منطقی و صحیح ارائه داده است[7].
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{"F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++models analysis++/confidence.png"}
+	\caption{میانگین امتیاز اطمینان مدل‌ها در روش \lr{Few-shot CoT}.}
+	\label{fig:fewcot-confidence}
+\end{figure}
+
+در مجموع، نتایج نشان داد که پیچیده‌تر کردن استراتژی پرامپتینگ (ترکیب \lr{Few-shot} و \lr{CoT}) لزوماً تضمین‌کننده عملکرد بهتر نیست. در حالی که مدل‌هایی مانند \lr{Grok} از این ساختار بهره بردند، مدل‌های دیگر تغییر معناداری نشان ندادند یا حتی دچار افت شدند، که این امر اهمیت بهینه‌سازی پرامپت متناسب با معماری هر مدل \lr{(Model-Specific Prompting)} را برجسته می‌کند.
+
+\subsection{تحلیل عمیق رفتار استدلالی در روش کم‌نمونه با استدلال}
+
+در این بخش، به واکاوی دقیق‌تر مکانیزم‌های استدلالی مدل‌ها در شرایط \lr{Few-shot} می‌پردازیم. افزودن مثال‌های آموزشی، پویایی جدیدی را در رفتار مدل‌ها ایجاد کرده است که از طریق متریک‌های عمیق‌تر قابل مشاهده است.
+
+شکل \ref{fig:fewcot-completion} توزیع طول استدلال‌ها را نشان می‌دهد. یک تغییر رفتاری مهم در اینجا مشاهده می‌شود: مدل‌ها در تلاش برای تقلید از ساختار مثال‌های \lr{Few-shot}، توضیحات طولانی‌تری تولید کرده‌اند. مدل \lr{Qwen3-235} که در حالت‌های قبلی استدلال‌های کوتاه‌تری داشت، اکنون به طور میانگین حدود \lr{40} تا \lr{50} کلمه توضیح می‌دهد. نکته کلیدی، پایداری مدل \lr{Claude Haiku 4.5} است که میانگین طول استدلالش برای پاسخ‌های صحیح (\lr{49.8} کلمه) و غلط (\lr{48} کلمه) تقریباً یکسان است. این ثبات نشان می‌دهد که مدل الگوی ساختاری مثال‌ها را به خوبی درک کرده و حتی در زمان خطا، فرمت صحیح را حفظ می‌کند.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{"F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++models analysis++/explain len.png"}
+	\caption{مقایسه میانگین توکن‌های تولید شده در پاسخ‌های صحیح و نادرست.}
+	\label{fig:fewcot-explain}
+\end{figure}
+
+شکل \ref{fig:fewcot-explain} مقایسه حجم توکن‌های تولیدی را نمایش می‌دهد. پدیده «پرگویی در شکست» (\lr{Failure Verbosity}) در اینجا با شدت بیشتری خودنمایی می‌کند. مدل \lr{Grok 4 Fast} در پاسخ‌های نادرست خود به طور میانگین \lr{1956} توکن تولید کرده است، در حالی که برای پاسخ‌های صحیح \lr{1394} توکن مصرف کرده است. این اختلاف فاحش (بیش از \lr{500} توکن) نشان می‌دهد که مثال‌های \lr{Few-shot} نتوانسته‌اند مدل را در مسیر صحیح هدایت کنند و برعکس، در زمان عدم قطعیت، مدل شروع به تولید محتوای طولانی و نامربوط \lr{(Hallucination Loop)} کرده است[13].
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{"F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++models analysis++/completion.png"}
+	\caption{توزیع طول توضیحات در پاسخ‌های صحیح و نادرست.}
+	\label{fig:fewcot-completion}
+\end{figure}
+
+نمودار حبابی در شکل \ref{fig:fewcot-token-eff}، جایگاه مدل‌ها را از نظر هزینه-فایده نشان می‌دهد. مدل‌های \lr{Llama 4 Scout} و \lr{Claude Haiku 4.5} در ناحیه چپ و بالای نمودار قرار دارند که نشان‌دهنده دقت بالا با مصرف توکن بهینه است. در سوی دیگر، مدل \lr{Grok 4 Fast} (حباب نارنجی بزرگ در سمت راست) با مصرف میانگین بیش از \lr{3000} توکن، بسیار پرهزینه است. اگرچه دقت خوبی دارد، اما برای رسیدن به این دقت، منابع محاسباتی زیادی را هدر می‌دهد.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{"F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++models analysis++/Token Efficiency.png"}
+	\caption{نمودار کارایی توکن در روش \lr{Few-shot CoT}.}
+	\label{fig:fewcot-token-eff}
+\end{figure}
+
+شکل \ref{fig:fewcot-stability} شاخص «دلتا طول» را بررسی می‌کند. مدل \lr{Qwen3-235} و \lr{Llama 4 Scout} ناپایدارترین رفتار را دارند و در زمان اشتباه، توضیحات بسیار طولانی‌تری (بیش از \lr{5} کلمه اختلاف) ارائه می‌دهند. این رفتار می‌تواند به عنوان یک «نشانگر خطا» \lr{(Error Indicator)} در سیستم‌های نظارتی استفاده شود. در مقابل، \lr{GPT-OSS-20} رفتار معکوس و عجیبی دارد و در زمان اشتباه کوتاه‌تر پاسخ می‌دهد.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++models analysis++/Stability of Reasoning (Delta Chart).png}
+	\caption{نمودار پایداری استدلال (تفاوت طول توضیحات در پاسخ‌های غلط و درست).}
+	\label{fig:fewcot-stability}
+\end{figure}
+
+شکل \ref{fig:fewcot-heatmap} نمای کلی عملکرد مدل‌ها را نشان می‌دهد. \lr{Gemini 2.5 Flash} با رنگ‌های آبی تیره در اکثر ستون‌ها (دقت، کارایی، طول استدلال)، متوازن‌ترین عملکرد را دارد. در مقابل، ستون‌های قرمز رنگ برای \lr{GPT-OSS} و \lr{Grok} در بخش‌های \lr{Latency} و \lr{Total Tokens}، نشان‌دهنده ناکارآمدی شدید آن‌ها در محیط‌های عملیاتی است.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.9\textwidth]{F:/Thesis/project/1-BaselineTest/Models Responses/few-shot-cot-e2p/++models analysis++/Heatmap(Models × Metrics).png}
+	\caption{نقشه حرارتی جامع متریک‌ها در روش \lr{Few-shot CoT}.}
+	\label{fig:fewcot-heatmap}
+\end{figure}
+
+تحلیل‌های عمیق این بخش نشان می‌دهد که استراتژی \lr{Few-shot CoT} یک شمشیر دو لبه است. برای مدل‌های قدرتمند و بهینه (مثل \lr{Gemini} و \lr{Claude})، این روش باعث تثبیت ساختار پاسخگویی می‌شود. اما برای مدل‌های مستعد توهم (مثل \lr{Grok} و \lr{GPT-OSS})، وجود مثال‌ها تنها باعث می‌شود که مدل «با اعتماد به نفس بیشتر و طولانی‌تر» اشتباه کند. بنابراین، استفاده از این روش باید با احتیاط و پایش دقیق هزینه توکن همراه باشد.
+
+\section{ارزیابی عملکرد مدل‌ها در رویکرد \lr{Self-Consistency}}
+
+در آخرین مرحله از ارزیابی تجربی، از تکنیک \lr{Self-Consistency} استفاده شد. این روش که بر پایه «خرد جمعی درونی» مدل استوار است، به جای تکیه بر یک پاسخ واحد، چندین مسیر استدلالی را از مدل استخراج کرده و پرتکرارترین پاسخ را به عنوان خروجی نهایی انتخاب می‌کند[14]. هدف از به‌کارگیری این روش، کاهش اثرات تصادفی بودن فرآیند تولید متن و افزایش پایداری و قابلیت اطمینان پاسخ‌های حقوقی است.
+
+شکل \ref{fig:sc-acc} نتایج دقت مدل‌ها را در حالت \lr{Self-Consistency} نمایش می‌دهد. این تکنیک تأثیر شگرفی بر عملکرد برخی مدل‌ها داشته است؛ به طوری که مدل \lr{DeepSeek-R1-T2-Chimera} که در مراحل قبلی عملکردی نوسانی داشت، در اینجا با جهشی قابل توجه به دقت \lr{\%53.3} دست یافته و هم‌رده با مدل‌های پیشتاز \lr{Grok 4 Fast} و \lr{Gemini 2.5 Flash} قرار گرفته است. این ارتقای عملکرد نشان می‌دهد که مدل‌های سنگین‌تر دارای دانش نهفته‌ای هستند که تنها از طریق نمونه‌برداری‌های متعدد و مکانیسم رأی‌گیری اکثریت \lr{(Majority Voting)} قابل استخراج است[15]. در نقطه مقابل، مدل‌های \lr{GPT-OSS} همچنان در محدوده دقت \lr{\%30} تا \lr{\%35} متوقف مانده‌اند که حاکی از ضعف بنیادین دانش آن‌هاست؛ ضعفی که حتی با اعمال \lr{Self-Consistency} نیز قابل جبران نیست.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{"F:/Thesis/project/1-BaselineTest/Models Responses/self-consistency/++models analysis++/acc.png"}
+	\caption{مقایسه دقت مدل‌ها در روش \lr{Self-Consistency}.}
+	\label{fig:sc-acc}
+\end{figure}
+
+از منظر هزینه محاسباتی، شکل \ref{fig:sc-latency} بار سنگین این روش را به وضوح نشان می‌دهد. از آنجا که \lr{Self-Consistency} مستلزم تولید و ارزیابی چندین پاسخ برای هر پرسش است، زمان پاسخگویی مدل‌ها به شدت افزایش یافته است. \lr{DeepSeek-R1-T2} با ثبت میانگین تأخیر \lr{19,118} میلی‌ثانیه، همچنان کندترین عملکرد را دارد و \lr{Grok 4 Fast} نیز با زمان \lr{9,434} میلی‌ثانیه در رده مدل‌های کند جای می‌گیرد. با این حال، \lr{Gemini 2.5 Flash} بار دیگر به عنوان پدیده این ارزیابی ظاهر شده است؛ این مدل توانسته ضمن حفظ دقت بالای \lr{\%53.3}، زمان پاسخگویی را در سطح \lr{1,335} میلی‌ثانیه نگه دارد که حدود \lr{14} برابر سریع‌تر از رقیب خود یعنی \lr{DeepSeek} است و مزیتی استراتژیک برای کاربردهای عملیاتی محسوب می‌شود.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{"F:/Thesis/project/1-BaselineTest/Models Responses/self-consistency/++models analysis++/latency.png"}
+	\caption{میانگین زمان پاسخ‌دهی \lr{(Latency)} در روش \lr{Self-Consistency}.}
+	\label{fig:sc-latency}
+\end{figure}
+
+نمودار پراکندگی در شکل \ref{fig:sc-speed-acc}، تمایز عملکردی مدل‌ها را شفاف‌تر می‌سازد. \lr{Gemini 2.5 Flash} تنها مدلی است که در ناحیه ایده‌آل «دقت بالا و سرعت بالا» (بالا-چپ) قرار گرفته است. در مقابل، مدل‌های \lr{DeepSeek} و \lr{Grok} علیرغم دقت بالا، به دلیل کندی زیاد در ناحیه سمت راست نمودار جای گرفته‌اند که استفاده از آن‌ها را به سناریوهای آفلاین محدود می‌کند. سایر مدل‌ها عمدتاً در نواحی ناکارآمد میانی و پایین نمودار پراکنده شده‌اند که نشان‌دهنده عدم تعادل میان سرعت و دقت در آن‌هاست.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{"F:/Thesis/project/1-BaselineTest/Models Responses/self-consistency/++models analysis++/speed vs acc.png"}
+	\caption{نمودار تعامل سرعت و دقت در حالت \lr{Self-Consistency}.}
+	\label{fig:sc-speed-acc}
+\end{figure}
+
+در نهایت، بررسی وضعیت کالیبراسیون اطمینان در شکل \ref{fig:sc-confidence} نکته جالبی را آشکار می‌کند: کاهش شدید سطح اطمینان در مدل‌های \lr{GPT-OSS} (سقوط به مقادیر \lr{1.16} و \lr{1.35}). این افت معنادار نشان می‌دهد که وقتی این مدل‌ها با درخواست‌های مکرر برای یک سوال مواجه می‌شوند، پاسخ‌های متنوع و متناقضی تولید می‌کنند که منجر به کاهش میانگین امتیاز اطمینان می‌شود. این رفتار، برخلاف «اعتماد به نفس کاذب» مشاهده شده در روش‌های قبلی، بازتاب‌دهنده عدم قطعیت واقعی مدل است و نشان می‌دهد که \lr{Self-Consistency} می‌تواند به عنوان ابزاری مؤثر برای سنجش پایداری و صداقت درونی مدل‌ها مورد استفاده قرار گیرد[11].
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{"F:/Thesis/project/1-BaselineTest/Models Responses/self-consistency/++models analysis++/confidence.png"}
+	\caption{میانگین امتیاز اطمینان مدل‌ها در روش \lr{Self-Consistency}.}
+	\label{fig:sc-confidence}
+\end{figure}
+
+در مجموع، نتایج نشان داد که روش \lr{Self-Consistency} قدرتمندترین ابزار برای ارتقای دقت استدلال حقوقی در مدل‌های زبانی است، مشروط بر آنکه محدودیت‌های زمانی و منابع محاسباتی مانع نباشند. برای تحلیل‌های عمیق و آفلاین پرونده‌های حقوقی، مدل‌هایی نظیر \lr{DeepSeek} با بهره‌گیری از این روش گزینه‌های ارزشمندی هستند، اما در سناریوهای تعاملی و بلادرنگ، \lr{Gemini 2.5 Flash} به دلیل ایجاد تعادل کم‌نظیر میان سرعت و دقت، همچنان گزینه برتر باقی می‌ماند.
+
+\subsection{تحلیل عمیق مکانیزم‌های \lr{Self-Consistency} و اطمینان}
+
+در این بخش، به بررسی دقیق‌تر پویایی‌های داخلی روش \lr{Self-Consistency} می‌پردازیم. داده‌های جدید نشان می‌دهند که چگونه «توافق مدل» \lr{(Consensus)} و «آستانه اطمینان» \lr{(Confidence Threshold)} بر دقت نهایی تأثیر می‌گذارند.
+
+شکل‌های \ref{fig:sc-consensus-closed} و \ref{fig:sc-consensus-open} رابطه بین «درجه اجماع» (تعداد دفعاتی که مدل یک پاسخ را تکرار کرده) و دقت نهایی را نشان می‌دهند. یک الگوی رفتاری خیره‌کننده در اینجا مشاهده می‌شود: زمانی که مدل در تمام \lr{5} اجرا \lr{(Run)} به یک پاسخ واحد می‌رسد (اجماع کامل)، دقت به اوج خود می‌رسد. برای مثال، \lr{Grok 4 Fast} در حالت اجماع کامل به دقت \lr{\%100} دست یافته است (ستون آبی روشن بلند در نمودار). این یافته نشان می‌دهد که «اطمینان کامل مدل» یک شاخص بسیار معتبر برای صحت پاسخ است. در مقابل، وقتی مدل پاسخ‌های پراکنده می‌دهد (توافق \lr{1/5} یا \lr{2/5})، دقت به شدت افت می‌کند. به عنوان نمونه، در مدل \lr{Claude Haiku 4.5}، وقتی توافق پایین است (\lr{2/5})، دقت به \lr{\%50} و در حالت \lr{3/5} به \lr{\%20} سقوط می‌کند که این ناحیه «خطر» و نشان‌دهنده سردرگمی مدل است[4].
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{"F:/Thesis/project/1-BaselineTest/Models Responses/self-consistency/++models analysis++/acc-consensus-closed-source.png"}
+	\caption{دقت مدل‌های تجاری بر اساس سطح توافق \lr{(Consensus Level)}.}
+	\label{fig:sc-consensus-closed}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{"F:/Thesis/project/1-BaselineTest/Models Responses/self-consistency/++models analysis++/acc-consensus-open-source.png"}
+	\caption{دقت مدل‌های متن‌باز بر اساس سطح توافق \lr{(Consensus Level)}.}
+	\label{fig:sc-consensus-open}
+\end{figure}
+
+شکل \ref{fig:sc-acc-coverage} منحنی‌های کالیبراسیون را نشان می‌دهد و به ما می‌گوید که اگر فقط پاسخ‌هایی با اطمینان بالا (مثلاً بالای \lr{\%90}) را بپذیریم، چه نتیجه‌ای حاصل می‌شود. با افزایش آستانه اطمینان به \lr{\%95}، دقت مدل‌ها به شدت افزایش می‌یابد (خطوط صعودی در نمودار چپ)، اما در مقابل، «پوشش» (تعداد سوالاتی که پاسخ داده می‌شوند) کاهش می‌یابد (خطوط نزولی در نمودار راست). در این میان، مدل \lr{Claude Haiku 4.5} با آستانه اطمینان \lr{83.2}، توانسته تعادل بهینه‌ای ایجاد کند و دقت خود را به \lr{\%56.5} برساند (\lr{14\%} بهبود نسبت به حالت پایه). این ویژگی آن را برای «سیستم‌های حیاتی» که در آن‌ها پاسخ ندادن بهتر از پاسخ غلط دادن است، به گزینه‌ای ایده‌آل تبدیل می‌کند.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.9\textwidth]{"F:/Thesis/project/1-BaselineTest/Models Responses/self-consistency/++models analysis++/Accuracy–Coverage.png"}
+	\caption{منحنی‌های دقت و پوشش بر اساس آستانه اطمینان 5 مدل برتر.}
+	\label{fig:sc-acc-coverage}
+\end{figure}
+
+شکل \ref{fig:sc-gain-heatmap} به صورت نقشه حرارتی نشان می‌دهد که هر مدل در چه آستانه اطمینانی بیشترین «سود» \lr{(Gain)} را می‌برد. مدل \lr{Claude Haiku} در آستانه \lr{90-95\%}، بیشترین جهش دقت (\lr{57.5\%} بهبود) را تجربه کرده است (رنگ سبز تیره). در نقطه مقابل، مدل \lr{Gemini 2.5 Flash Lite} در آستانه‌های بالا دچار افت عملکرد شده است (رنگ قرمز)، که نشان می‌دهد سیستم امتیازدهی اطمینان در این مدل «کالیبره نیست» و اعتماد به اطمینان بالای آن می‌تواند گمراه‌کننده باشد.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.9\textwidth]{"F:/Thesis/project/1-BaselineTest/Models Responses/self-consistency/++models analysis++/Heatmap of accuracy gains.png"}
+	\caption{نقشه حرارتی میزان بهبود دقت در آستانه‌های مختلف اطمینان.}
+	\label{fig:sc-gain-heatmap}
+\end{figure}
+
+شکل \ref{fig:sc-expl-delta} تفاوت طول توضیحات در پاسخ‌های صحیح و غلط را به عنوان معیاری برای پایداری استدلال بررسی می‌کند. مدل \lr{Llama 4 Scout} وقتی اشتباه می‌کند، به طور میانگین \lr{9.6} کلمه بیشتر توضیح می‌دهد (میله زرد بسیار بلند). این پدیده یک «نشت اطلاعاتی» \lr{(Information Leakage)} مفید است؛ بدین معنا که هرگاه مدل دچار پرگویی شود، احتمال خطا بالاست. در سوی دیگر، مدل \lr{DeepSeek R1T2} رفتار معکوسی دارد و در زمان خطا \lr{3} کلمه کمتر صحبت می‌کند (میله سبز منفی)، که نشان‌دهنده نوعی محافظه‌کاری در هنگام شکست است.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{"F:/Thesis/project/1-BaselineTest/Models Responses/self-consistency/++models analysis++/Explanation delta.png"}
+	\caption{نمودار پایداری استدلال بر اساس تفاوت طول توضیحات.}
+	\label{fig:sc-expl-delta}
+\end{figure}
+
+تحلیل‌های این بخش نشان می‌دهد که «اطمینان» \lr{(Confidence)} و «اجماع» \lr{(Consensus)} دو سیگنال حیاتی برای فیلتر کردن پاسخ‌های مدل هستند. با تنظیم آستانه اطمینان روی \lr{\%90} و پذیرش پاسخ‌هایی که حداقل \lr{4/5} توافق دارند، می‌توان دقت سیستم نهایی را به نزدیک \lr{\%100} رساند (مانند \lr{Grok})، هرچند که این کار به قیمت کاهش تعداد پاسخ‌های خروجی \lr{(Coverage)} تمام می‌شود. برای سیستم‌های حقوقی حساس، این استراتژی «کیفیت بر کمیت» \lr{(Quality over Quantity)} رویکردی منطقی و توصیه‌شده است.
+
+\section{رتبه‌بندی نهایی و توصیه‌های کاربردی}
+
+بر اساس نتایج جامع به‌دست‌آمده از روش \lr{Self-Consistency}، جدول \ref{tab:final-ranking} رتبه‌بندی نهایی مدل‌ها و بهترین سناریوی استفاده \lr{(Use Case)} برای هر یک را ارائه می‌دهد. این توصیه‌ها بر مبنای تعادل میان دقت، پوشش و قابلیت اطمینان تدوین شده‌اند.
+
+\begin{table}[H]
+	\centering
+	\caption{رتبه‌بندی نهایی و توصیه‌های کاربردی برای انتخاب مدل.}
+	\label{tab:final-ranking}
+	\begin{tabular}{r l c c c c c l}
+		\hline
+		رتبه & مدل & دقت پایه & آستانه & پوشش & دقت & بهبود & کاربرد پیشنهادی \\
+		\hline
+		1  & \lr{Claude Haiku 4.5}     & \lr{\%42.5} & \lr{83.2} & \lr{\%19.2} & \lr{\%56.5} & \lr{14\%}  & موارد حیاتی با \lr{reliability} بالا \\
+		2  & \lr{Grok 4 Fast}          & \lr{\%53.3} & \lr{90}   & \lr{\%55.0} & \lr{\%63.6} & \lr{10.3\%}& سیستم \lr{hybrid} متعادل \\
+		3  & \lr{Llama 4 Maverick}     & \lr{\%40.0} & \lr{88}   & \lr{\%27.5} & \lr{\%48.5} & \lr{8.5\%} & موارد حیاتی با \lr{reliability} بالا \\
+		4  & \lr{Qwen3 80}             & \lr{\%45.0} & \lr{94.7} & \lr{\%29.2} & \lr{\%51.4} & \lr{6.4\%} & موارد حیاتی با \lr{reliability} بالا \\
+		5  & \lr{DeepSeek V32 Exp}     & \lr{\%43.3} & \lr{86.8} & \lr{\%35.8} & \lr{\%48.8} & \lr{5.5\%} & موارد حیاتی با \lr{reliability} بالا \\
+		6  & \lr{DeepSeek R1T2 Chimera}& \lr{\%53.3} & \lr{86}   & \lr{\%56.7} & \lr{\%58.8} & \lr{5.5\%} & سیستم \lr{hybrid} متعادل \\
+		7  & \lr{Gemini 2.5 Flash}     & \lr{\%53.3} & \lr{88.4} & \lr{\%68.3} & \lr{\%56.1} & \lr{2.8\%} & سیستم \lr{hybrid} متعادل \\
+		8  & \lr{GPT-oss 120}          & \lr{\%35.0} & \lr{80}   & \lr{\%95.8} & \lr{\%36.5} & \lr{1.5\%} & \lr{QA} عمومی با \lr{coverage} بالا \\
+		9  & \lr{Gemini 2.5 Flash Lite}& \lr{\%45.0} & \lr{18.8} & \lr{\%98.3} & \lr{\%45.8} & \lr{0.8\%} & \lr{QA} عمومی با \lr{coverage} بالا \\
+		10 & \lr{GPT-4.1 Mini}         & \lr{\%36.7} & \lr{88.8} & \lr{\%89.2} & \lr{\%37.4} & \lr{0.7\%} & \lr{QA} عمومی با \lr{coverage} بالا \\
+		11 & \lr{GPT-oss 20}           & \lr{\%30.8} & \lr{86}   & \lr{\%92.5} & \lr{\%31.5} & \lr{0.7\%} & \lr{QA} عمومی با \lr{coverage} بالا \\
+		12 & \lr{Llama 4 Scout}        & \lr{\%45.8} & \lr{87.2} & \lr{\%41.7} & \lr{\%46.0} & \lr{0.2\%} & سیستم \lr{hybrid} متعادل \\
+		13 & \lr{GPT-4o Mini}          & \lr{\%39.2} & \lr{80}   & \lr{\%100.0}& \lr{\%39.2} & \lr{0\%}   & \lr{QA} عمومی با \lr{coverage} بالا \\
+		14 & \lr{Qwen3-235}            & \lr{\%46.7} & \lr{80}   & \lr{\%100.0}& \lr{\%46.7} & \lr{0\%}   & \lr{QA} عمومی با \lr{coverage} بالا \\
+		\hline
+	\end{tabular}
+\end{table}
+
+برای کاربردهایی که در آن‌ها «خطا پذیرفته نیست» (مانند مشاوره حقوقی حساس)، مدل \lr{Claude Haiku 4.5} با آستانه اطمینان \lr{83.2} پیشنهاد می‌شود. با این تنظیمات، مدل تنها به \lr{\%19.2} از سوالات پاسخ می‌دهد (پوشش کم)، اما دقت پاسخ‌هایش \lr{\%56.5} است که \lr{14\%} بهبود نسبت به حالت پایه دارد. این استراتژی «پاسخ نده، مگر مطمئن باشی» برای جلوگیری از تولید اطلاعات غلط حیاتی است. در مقابل، مدل‌های \lr{Grok 4 Fast} و \lr{Gemini 2.5 Flash} بهترین گزینه‌ها برای سیستم‌هایی هستند که هم دقت بالا و هم پوشش مناسب (حدود \lr{\%55} تا \lr{\%68}) می‌خواهند. با تنظیم آستانه اطمینان روی حدود \lr{\%90}، می‌توان به دقت بالای \lr{\%60} (در \lr{Grok}) رسید که تعادل عالی میان کمیت و کیفیت است. نهایتاً برای کاربردهای عمومی که پاسخ دادن به اکثر سوالات \lr{(Coverage \(\approx\) 100\%)} مهم‌تر از دقت محض است، مدل‌های \lr{GPT-4o Mini} و \lr{Qwen3-235} پیشنهاد می‌شوند. این مدل‌ها با آستانه اطمینان پایین (\lr{80})، تقریباً به تمام سوالات پاسخ می‌دهند، اما دقت آن‌ها (حدود \lr{\%40} تا \lr{\%46}) برای تصمیم‌گیری‌های حساس کافی نیست و باید توسط انسان بازبینی شود.
+
+هیچ «بهترین مدل واحدی» وجود ندارد. انتخاب مدل باید بر اساس «تحمل ریسک» \lr{(Risk Tolerance)} سیستم انجام شود: اگر ریسک پاسخ غلط بالاست، گزینه مناسب \lr{Claude} با فیلتر سخت‌گیرانه است و اگر سرعت و پوشش مهم است، \lr{Gemini} و \lr{Grok} گزینه‌های برنده هستند.
+
+\end{document}
