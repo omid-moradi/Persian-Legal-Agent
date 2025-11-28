@@ -1,8 +1,5 @@
 .env
-q1.json
-q2.json
-lite report.docx
-flash report.docx
-GPT-41 mini report.docx
-grok 4 fast report.docx
-1-100 or 50-100.txt
+qanuns.ipynb
+dadname_scraping.ipynb
+subjects.ipynb
+davoudabadi_cookies.pkl
