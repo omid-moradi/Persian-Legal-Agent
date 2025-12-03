@@ -8,3 +8,5 @@ extract IPYNB
 embeddins_test.ipynb
 law-meta-address.txt
 qdrant_data
+rag_pipeline_test.ipynb
+metadata_reverse_index.json
