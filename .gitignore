@@ -11,4 +11,3 @@ qdrant_data
 rag_pipeline_test.ipynb
 rag_pipeline_test-Copy.ipynb
 test.ipynb
-vector_store_bge
