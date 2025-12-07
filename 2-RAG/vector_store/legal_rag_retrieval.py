@@ -1,228 +1,105 @@
 """
 Legal RAG Retrieval System
 ===========================
-سیستم بازیابی هوشمند اطلاعات حقوقی با استفاده از:
-- Metadata-aware retrieval
-- Semantic search
-- Cohere reranking
 
-نویسنده: [OMID Moradi]
+سیستم جستجوی هوشمند برای پرسش‌وپاسخ حقوقی با استفاده از:
+- Metadata-aware retrieval (نام قانون + شماره ماده/اصل)
+- Semantic search (bge-m3 embeddings روی Qdrant)
+- Cohere reranking (rerank-multilingual-v3.0)
+
+نویسنده: OMID Moradi
 تاریخ: دسامبر 2025
 """
 
-import os
-import re
-import json
-import numpy as np
-from typing import List, Dict, Optional
+from typing import List, Dict
 from openai import OpenAI
 from qdrant_client import QdrantClient
 from qdrant_client.models import Filter, FieldCondition, MatchValue, Range
 import cohere
+import re
+import os
+import numpy as np
 
-
-# ==========================================
-# تنظیمات پیش‌فرض
-# ==========================================
-
-# Qdrant
+# ===========================
+# تنظیمات
+# ===========================
 QDRANT_URL = "http://localhost:6333"
+
 COLLECTION_LAWS = "legal_laws"
 COLLECTION_UNITY = "legal_votes_unity"
 COLLECTION_DADNAMEH = "legal_votes_dadnameh"
 
-# Embedding Model
 MODEL_EMBED = "baai/bge-m3"
 
-# مسیرهای پیش‌فرض فایل‌ها
-DEFAULT_KEYWORDS_PATH = r"F:\Thesis\project\2-RAG\raw_laws\Unifying Precedent Decisions\keywords.txt"
-DEFAULT_QAVANIN_PATH = r"F:\Thesis\project\2-RAG\raw_laws\Unifying Precedent Decisions\qavanin_karbordi.txt"
-DEFAULT_METADATA_INDEX_PATH = r"F:\Thesis\project\2-RAG\vector_store\metadata_reverse_index.json"
+# ===========================
+# API Keys
+# ===========================
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_EMBEDDINGS_API_KEY")
+COHERE_API_KEY = os.environ.get("COHERE_API_KEY")
 
+if not OPENROUTER_API_KEY:
+    raise ValueError("OPENROUTER_EMBEDDINGS_API_KEY تنظیم نشده است")
+if not COHERE_API_KEY:
+    raise ValueError("COHERE_API_KEY تنظیم نشده است")
 
-# ==========================================
-# متغیرهای Global
-# ==========================================
+# ===========================
+# اتصال به سرویس‌ها
+# ===========================
+qdrant = QdrantClient(url=QDRANT_URL)
 
-qdrant = None
-client_embed = None
-co = None
-KEYWORDS = set()
-QAVANIN_LIST = []
-REVERSE_INDEX = {}
-DOMAIN_LAW_PRIORITY = {}
+client_embed = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=OPENROUTER_API_KEY
+)
 
-# ==========================================
-# تابع Setup (اجباری برای اجرا)
-# ==========================================
+co = cohere.Client(api_key=COHERE_API_KEY)
 
-def setup_legal_rag(
-    qdrant_url: str = QDRANT_URL,
-    openrouter_api_key: Optional[str] = None,
-    cohere_api_key: Optional[str] = None,
-    keywords_path: Optional[str] = None,
-    qavanin_path: Optional[str] = None,
-    metadata_index_path: Optional[str] = None
-):
-    """
-    راه‌اندازی اولیه سیستم Legal RAG
-    
-    Parameters
-    ----------
-    qdrant_url : str
-        آدرس Qdrant server
-    openrouter_api_key : str, optional
-        کلید API برای OpenRouter (اگر None باشد، از environment variable استفاده می‌شود)
-    cohere_api_key : str, optional
-        کلید API برای Cohere (اگر None باشد، از environment variable استفاده می‌شود)
-    keywords_path : str, optional
-        مسیر فایل keywords.txt
-    qavanin_path : str, optional
-        مسیر فایل qavanin_karbordi.txt
-    metadata_index_path : str, optional
-        مسیر فایل metadata_reverse_index.json
-    
-    Returns
-    -------
-    bool
-        True اگر setup موفق بود
-    
-    Examples
-    --------
-    >>> setup_legal_rag(
-    ...     openrouter_api_key="YOUR_KEY",
-    ...     cohere_api_key="YOUR_KEY"
-    ... )
-    """
-    
-    global qdrant, client_embed, co, KEYWORDS, QAVANIN_LIST, REVERSE_INDEX
-    
-    # ===========================
-    # 1. دریافت API Keys
-    # ===========================
-    if openrouter_api_key is None:
-        openrouter_api_key = os.environ.get("OPENROUTER_EMBEDDINGS_API_KEY")
-    if cohere_api_key is None:
-        cohere_api_key = os.environ.get("COHERE_API_KEY")
-    
-    if not openrouter_api_key:
-        raise ValueError("OPENROUTER_EMBEDDINGS_API_KEY تنظیم نشده است")
-    if not cohere_api_key:
-        raise ValueError("COHERE_API_KEY تنظیم نشده است")
-    
-    # ===========================
-    # 2. اتصال به سرویس‌ها
-    # ===========================
-    qdrant = QdrantClient(url=qdrant_url)
-    
-    client_embed = OpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=openrouter_api_key
+print("✓ Qdrant متصل شد")
+print("✓ Cohere آماده است")
+print("✓ Embedding client آماده است")
+
+# ===========================
+# Embedding function
+# ===========================
+def embed_query(text: str) -> np.ndarray:
+    """تبدیل متن سؤال به Dense embedding"""
+    resp = client_embed.embeddings.create(
+        model=MODEL_EMBED,
+        input=[text]
     )
-    
-    co = cohere.Client(api_key=cohere_api_key)
-    
-    print("✓ Qdrant متصل شد")
-    print("✓ Cohere آماده است")
-    print("✓ Embedding client آماده است")
-    
-    # ===========================
-    # 3. بارگذاری فایل‌های متادیتا
-    # ===========================
-    
-    # استفاده از مسیرهای پیش‌فرض اگر مسیر داده نشده
-    keywords_path = keywords_path or DEFAULT_KEYWORDS_PATH
-    qavanin_path = qavanin_path or DEFAULT_QAVANIN_PATH
-    metadata_index_path = metadata_index_path or DEFAULT_METADATA_INDEX_PATH
-    
-    # بارگذاری keywords
-    if os.path.exists(keywords_path):
-        with open(keywords_path, "r", encoding="utf-8") as f:
-            KEYWORDS = set(line.strip() for line in f if line.strip())
-        print(f"✓ بارگذاری شد: {len(KEYWORDS)} keyword")
-    else:
-        print(f"⚠️ فایل keywords یافت نشد: {keywords_path}")
-    
-    # بارگذاری قوانین کاربردی
-    if os.path.exists(qavanin_path):
-        with open(qavanin_path, "r", encoding="utf-8") as f:
-            qavanin_text = f.read()
-            QAVANIN_LIST = [
-                line.strip() 
-                for line in qavanin_text.split('\n') 
-                if line.strip() and (line.strip().startswith('قانون') or line.strip().startswith('لایحه'))
-            ]
-        print(f"✓ بارگذاری شد: {len(QAVANIN_LIST)} قانون کاربردی")
-    else:
-        print(f"⚠️ فایل qavanin یافت نشد: {qavanin_path}")
-    
-    # 🆕 ساخت خودکار DOMAIN_LAW_PRIORITY از qavanin_karbordi
-    DOMAIN_LAW_PRIORITY = {}
-    try:
-        with open(qavanin_path, "r", encoding="utf-8") as f:
-            content = f.read()
-        
-        sections = content.split("**")
-        for i in range(1, len(sections), 2):
-            domain = sections[i].strip()
-            laws_section = sections[i+1].strip()
-            laws = [
-                line.strip()
-                for line in laws_section.split("\n")
-                if line.strip() and not line.startswith("**")
-            ]
-            if domain and laws:
-                DOMAIN_LAW_PRIORITY[domain] = laws  # 5 قانون اول هر حوزه
-        
-        print(f"✓ DOMAIN_LAW_PRIORITY ساخته شد ({len(DOMAIN_LAW_PRIORITY)} حوزه)")
-        globals()["DOMAIN_LAW_PRIORITY"] = DOMAIN_LAW_PRIORITY
-        
-    except Exception as e:
-        print(f"⚠️ خطا در ساخت DOMAIN_LAW_PRIORITY: {e}")
-        DOMAIN_LAW_PRIORITY = {}
-    
-    # بارگذاری metadata reverse index
-    if os.path.exists(metadata_index_path):
-        with open(metadata_index_path, "r", encoding="utf-8") as f:
-            REVERSE_INDEX = json.load(f)
-        print(f"✓ بارگذاری شد: Metadata Reverse Index ({len(REVERSE_INDEX)} کلیدواژه)")
-    else:
-        print(f"⚠️ فایل metadata_reverse_index.json یافت نشد: {metadata_index_path}")
-        REVERSE_INDEX = {}
-    
-    print("\n" + "="*80)
-    print("✅ Setup کامل شد!")
-    print("="*80 + "\n")
-    
-    return True
+    emb = np.array(resp.data[0].embedding, dtype="float32")
+    return emb
 
-# ==========================================
-# تابع کمکی: Embed Query
-# ==========================================
+# ===========================
+# بارگذاری فایل‌های متادیتا (ساده)
+# ===========================
+QAVANIN_PATH = os.path.join(os.path.dirname(__file__), "qavanin_karbordi.txt")
 
-def embed_query(text: str, keywords: Optional[List[str]] = None) -> np.ndarray:
-    """تبدیل متن به embedding با افزودن کلیدواژه‌های اختیاری"""
-    if client_embed is None:
-        raise RuntimeError("لطفاً ابتدا setup_legal_rag() را اجرا کنید")
-    
-    # اگر کلیدواژه داریم، به query اضافه کن
-    if keywords:
-        enhanced_text = f"{text} {' '.join(keywords)}"
-    else:
-        enhanced_text = text
-    
-    response = client_embed.embeddings.create(
-        input=enhanced_text,
-        model=MODEL_EMBED
-    )
+# فقط QAVANIN_LIST (بدون LAW_TO_DOMAIN)
+with open(QAVANIN_PATH, "r", encoding="utf-8") as f:
+    QAVANIN_TEXT = f.read()
+    lines = [line.strip() for line in QAVANIN_TEXT.split('\n') if line.strip()]
+   
+    QAVANIN_LIST = [
+        line for line in lines
+        if line.startswith(('قانون', 'لایحه', 'آیین‌نامه', 'آیین نامه', 'دستورالعمل', 'احکام'))
+    ]
 
-    return np.array(response.data[0].embedding)
+print(f"✓ بارگذاری شد: {len(QAVANIN_LIST)} قانون کاربردی")
+print("\n" + "="*80)
 
-# ==========================================
-# Parse Metadata & Helper Functions
-# ==========================================
+def normalize_for_match(text: str) -> str:
+    """
+    نرمال‌سازی موقت فقط برای مقایسه (حفظ متن اصلی با نیم‌فاصله)
+    تبدیل نیم‌فاصله به فاصله و یکسان‌سازی فاصله‌ها
+    """
+    t = text.replace('\u200c', ' ')  # نیم‌فاصله → فاصله
+    t = re.sub(r'\s+', ' ', t)       # چند فاصله → یک فاصله
+    return t.strip().lower()
 
+# ===========================
 # تبدیل اعداد فارسی به انگلیسی (کامل)
+# ===========================
 FARSI_ONES = {
     'صفر': 0, 'یک': 1, 'دو': 2, 'سه': 3, 'چهار': 4, 'پنج': 5,
     'شش': 6, 'هفت': 7, 'هشت': 8, 'نه': 9
@@ -249,29 +126,9 @@ FARSI_ORDINAL_SIMPLE = {
     'هفتادم': '70', 'هشتادم': '80', 'نودم': '90', 'یکصدم': '100'
 }
 
-
 def farsi_word_to_number(text: str) -> int:
-    """
-    تبدیل عدد فارسی (ترکیبی) به عدد انگلیسی
-    
-    Parameters
-    ----------
-    text : str
-        عدد فارسی (مثل "یکصد و دوازده")
-    
-    Returns
-    -------
-    int
-        عدد انگلیسی (مثل 112)
-    
-    Examples
-    --------
-    >>> farsi_word_to_number("یکصد و دوازده")
-    112
-    >>> farsi_word_to_number("بیست و سوم")
-    23
-    """
-    text = text.strip().replace('‌', ' ')
+    """تبدیل عدد فارسی (ترکیبی) به عدد انگلیسی"""
+    text = text.strip().replace('‌', ' ')  # تبدیل نیم‌فاصله به فاصله
     
     if text.isdigit():
         return int(text)
@@ -303,21 +160,8 @@ def farsi_word_to_number(text: str) -> int:
     total += current
     return total if total > 0 else None
 
-
 def normalize_article_number(text: str) -> str:
-    """
-    تبدیل شماره فارسی (ساده یا ترکیبی) به انگلیسی
-    
-    Parameters
-    ----------
-    text : str
-        شماره به فارسی یا انگلیسی
-    
-    Returns
-    -------
-    str
-        شماره به انگلیسی
-    """
+    """تبدیل شماره فارسی (ساده یا ترکیبی) به انگلیسی"""
     text = text.strip()
     
     if text.isdigit():
@@ -329,867 +173,418 @@ def normalize_article_number(text: str) -> str:
     except:
         return text
 
-def parse_question_metadata(question: str) -> dict:
+def parse_question_metadata_simple(question: str) -> dict:
     """
-    استخراج متادیتا از سؤال حقوقی:
-    - نام قانون (فقط اگر صراحتاً در سؤال آمده باشد)
-    - شماره ماده/اصل
-    - نوع (ماده، اصل، تبصره، ...)
-    - ساختار (فصل، باب، ...)
-    - حوزه حقوقی (فقط اگر صراحتاً در سؤال ذکر شده)
-    - topic تقریبی بر اساس KEYWORDS
-    - matched_metadata برای استفاده از REVERSE_INDEX
+    استخراج ساده: فقط نام قانون + اصل/ماده
+   
+    Returns:
+    - law_name: نام قانون یا None
+    - article_number: شماره یا None  
+    - article_type: "اصل" یا "ماده" یا None
+    - has_metadata: True اگر حداقل یکی پیدا شد
     """
     q = question.strip()
+    q_norm = normalize_for_match(q)
+   
     result = {
         "law_name": None,
         "article_number": None,
         "article_type": None,
-        "domain": None,
-        "topic": None,
-        "structure_info": {},
-        "matched_metadata": []
+        "has_metadata": False
     }
-
-    # 1. تشخیص مستقیم حوزه از روی متن سؤال (فقط اگر صریحاً ذکر شده)
-    DOMAIN_PATTERNS = [
-        "حقوق اساسی",
-        "حقوق مدنی",
-        "حقوق جزا",
-        "آیین دادرسی کیفری",
-        "آیین دادرسی مدنی",
-        "حقوق تجارت",
-        "حقوق ثبت",
-        "ثبت احوال",
-        "قاچاق و تعزیرات حکومتی",
-        "مطبوعات و رسانه",
-        "حقوق کار و تامین اجتماعی",
-        "قضاوت",
-        "وکالت",
-        "سردفتران",
-        "کارشناسان رسمی",
-        "مالیات",
-    ]
-    for dom in DOMAIN_PATTERNS:
-        if dom in q:
-            result["domain"] = dom
-            break
-
-    # 2. تشخیص نام قانون فقط بر اساس حضور صریح نام قانون
-    candidate_laws = []
-
-    if result["domain"] and result["domain"] in DOMAIN_LAW_PRIORITY:
-        # اول قوانین مرتبط با حوزه را چک کن
-        candidate_laws.extend(DOMAIN_LAW_PRIORITY[result["domain"]])
-        # سپس بقیه قوانین را به‌عنوان fallback
-        candidate_laws.extend(QAVANIN_LIST)
-    else:
-        # اگر domain نداریم یا نمی‌شناسیم، فقط در QAVANIN_LIST بگرد
-        candidate_laws.extend(QAVANIN_LIST)
-
-    # حذف تکرار (حفظ ترتیب)
-    seen = set()
-    candidate_laws = [l for l in candidate_laws if not (l in seen or seen.add(l))]
-
-    # فقط اگر نام کامل قانون در سؤال هست
-    for law in candidate_laws:
-        if law and law in q:
+   
+    # ===========================
+    # 1. نام قانون (دقیق + فازی)
+    # ===========================
+    # تطبیق دقیق
+    for law in QAVANIN_LIST:
+        if normalize_for_match(law) in q_norm:
             result["law_name"] = law
+            result["has_metadata"] = True
             break
-
-    # 3. استخراج شماره ماده/اصل/تبصره/بند/فقره
+   
+    # تطبیق فازی
+    if not result["law_name"]:
+        candidates = []
+        for law in QAVANIN_LIST:
+            law_clean = law.replace('لایحه قانونی', '').replace('قانون', '').replace('آیین‌نامه', '').strip()
+            law_keywords_raw = [w for w in law_clean.split() if len(w) > 3][:4]
+           
+            if law_keywords_raw:
+                law_keywords_norm = [normalize_for_match(kw) for kw in law_keywords_raw]
+                matches = sum(1 for kw_norm in law_keywords_norm if kw_norm in q_norm)
+               
+                if matches >= 1:
+                    match_ratio = matches / len(law_keywords_norm)
+                    score = (match_ratio * 100) + len(law_keywords_norm)
+                    candidates.append({'law': law, 'matches': matches, 'score': score})
+       
+        if candidates:
+            candidates.sort(key=lambda x: (x['matches'], x['score']), reverse=True)
+            best = candidates[0]
+            if best['matches'] >= 2 or len([w for w in best['law'].split() if len(w) > 3]) == 1:
+                result["law_name"] = best['law']
+                result["has_metadata"] = True
+   
+    # ===========================
+    # 2. اصل/ماده
+    # ===========================
     patterns = [
         (r'اصل\s+([آ-ی\s]+(?:م|مین)?|\d+)', 'اصل'),
         (r'(?:ماده|مواد)\s+(\d+(?:\s*مکرر)?(?:\s*تا\s*\d+)?(?:\s*و\s*\d+)*)', 'ماده'),
-        (r'تبصره\s+([آ-ی\s]+(?:م)?|\d+)', 'تبصره'),
-        (r'بند\s+([آ-ی\s]+(?:م)?|[آ-ی]|\d+)', 'بند'),
-        (r'فقره\s+([آ-ی\s]+(?:م)?|\d+)', 'فقره'),
     ]
-
+   
     for pattern, article_type in patterns:
         match = re.search(pattern, q)
         if match:
             raw_number = match.group(1).strip()
             result["article_number"] = normalize_article_number(raw_number)
             result["article_type"] = article_type
+            result["has_metadata"] = True
             break
-
-    # 4. استخراج ساختار (فصل/باب/کتاب/...)
-    structure_patterns = [
-        (r'فصل\s+([آ-ی\s]+(?:م)?|\d+)(?:\s*[-:]\s*([^\n،\.؛]+))?', 'فصل'),
-        (r'باب\s+([آ-ی\s]+(?:م)?|\d+)(?:\s*[-:]\s*([^\n،\.؛]+))?', 'باب'),
-        (r'بخش\s+([آ-ی\s]+(?:م)?|\d+)(?:\s*[-:]\s*([^\n،\.؛]+))?', 'بخش'),
-        (r'کتاب\s+([آ-ی\s]+(?:م)?|\d+)(?:\s*[-:]\s*([^\n،\.؛]+))?', 'کتاب'),
-        (r'جلد\s+([آ-ی\s]+(?:م)?|\d+)(?:\s*[-:]\s*([^\n،\.؛]+))?', 'جلد'),
-        (r'مبحث\s+([آ-ی\s]+(?:م)?|\d+)(?:\s*[-:]\s*([^\n،\.؛]+))?', 'مبحث'),
-    ]
-
-    for pattern, struct_type in structure_patterns:
-        match = re.search(pattern, q)
-        if match:
-            raw_number = match.group(1).strip()
-            number = normalize_article_number(raw_number)
-            title = match.group(2).strip() if match.lastindex >= 2 and match.group(2) else None
-            result["structure_info"][struct_type] = {
-                "number": number,
-                "title": title
-            }
-
-    # 5. استخراج topic بر اساس KEYWORDS
-    result["topic"] = None
-    for keyword in KEYWORDS:
-        if keyword in q:
-            result["topic"] = keyword
-            break
-
-    # 6. جستجو در REVERSE_INDEX برای metadata titles
-    if REVERSE_INDEX:
-        # استخراج کلمات کلیدی از سؤال (حداقل 3 حرف)
-        words = [w.strip() for w in q.split() if len(w.strip()) >= 3]
-        
-        for word in words:
-            if word in REVERSE_INDEX:
-                # REVERSE_INDEX[word] باید لیستی از دیکشنری‌های metadata باشد
-                result["matched_metadata"].extend(REVERSE_INDEX[word][:2])
-        
-        # حذف تکرار بر اساس title
-        seen_titles = set()
-        unique_matches = []
-        for m in result["matched_metadata"]:
-            title = m.get("title", "")
-            if title and title not in seen_titles:
-                seen_titles.add(title)
-                unique_matches.append(m)
-        
-        result["matched_metadata"] = unique_matches[:3]  # حداکثر 3 مورد
-
+   
     return result
 
-
 # ==========================================
-# Semantic-Only Retrieval
+#  Retrieval بدون متادیتا (Semantic Only)
 # ==========================================
-
-def retrieve_semantic_only(query_text: str, top_laws: int = 10, top_unity: int = 5, top_dadnameh: int = 5) -> List[Dict]:
+def retrieve_semantic_only(query_text: str, top_k_total: int = 20):
     """
-    جستجوی معنایی خالص (بدون استفاده از metadata filtering)
-    
-    این تابع بدون فیلتر metadata، صرفاً بر اساس شباهت معنایی
-    embedding ها در سه collection جستجو می‌کند.
-    
-    Parameters
-    ----------
-    query_text : str
-        متن سؤال
-    top_laws : int, default=10
-        تعداد نتایج از collection قوانین
-    top_unity : int, default=5
-        تعداد نتایج از collection وحدت رویه
-    top_dadnameh : int, default=5
-        تعداد نتایج از collection دادنامه‌ها
-    
-    Returns
-    -------
-    List[Dict]
-        لیست نتایج شامل:
-        - text: متن سند
-        - source_type: نوع منبع
-        - retrieval_score: امتیاز شباهت
-        - metadata: اطلاعات metadata
-        - matched_via: "semantic_only"
-    
-    Examples
-    --------
-    >>> results = retrieve_semantic_only(
-    ...     "تعریف اموال غیرمنقول",
-    ...     top_laws=5,
-    ...     top_unity=2
-    ... )
-    >>> print(len(results))
-    7
+    جستجوی صرفاً معنایی (بدون استفاده از متادیتا) روی ۳ کالکشن:
+    - COLLECTION_LAWS
+    - COLLECTION_UNITY
+    - COLLECTION_DADNAMEH
     """
-    
-    if qdrant is None or client_embed is None:
-        raise RuntimeError("لطفاً ابتدا setup_legal_rag() را اجرا کنید")
-    
-    # Embed کردن سؤال
+    # 1) Embed کردن سؤال
     query_vec = embed_query(query_text).tolist()
-    
     all_results = []
-    
-    # 1. جستجو در قوانین
-    try:
-        hits_laws = qdrant.query_points(
-            collection_name=COLLECTION_LAWS,
-            query=query_vec,
-            limit=top_laws,
-            with_payload=True
-        ).points
-        
-        for hit in hits_laws:
-            all_results.append({
-                "text": hit.payload.get("page_content", "")[:4000],
-                "source_type": "قانون",
-                "retrieval_score": float(hit.score),
-                "metadata": hit.payload,
-                "matched_via": "semantic_only"
-            })
-    except Exception as e:
-        print(f"⚠️ خطا در جستجوی قوانین: {e}")
-    
-    # 2. جستجو در آراء وحدت رویه
-    try:
-        hits_unity = qdrant.query_points(
-            collection_name=COLLECTION_UNITY,
-            query=query_vec,
-            limit=top_unity,
-            with_payload=True
-        ).points
-        
-        for hit in hits_unity:
-            all_results.append({
-                "text": hit.payload.get("page_content", "")[:4000],
-                "source_type": "وحدت رویه",
-                "retrieval_score": float(hit.score),
-                "metadata": hit.payload,
-                "matched_via": "semantic_only"
-            })
-    except Exception as e:
-        print(f"⚠️ خطا در جستجوی وحدت رویه: {e}")
-    
-    # 3. جستجو در دادنامه‌ها
-    try:
-        hits_dadnameh = qdrant.query_points(
-            collection_name=COLLECTION_DADNAMEH,
-            query=query_vec,
-            limit=top_dadnameh,
-            with_payload=True
-        ).points
-        
-        for hit in hits_dadnameh:
-            all_results.append({
-                "text": hit.payload.get("page_content", "")[:4000],
-                "source_type": "دادنامه",
-                "retrieval_score": float(hit.score),
-                "metadata": hit.payload,
-                "matched_via": "semantic_only"
-            })
-    except Exception as e:
-        print(f"⚠️ خطا در جستجوی دادنامه‌ها: {e}")
-    
-    # مرتب‌سازی بر اساس score (نزولی)
+
+    # 2) توزیع ساده top_k بین سه کالکشن (با وزن بیشتر برای قوانین)
+    laws_limit = max(8, top_k_total // 2)
+    unity_limit = max(4, top_k_total // 4)
+    dadnameh_limit = max(4, top_k_total // 4)
+
+    collections = [
+        (COLLECTION_LAWS, "قانون", laws_limit),
+        (COLLECTION_UNITY, "وحدت رویه", unity_limit),
+        (COLLECTION_DADNAMEH, "دادنامه", dadnameh_limit),
+    ]
+
+    for collection_name, source_type, limit in collections:
+        try:
+            search_result = qdrant.query_points(
+                collection_name=collection_name,
+                query=query_vec,
+                limit=limit,
+                with_payload=True,
+                with_vectors=False  # فقط امتیاز و payload کافی است
+            )
+
+            for hit in search_result.points:
+                all_results.append({
+                    "text": hit.payload.get("page_content", "")[:3500],
+                    "source_type": source_type,
+                    "collection": collection_name,
+                    "retrieval_score": float(hit.score),
+                    "metadata": dict(hit.payload),
+                    "matched_via": "semantic_only"
+                })
+        except Exception as e:
+            print(f"⚠️ خطا در جستجو روی کالکشن {collection_name}: {e}")
+
+    # 3) مرتب‌سازی بر اساس امتیاز و محدود کردن به top_k_total
     all_results.sort(key=lambda x: x["retrieval_score"], reverse=True)
-    
-    return all_results
+    final_results = all_results[:top_k_total]
 
-# ==========================================
-# Metadata-Aware Retrieval
-# ==========================================
+    print(f"🔍 Semantic only: {len(final_results)} نتیجه (از {len(all_results)} نتیجه خام)")
+    return final_results
 
-# ==========================================
-# تابع کمکی: Embed Query (اصلاح‌شده)
-# ==========================================
-
-def embed_query(text: str, keywords: Optional[List[str]] = None) -> np.ndarray:
+def retrieve_with_metadata(query_text: str, top_k_total: int = 20):
     """
-    تبدیل متن به embedding vector با افزودن کلیدواژه‌های اختیاری
-    
-    Parameters
-    ----------
-    text : str
-        متن ورودی
-    keywords : List[str], optional
-        کلیدواژه‌های استخراج‌شده از KEYWORDS
-    
-    Returns
-    -------
-    np.ndarray
-        بردار embedding
-    """
-    
-    if client_embed is None:
-        raise RuntimeError("لطفاً ابتدا setup_legal_rag() را اجرا کنید")
-    
-    # اگر کلیدواژه داریم، به query اضافه کن (با وزن‌دهی)
-    if keywords and len(keywords) > 0:
-        enhanced_text = f"{text} [کلیدواژه‌های مرتبط: {' '.join(keywords)}]"
-    else:
-        enhanced_text = text
-    
-    response = client_embed.embeddings.create(
-        input=enhanced_text,
-        model=MODEL_EMBED
-    )
-    
-    return np.array(response.data[0].embedding)
+    جستجو با استفاده از متادیتا (نام قانون + شماره اصل/ماده)
 
-# ==========================================
-# تابع retrieve_with_metadata (کامل و اصلاح‌شده)
-# ==========================================
+    اولویت‌ها:
+      1) law+article : قانون + شماره دقیق اصل/ماده (با Range روی فیلد عددی)
+      2) law_only    : فقط قانون (بدون شماره مشخص)
+      3) semantic    : جستجوی صرفاً معنایی در همه کالکشن‌ها
+    """
+    # 1️⃣ استخراج متادیتا ساده از سؤال
+    parsed = parse_question_metadata_simple(query_text)
+    query_vec = embed_query(query_text).tolist()
+    all_results = []
 
-def retrieve_with_metadata(query_text: str, top_k_per_source: int = 20) -> List[Dict]:
-    """
-    جستجوی هوشمند با استفاده از metadata (شماره ماده/اصل، نام قانون و عناوین)
-    
-    Parameters
-    ----------
-    query_text : str
-        متن سؤال
-    top_k_per_source : int, default=20
-        تعداد نتایج در هر منبع برای بخش semantic عمومی
-    
-    Returns
-    -------
-    List[Dict]
-        لیست نتایج یکتا، مرتب‌شده بر اساس اولویت و امتیاز
-    """
-    
-    if qdrant is None or client_embed is None:
-        raise RuntimeError("لطفاً ابتدا setup_legal_rag() را اجرا کنید")
-    
-    parsed_metadata = parse_question_metadata(query_text)
-    
-    # 🆕 استخراج کلیدواژه‌ها از سؤال
-    extracted_keywords = [kw for kw in KEYWORDS if kw in query_text]
-    print(f"🔑 کلیدواژه‌های یافت‌شده: {extracted_keywords[:3]}")
-    
-    # 🆕 Embed کردن با کلیدواژه‌ها
-    query_vec = embed_query(query_text, extracted_keywords[:3]).tolist()
-    
-    all_results: List[Dict] = []
-    
+    law_name = parsed["law_name"]
+    article_num = parsed["article_number"]
+    article_type = parsed["article_type"]
+
+    print(f"🎯 Metadata: law='{law_name}' | {article_type} {article_num}")
+
+    # اولویت مرتب‌سازی نهایی
+    priority = {"law+article": 0, "law_only": 1, "semantic": 2}
+
     # ===========================
-    # بخش 1: فیلتر مستقیم شماره اصل/ماده
+    # 1️⃣ قانون + شماره اصل/ماده (با Range)
     # ===========================
-    direct_match_found = False
-    
-    if parsed_metadata.get("article_number") and parsed_metadata.get("article_type"):
-        article_num = parsed_metadata["article_number"]
-        article_type = parsed_metadata["article_type"]
-        
-        print(f"🎯 جستجوی مستقیم: {article_type} {article_num}")
-        
+    if law_name and article_num:
+        print("🔍 فیلتر قانون + شماره (با Range)...")
+
+        # انتخاب فیلد صحیح در payload بر اساس نوع
         if article_type == "اصل":
-            collection = COLLECTION_LAWS
             field_name = "principle_number"
         elif article_type == "ماده":
-            collection = COLLECTION_LAWS
             field_name = "article_number"
         else:
-            collection = None
             field_name = None
-        
-        if collection and field_name:
+
+        if field_name:
+            # تلاش برای تبدیل به float تا با هر دو نوع int/float در payload مچ شود
+            article_num_float = None
             try:
-                # تبدیل به float برای استفاده در Range
-                try:
-                    article_num_float = float(article_num)
-                except (ValueError, TypeError):
-                    article_num_float = None
-                
-                filters = []
+                article_num_float = float(article_num)
+            except Exception:
+                article_num_float = None
+
+            try:
+                filters = [
+                    FieldCondition(
+                        key="law_name",
+                        match=MatchValue(value=law_name)
+                    )
+                ]
+
+                # اگر توانستیم به عدد تبدیل کنیم، از Range استفاده می‌کنیم
                 if article_num_float is not None:
-                    # استفاده از Range با tolerance مناسب
                     filters.append(
                         FieldCondition(
                             key=field_name,
                             range=Range(
-                                gte=article_num_float - 0.01,
-                                lte=article_num_float + 0.01
+                                gte=article_num_float - 0.1,
+                                lte=article_num_float + 0.1
                             )
                         )
                     )
-                
-                # فیلتر قانون اساسی برای اصول
-                if article_type == "اصل" and not parsed_metadata.get("law_name"):
-                    if "قانون اساسی" in query_text or "اساسی" in query_text:
-                        filters.append(
-                            FieldCondition(
-                                key="law_name",
-                                match=MatchValue(value="قانون اساسی جمهوری اسلامی ایران")
-                            )
-                        )
-                elif parsed_metadata.get("law_name"):
-                    filters.append(
-                        FieldCondition(
-                            key="law_name",
-                            match=MatchValue(value=parsed_metadata["law_name"])
-                        )
-                    )
-                
-                if filters:
-                    hits = qdrant.query_points(
-                        collection_name=collection,
-                        query=query_vec,
-                        query_filter=Filter(must=filters),
-                        limit=5,
-                        with_payload=True
-                    ).points
-                    
-                    print(f"   ✓ یافت شد: {len(hits)} سند")
-                    
-                    if len(hits) > 0:
-                        direct_match_found = True
-                        for hit in hits:
-                            all_results.append({
-                                "text": hit.payload.get("page_content", "")[:4000],
-                                "source_type": "قانون",
-                                "retrieval_score": float(hit.score),
-                                "metadata": hit.payload,
-                                "matched_via": f"direct: {article_type} {article_num}"
-                            })
-                    else:
-                        print(f"   ⚠️ هیچ سندی با {field_name}={article_num} پیدا نشد")
-            
+
+                hits = qdrant.query_points(
+                    collection_name=COLLECTION_LAWS,
+                    query=query_vec,
+                    query_filter=Filter(must=filters),
+                    limit=10,
+                    with_payload=True,
+                    with_vectors=False
+                ).points
+
+                print(f"   ✓ {len(hits)} سند (law+{field_name})")
+
+                for hit in hits:
+                    meta = dict(hit.payload)
+                    # متن اصلی برای قوانین: text → page_content
+                    main_text = meta.get("text") or meta.get("page_content", "")
+                    all_results.append({
+                        "text": main_text[:3500],
+                        "source_type": "قانون",
+                        "collection": COLLECTION_LAWS,
+                        "retrieval_score": float(hit.score),
+                        "metadata": meta,
+                        "matched_via": "law+article"
+                    })
             except Exception as e:
-                print(f"⚠️ خطا در فیلتر {article_type}: {e}")
-    
+                print(f"⚠️ خطا در law+article: {e}")
+
     # ===========================
-    # Fallback: نام قانون
+    # 2️⃣ فقط قانون (اگر هنوز نتایج کافی نداریم)
     # ===========================
-    if not direct_match_found and parsed_metadata.get("law_name"):
-        law_name = parsed_metadata["law_name"]
-        print(f"🔄 Fallback: جستجو در {law_name[:50]}...")
-        
+    if law_name and len(all_results) < top_k_total // 2:
+        print("🔍 فیلتر فقط قانون...")
+
         try:
             hits = qdrant.query_points(
                 collection_name=COLLECTION_LAWS,
                 query=query_vec,
-                query_filter=Filter(
-                    must=[
-                        FieldCondition(
-                            key="law_name",
-                            match=MatchValue(value=law_name)
-                        )
-                    ]
-                ),
-                limit=8,
-                with_payload=True
+                query_filter=Filter(must=[
+                    FieldCondition(
+                        key="law_name",
+                        match=MatchValue(value=law_name)
+                    )
+                ]),
+                limit=10,
+                with_payload=True,
+                with_vectors=False
             ).points
-            
-            print(f"   ✓ یافت شد: {len(hits)} سند")
-            
+
+
+            print(f"   ✓ {len(hits)} سند (law_only)")
+
             for hit in hits:
+                meta = dict(hit.payload)
+                main_text = meta.get("text") or meta.get("page_content", "")
                 all_results.append({
-                    "text": hit.payload.get("page_content", "")[:4000],
+                    "text": main_text[:3500],
                     "source_type": "قانون",
+                    "collection": COLLECTION_LAWS,
                     "retrieval_score": float(hit.score),
-                    "metadata": hit.payload,
-                    "matched_via": f"law_fallback: {law_name[:30]}..."
+                    "metadata": meta,
+                    "matched_via": "law_only"
                 })
-        
         except Exception as e:
-            print(f"⚠️ خطا در fallback: {e}")
-    
+            print(f"⚠️ خطا در law_only: {e}")
+
     # ===========================
-    # بخش 2: metadata titles (REVERSE_INDEX)
+    # 3️⃣ Semantic fallback (همه کالکشن‌ها)
     # ===========================
-    if parsed_metadata.get("matched_metadata"):
-        print(f"🎯 یافت شد {len(parsed_metadata['matched_metadata'])} metadata title")
-        
-        for matched in parsed_metadata["matched_metadata"][:2]:
+    if len(all_results) < top_k_total:
+        print("🔍 Semantic fallback...")
+
+        collections = [
+            (COLLECTION_LAWS, "قانون", 8),
+            (COLLECTION_UNITY, "وحدت رویه", 6),
+            (COLLECTION_DADNAMEH, "دادنامه", 6)
+        ]
+
+        for collection_name, source_type, limit in collections:
             try:
-                filters = []
-                
-                if matched.get("law_name"):
-                    filters.append(
-                        FieldCondition(
-                            key="law_name",
-                            match=MatchValue(value=matched["law_name"])
-                        )
-                    )
-                
-                if matched.get("metadata_field") and matched.get("full_text"):
-                    filters.append(
-                        FieldCondition(
-                            key=matched["metadata_field"],
-                            match=MatchValue(value=matched["full_text"])
-                        )
-                    )
-                
-                if filters:
-                    hits = qdrant.query_points(
-                        collection_name=matched["collection"],
-                        query=query_vec,
-                        query_filter=Filter(must=filters),
-                        limit=3,
-                        with_payload=True
-                    ).points
-                    
-                    for hit in hits:
-                        all_results.append({
-                            "text": hit.payload.get("page_content", "")[:4000],
-                            "source_type": (
-                                "قانون" if matched["collection"] == COLLECTION_LAWS
-                                else "وحدت رویه" if matched["collection"] == COLLECTION_UNITY
-                                else "دادنامه"
-                            ),
-                            "retrieval_score": float(hit.score),
-                            "metadata": hit.payload,
-                            "matched_via": f"title: {matched.get('title', 'نامشخص')[:30]}..."
-                        })
-            
-            except Exception:
-                pass
-    
+                hits = qdrant.query_points(
+                    collection_name=collection_name,
+                    query=query_vec,
+                    limit=limit,
+                    with_payload=True,
+                    with_vectors=False
+                ).points
+
+                for hit in hits:
+                    meta = dict(hit.payload)
+                    # انتخاب متن مناسب بر اساس نوع منبع
+                    if source_type == "قانون":
+                        main_text = meta.get("text") or meta.get("page_content", "")
+                    else:
+                        # برای آراء وحدت رویه و دادنامه: vote_text → text → page_content
+                        main_text = meta.get("vote_text") or meta.get("text") or meta.get("page_content", "")
+
+                    all_results.append({
+                        "text": main_text[:3500],
+                        "source_type": source_type,
+                        "collection": collection_name,
+                        "retrieval_score": float(hit.score),
+                        "metadata": meta,
+                        "matched_via": "semantic"
+                    })
+            except Exception as e:
+                print(f"⚠️ خطا در semantic {source_type}: {e}")
+
     # ===========================
-    # بخش 3: semantic عمومی با فیلتر domain
+    # 🔎 حذف تکراری + اولویت‌دهی + برش نهایی
     # ===========================
-    collections = [
-        (COLLECTION_LAWS, "قانون", top_k_per_source),
-        (COLLECTION_UNITY, "وحدت رویه", max(3, top_k_per_source // 2)),
-        (COLLECTION_DADNAMEH, "دادنامه", max(3, top_k_per_source // 2))
-    ]
-    
-    for collection_name, source_type, limit in collections:
-        try:
-            query_filter = None
-            matched_via = "semantic_general"
-            
-            # فیلتر domain (دو روش fallback)
-            if parsed_metadata.get("domain") and not parsed_metadata.get("law_name"):
-                # روش 1: فیلد domain
-                try:
-                    query_filter = Filter(
-                        must=[
-                            FieldCondition(
-                                key="domain",
-                                match=MatchValue(value=parsed_metadata["domain"])
-                            )
-                        ]
-                    )
-                    matched_via = f"domain_filtered: {parsed_metadata['domain']}"
-                except Exception:
-                    # روش 2: لیست قوانین حوزه
-                    domain_laws = DOMAIN_LAW_PRIORITY.get(parsed_metadata["domain"], [])
-                    if domain_laws:
-                        from qdrant_client.models import MatchAny
-                        query_filter = Filter(
-                            should=[
-                                FieldCondition(
-                                    key="law_name",
-                                    match=MatchAny(any=domain_laws[:10])
-                                )
-                            ]
-                        )
-                        matched_via = f"law_list_filtered: {parsed_metadata['domain']}"
-            
-            hits = qdrant.query_points(
-                collection_name=collection_name,
-                query=query_vec,
-                query_filter=query_filter,
-                limit=limit,
-                with_payload=True
-            ).points
-            
-            for hit in hits:
-                all_results.append({
-                    "text": hit.payload.get("page_content", "")[:4000],
-                    "source_type": source_type,
-                    "retrieval_score": float(hit.score),
-                    "metadata": hit.payload,
-                    "matched_via": matched_via,
-                    "keywords_used": extracted_keywords[:3]  # برای دیباگ
-                })
-        
-        except Exception as e:
-            print(f"⚠️ خطا در {source_type}: {e}")
-    
-    # ===========================
-    # حذف تکراری و مرتب‌سازی
-    # ===========================
-    seen_texts = set()
-    unique_results: List[Dict] = []
-    
-    for result in all_results:
-        text_hash = result["text"][:200]
-        if text_hash not in seen_texts:
-            seen_texts.add(text_hash)
-            unique_results.append(result)
-    
-    # Priority کامل
-    priority_order = {
-        "direct": 0,
-        "title": 1,
-        "law_fallback": 2,
-        "domain_filtered": 3,
-        "law_list_filtered": 4,
-        "semantic_general": 5
-    }
-    
+    seen = set()
+    unique_results = []
+    for r in all_results:
+        h = r["text"][:200]
+        if h not in seen:
+            seen.add(h)
+            unique_results.append(r)
+
     unique_results.sort(
         key=lambda x: (
-            priority_order.get(x["matched_via"].split(":")[0], 99),
+            priority.get(x["matched_via"], 99),
             -x["retrieval_score"]
         )
     )
-    
-    return unique_results[:50]  # حداکثر 50 نتیجه برای جلوگیری از overload
-    
-    # ===========================
-    # Fallback: اگر direct match پیدا نشد ولی نام قانون داریم
-    # ===========================
-    if not direct_match_found and parsed_metadata.get("law_name"):
-        law_name = parsed_metadata["law_name"]
-        print(f"🔄 Fallback: جستجو در {law_name[:50]}...")
-        
-        try:
-            hits = qdrant.query_points(
-                collection_name=COLLECTION_LAWS,
-                query=query_vec,
-                query_filter=Filter(
-                    must=[
-                        FieldCondition(
-                            key="law_name",
-                            match=MatchValue(value=law_name)
-                        )
-                    ]
-                ),
-                limit=8,
-                with_payload=True
-            ).points
-            
-            print(f"   ✓ یافت شد: {len(hits)} سند")
-            
-            for hit in hits:
-                all_results.append({
-                    "text": hit.payload.get("page_content", "")[:4000],
-                    "source_type": "قانون",
-                    "retrieval_score": float(hit.score),
-                    "metadata": hit.payload,
-                    "matched_via": f"law_fallback: {law_name[:30]}..."
-                })
-        
-        except Exception as e:
-            print(f"⚠️ خطا در fallback: {e}")
-    
-    # ===========================
-    # بخش 2: metadata titles (استفاده از REVERSE_INDEX)
-    # ===========================
-    if parsed_metadata.get("matched_metadata"):
-        print(f"🎯 یافت شد {len(parsed_metadata['matched_metadata'])} metadata title")
-        
-        for matched in parsed_metadata["matched_metadata"][:2]:
-            try:
-                filters = []
-                
-                if matched.get("law_name"):
-                    filters.append(
-                        FieldCondition(
-                            key="law_name",
-                            match=MatchValue(value=matched["law_name"])
-                        )
-                    )
-                
-                if matched.get("metadata_field") and matched.get("full_text"):
-                    filters.append(
-                        FieldCondition(
-                            key=matched["metadata_field"],
-                            match=MatchValue(value=matched["full_text"])
-                        )
-                    )
-                
-                if filters:
-                    hits = qdrant.query_points(
-                        collection_name=matched["collection"],
-                        query=query_vec,
-                        query_filter=Filter(must=filters),
-                        limit=3,
-                        with_payload=True
-                    ).points
-                    
-                    for hit in hits:
-                        all_results.append({
-                            "text": hit.payload.get("page_content", "")[:4000],
-                            "source_type": (
-                                "قانون" if matched["collection"] == COLLECTION_LAWS
-                                else "وحدت رویه" if matched["collection"] == COLLECTION_UNITY
-                                else "دادنامه"
-                            ),
-                            "retrieval_score": float(hit.score),
-                            "metadata": hit.payload,
-                            "matched_via": f"title: {matched['title'][:30]}..."
-                        })
-            
-            except Exception:
-                # در صورت خطا در یک title خاص، ادامه می‌دهیم
-                pass
-    
-    # ===========================
-    # بخش 3: semantic عمومی
-    # ===========================
-    collections = [
-        (COLLECTION_LAWS, "قانون", top_k_per_source),
-        (COLLECTION_UNITY, "وحدت رویه", max(3, top_k_per_source // 2)),
-        (COLLECTION_DADNAMEH, "دادنامه", max(3, top_k_per_source // 2))
-    ]
-    
-# در بخش "semantic عمومی" (بخش 3)
-    for collection_name, source_type, limit in collections:
-        try:
-            query_filter = None
-            
-            # اگر domain داریم ولی law_name نداریم، از domain برای فیلتر استفاده کن
-            if parsed_metadata.get("domain") and not parsed_metadata.get("law_name"):
-                query_filter = Filter(
-                    must=[
-                        FieldCondition(
-                            key="domain",  # یا "category" بسته به ساختار دیتابیس شما
-                            match=MatchValue(value=parsed_metadata["domain"])
-                        )
-                    ]
-                )
-            
-            hits = qdrant.query_points(
-                collection_name=collection_name,
-                query=query_vec,
-                query_filter=query_filter,
-                limit=limit,
-                with_payload=True
-            ).points
-            
-            for hit in hits:
-                all_results.append({
-                    "text": hit.payload.get("page_content", "")[:4000],
-                    "source_type": source_type,
-                    "retrieval_score": float(hit.score),
-                    "metadata": hit.payload,
-                    "matched_via": "semantic_general" if not query_filter else f"domain_filtered: {parsed_metadata['domain']}"
-                })
-        
-        except Exception as e:
-            print(f"⚠️ خطا در {source_type}: {e}")
 
-    
-    # ===========================
-    # حذف تکراری و مرتب‌سازی
-    # ===========================
-    seen_texts = set()
-    unique_results: List[Dict] = []
-    
-    for result in all_results:
-        text_hash = result["text"][:200]
-        if text_hash not in seen_texts:
-            seen_texts.add(text_hash)
-            unique_results.append(result)
-    
-    priority_order = {
-        "direct": 0,
-        "title": 1,
-        "law_fallback": 2,
-        "semantic_general": 3
-    }
-    
-    unique_results.sort(
-        key=lambda x: (
-            priority_order.get(x["matched_via"].split(":")[0], 99),
-            -x["retrieval_score"]
-        )
-    )
-    
-    return unique_results
+    final_results = unique_results[:top_k_total]
+    print(f"✅ نهایی: {len(final_results)} نتیجه")
+    return final_results
 
-# ==========================================
-# Reranking با استراتژی هوشمند
-# ==========================================
-
-def rerank_with_cohere_smart(query: str, results: List[Dict], top_k: int = 5) -> List[Dict]:
+def rerank_with_cohere_smart(query: str, results: list, top_k: int = 5):
     """
-    Reranking هوشمند نتایج که در آن:
-    - اسنادی که به صورت مستقیم با شماره ماده/اصل match شده‌اند (direct)
-      در اولویت حفظ می‌شوند.
-    - سایر اسناد با استفاده از مدل rerank چندزبانه Cohere مرتب‌سازی مجدد می‌شوند.
-    
-    Parameters
-    ----------
-    query : str
-        متن سؤال
-    results : List[Dict]
-        لیست نتایج اولیه (خروجی retrieve_with_metadata یا retrieve_semantic_only)
-    top_k : int, default=5
-        تعداد نتایج نهایی مورد نیاز
-    
-    Returns
-    -------
-    List[Dict]
-        لیست نتایج rerank شده، حداکثر به طول top_k، شامل فیلد جدید rerank_score (در صورت موفقیت)
+    Reranking هوشمند با Cohere:
+      - اگر سندی با matched_via == "law+article" داریم، آنها را در اولویت نگه می‌دارد.
+      - بقیه نتایج با مدل rerank-multilingual-v3.0 مرتب می‌شوند.
+      - اگر متادیتا نداشتیم، همه چیز صرفاً بر اساس امتیاز Cohere مرتب می‌شود.
     """
-    
     if not results:
         return []
-    
-    if co is None:
-        raise RuntimeError("لطفاً ابتدا setup_legal_rag() را اجرا کنید تا Cohere مقداردهی شود")
-    
-    # جدا کردن direct matches
-    direct_matches = [r for r in results if "direct" in r.get("matched_via", "")]
-    other_results = [r for r in results if "direct" not in r.get("matched_via", "")]
-    
-    # اگر direct match نداریم، rerank ساده روی همه‌ی نتایج
-    if not direct_matches:
+
+    # گروه‌بندی بر اساس matched_via
+    law_article = [r for r in results if r.get("matched_via") == "law+article"]
+    others = [r for r in results if r.get("matched_via") != "law+article"]
+
+    # اگر هیچ law+article نداریم → همه را معمولی rerank کن
+    if not law_article:
         documents = [r["text"][:4000] for r in results]
-        
+
         try:
-            print(f"🔄 Reranking {len(documents)} سند...")
+            print(f"🔄 Reranking {len(documents)} سند (بدون law+article)...")
             response = co.rerank(
                 query=query,
                 documents=documents,
                 model="rerank-multilingual-v3.0",
                 top_n=min(top_k, len(documents))
             )
-            
-            reranked: List[Dict] = []
+
+            reranked = []
             for item in response.results:
                 result = results[item.index].copy()
                 result["rerank_score"] = float(item.relevance_score)
                 reranked.append(result)
-            
+
             return reranked
-        
         except Exception as e:
             print(f"⚠️ خطا در reranking: {e}")
+            # در صورت خطا، همان top_k اولیه را برگردان
+            for r in results[:top_k]:
+                r["rerank_score"] = r.get("retrieval_score", 0.0)
             return results[:top_k]
-    
-    # اگر direct match داریم، استراتژی ترکیبی
-    print(f"🎯 {len(direct_matches)} direct match یافت شد")
-    
-    # Rerank کردن بقیه نتایج
-    if other_results:
-        documents = [r["text"][:4000] for r in other_results]
-        
+
+    # اگر law+article داریم → استراتژی ترکیبی
+    print(f"🎯 {len(law_article)} نتیجه law+article یافت شد")
+
+    # به نتایج law+article یک امتیاز بالا می‌دهیم تا در صدر بمانند
+    for dm in law_article:
+        dm["rerank_score"] = 1.0  # بالاتر از هر امتیاز نرمال‌شده‌ی Cohere
+
+    # تعداد جای خالی برای بقیه نتایج
+    available_slots = max(top_k - len(law_article), 0)
+
+    reranked_others = []
+    if others and available_slots > 0:
+        documents = [r["text"][:4000] for r in others]
+
         try:
             print(f"🔄 Reranking {len(documents)} سند دیگر...")
             response = co.rerank(
                 query=query,
                 documents=documents,
                 model="rerank-multilingual-v3.0",
-                top_n=min(max(top_k - len(direct_matches), 0), len(documents))
+                top_n=min(available_slots, len(documents))
             )
-            
-            reranked_others: List[Dict] = []
+
             for item in response.results:
-                result = other_results[item.index].copy()
+                result = others[item.index].copy()
                 result["rerank_score"] = float(item.relevance_score)
                 reranked_others.append(result)
-        
         except Exception as e:
             print(f"⚠️ خطا در reranking: {e}")
-            reranked_others = other_results[:max(top_k - len(direct_matches), 0)]
-    else:
-        reranked_others = []
-    
-    # ترکیب: direct matches اول، سپس نتایج reranked
-    for dm in direct_matches:
-        # امتیاز پیش‌فرض بالا برای direct matches
-        dm.setdefault("rerank_score", 0.9)
-    
-    final_results = direct_matches + reranked_others
-    
-    # هشدار در صورت وجود نتیجه‌ی دیگر با امتیاز بسیار بالاتر
-    if reranked_others and reranked_others[0].get("rerank_score", 0) > 0.7:
-        print(f"   ⚠️ توجه: نتیجه دیگری با امتیاز بالا ({reranked_others[0]['rerank_score']:.3f}) یافت شد")
-        print("      ممکن است نتیجه مرتبط‌تری نسبت به direct match وجود داشته باشد.")
-    
+            # fallback: استفاده از retrieval_score
+            reranked_others = sorted(
+                others,
+                key=lambda x: x.get("retrieval_score", 0.0),
+                reverse=True
+            )[:available_slots]
+
+    # ترکیب نهایی: اول law+article، بعد نتایج rerank شده
+    final_results = law_article + reranked_others
+
+    # اگر هنوز کمتر از top_k است، از بقیه others طبق retrieval_score پر کن
+    if len(final_results) < top_k:
+        remaining = [r for r in others if r not in reranked_others]
+        remaining_sorted = sorted(
+            remaining,
+            key=lambda x: x.get("retrieval_score", 0.0),
+            reverse=True
+        )
+        for r in remaining_sorted[: top_k - len(final_results)]:
+            r = r.copy()
+            r["rerank_score"] = r.get("retrieval_score", 0.0)
+            final_results.append(r)
+
     return final_results[:top_k]
 
 # ==========================================
@@ -1198,85 +593,87 @@ def rerank_with_cohere_smart(query: str, results: List[Dict], top_k: int = 5) ->
 def legal_rag_retrieve(
     query: str,
     method: str = "auto",
-    top_k: int = 10,
+    top_k: int = 5,
     use_rerank: bool = True,
     verbose: bool = False
 ) -> List[Dict]:
     """
-    تابع اصلی برای جستجوی هوشمند در اسناد حقوقی.
+    تابع اصلی برای جستجوی هوشمند در اسناد حقوقی
 
     Parameters
     ----------
     query : str
-        متن سؤال یا query.
+        متن سؤال یا query
     method : str, default="auto"
         روش جستجو:
-        - "auto": انتخاب خودکار (استفاده از metadata در صورت وجود، در غیر این صورت semantic).
-        - "metadata": استفاده از metadata (شماره ماده/اصل، نام قانون، حوزه).
-        - "semantic": فقط جستجوی معنایی.
-    top_k : int, default=10
-        تعداد نتایج نهایی.
+        - "auto": انتخاب خودکار (metadata اگر موجود باشد، وگرنه semantic)
+        - "metadata": استفاده از metadata (شماره ماده/اصل، نام قانون)
+        - "semantic": فقط جستجوی معنایی
+    top_k : int, default=5
+        تعداد نتایج برگشتی
     use_rerank : bool, default=True
-        استفاده از Cohere reranking.
+        استفاده از Cohere reranking
     verbose : bool, default=False
-        نمایش جزئیات فرایند.
+        نمایش جزئیات
 
     Returns
     -------
     List[Dict]
         لیست نتایج شامل:
-        - text: متن سند.
-        - source_type: نوع منبع (قانون، وحدت رویه، دادنامه).
-        - retrieval_score: امتیاز retrieval.
-        - rerank_score: امتیاز rerank (اگر use_rerank=True و موفق).
-        - metadata: اطلاعات متادیتا.
-        - matched_via: روش match شدن.
+        - text: متن سند
+        - source_type: نوع منبع (قانون، وحدت رویه، دادنامه)
+        - retrieval_score: امتیاز اولیه جستجو
+        - rerank_score: امتیاز rerank (اگر use_rerank=True)
+        - metadata: اطلاعات متادیتا
+        - matched_via: روش match شدن (law+article, law_only, semantic)
+
+    Examples
+    --------
+    >>> results = legal_rag_retrieve(
+    ...     "تعریف اموال غیرمنقول در قانون مدنی چیست؟",
+    ...     method="auto",
+    ...     top_k=3
+    ... )
+    >>> print(results[0]['text'][:100])
+
+    >>> results = legal_rag_retrieve(
+    ...     "طبق اصل 57 قانون اساسی...",
+    ...     method="metadata",
+    ...     use_rerank=True
+    ... )
     """
     if verbose:
         print(f"📝 Query: {query[:80]}...")
 
+    # ===========================
     # 1. انتخاب روش
+    # ===========================
     if method == "auto":
-        parsed = parse_question_metadata(query)
-        
-        # 🆕 شرط کامل: شامل domain هم می‌شود
-        if (parsed.get("article_number") or 
-            parsed.get("law_name") or 
-            parsed.get("domain") or  # ← اضافه شد: حوزه حقوقی
-            parsed.get("matched_metadata")):  # ← اضافه شد: عناوین metadata
-            
+        parsed = parse_question_metadata_simple(query)
+        if parsed.get("article_number") or parsed.get("law_name"):
             method = "metadata"
             if verbose:
-                print("🎯 روش انتخاب‌شده: Metadata-aware")
-                # نمایش جزئیات metadata
-                if parsed.get("domain"):
-                    print(f"   📂 حوزه: {parsed['domain']}")
-                if parsed.get("law_name"):
-                    print(f"   📚 قانون: {parsed['law_name']}")
-                if parsed.get("article_number"):
-                    print(f"   🎯 {parsed['article_type']} {parsed['article_number']}")
-                if parsed.get("topic"):
-                    print(f"   🔑 کلیدواژه: {parsed['topic']}")
+                print("🎯 روش انتخاب شده: Metadata-aware")
         else:
             method = "semantic"
             if verbose:
-                print("🔍 روش انتخاب‌شده: Semantic search")
+                print("🔍 روش انتخاب شده: Semantic search")
 
+    # ===========================
     # 2. Retrieve
+    # ===========================
     if method == "metadata":
-        results = retrieve_with_metadata(query, top_k_per_source=top_k * 3)
+        # کمی بزرگ‌تر از top_k برای اینکه rerank فضای مانور داشته باشد
+        results = retrieve_with_metadata(query, top_k_total=top_k * 4)
     else:
-        results = retrieve_semantic_only(
-            query,
-            top_laws=top_k * 2,
-            top_unity=max(2, top_k // 2),
-            top_dadnameh=max(2, top_k // 2),
-        )
+        results = retrieve_semantic_only(query, top_k_total=top_k * 4)
 
     if verbose:
         print(f"   ✓ Retrieved: {len(results)} documents")
 
+    # ===========================
     # 3. Rerank (optional)
+    # ===========================
     if use_rerank and len(results) > 0:
         try:
             results = rerank_with_cohere_smart(query, results, top_k=top_k)
@@ -1297,45 +694,84 @@ def legal_rag_retrieve(
 
 def format_results_for_llm(results: List[Dict], include_metadata: bool = True) -> str:
     """
-    تبدیل نتایج به فرمت مناسب برای ورودی LLM.
+    تبدیل نتایج به فرمت مناسب برای ورودی LLM
 
     Parameters
     ----------
     results : List[Dict]
-        خروجی legal_rag_retrieve().
+        خروجی legal_rag_retrieve()
     include_metadata : bool, default=True
-        شامل کردن اطلاعات metadata در header هر منبع.
+        شامل کردن اطلاعات metadata (نام قانون، شماره ماده/اصل و نوع منبع)
 
     Returns
     -------
     str
-        متن فرمت‌شده برای context در LLM.
+        متن فرمت‌شده برای context در LLM
+
+    Examples
+    --------
+    >>> results = legal_rag_retrieve("سؤال...", top_k=3)
+    >>> context = format_results_for_llm(results)
+    >>> prompt = f"سؤال: ...\\n\\nمتن قانون:\\n{context}"
     """
-    formatted: List[str] = []
+    formatted = []
+
+    # فیلدهایی که اگر باشند، نمایش داده می‌شوند
+    FIELDS_ORDER = [
+        "article_number", "principle_number",
+        "volume", "book", "bab", "chapter", "section", "paragraph",
+        "text_section", "title", "issuer",
+        "text", "vote_text"
+    ]
 
     for i, result in enumerate(results, 1):
-        text = result["text"]
+        source_type = result.get("source_type", "نامشخص")
+        meta = result.get("metadata", {}) if include_metadata else {}
+        law_name = meta.get("law_name")
 
+        # هدر اصلی منبع
+        header_lines = [f"[منبع {i}] ({source_type})"]
+        if law_name:
+            header_lines[0] += f" - {law_name}"
+
+        # شماره ماده / اصل (اگر وجود داشته باشد)
+        principle = meta.get("principle_number")
+        article = meta.get("article_number")
+        if principle is not None:
+            header_lines.append(f"شماره_اصل: {principle}")
+        if article is not None:
+            header_lines.append(f"شماره_ماده: {article}")
+
+        # سایر فیلدها طبق ترتیب مشخص‌شده
+        body_lines = []
         if include_metadata:
-            meta = result["metadata"]
-            law_name = meta.get("law_name", "نامشخص")
+            for field in FIELDS_ORDER:
+                if field in meta:
+                    value = meta[field]
+                    # متن اصلی (text / vote_text) را محدود می‌کنیم تا خیلی طولانی نشود
+                    if field in ("text", "vote_text") and isinstance(value, str):
+                        snippet = value.strip()
+                        if len(snippet) > 1500:
+                            snippet = snippet[:1500] + " ..."
+                        body_lines.append(f"{field}: {snippet}")
+                    else:
+                        body_lines.append(f"{field}: {value}")
 
-            principle = meta.get("principle_number")
-            article = meta.get("article_number")
+        # اگر به هر دلیلی متن اصلی result["text"] با متادیتا متفاوت بود، می‌توانیم آن را هم اضافه کنیم
+        # ولی فقط اگر include_metadata=False باشد یا text در meta نباشد
+        if not include_metadata or "text" not in meta:
+            main_text = result.get("text", "")
+            if main_text:
+                snippet = main_text.strip()
+                if len(snippet) > 1500:
+                    snippet = snippet[:1500] + " ..."
+                body_lines.append(f"content: {snippet}")
 
-            if principle:
-                num_str = f"اصل {int(principle)}"
-            elif article:
-                num_str = f"ماده {article}"
-            else:
-                num_str = ""
+        # مونتاژ قطعه نهایی برای این منبع
+        block = "\n".join(header_lines)
+        if body_lines:
+            block += "\n" + "\n".join(body_lines)
 
-            header = f"[منبع {i}] {law_name}"
-            if num_str:
-                header += f" - {num_str}"
-
-            formatted.append(f"{header}\n{text}\n")
-        else:
-            formatted.append(f"[منبع {i}]\n{text}\n")
+        formatted.append(block)
 
     return "\n---\n\n".join(formatted)
