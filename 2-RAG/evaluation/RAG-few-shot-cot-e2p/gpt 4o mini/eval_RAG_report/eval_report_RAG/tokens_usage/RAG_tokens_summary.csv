@@ -1,0 +1,5 @@
+﻿,prompt_tokens,completion_tokens,total_tokens
+mean,3321.38,70.69,3392.07
+median,3269.0,69.0,3345.0
+min,2066.0,41.0,2134.0
+max,4688.0,125.0,4801.0
