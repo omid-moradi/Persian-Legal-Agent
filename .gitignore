@@ -10,7 +10,3 @@ qdrant_data
 rag_pipeline_test.ipynb
 test.ipynb
 ++models analysis++
-legal_rag_retrieval.py
-qavanin_karbordi.txt
-Book2.csv
-gemini 2.5 flash lite
