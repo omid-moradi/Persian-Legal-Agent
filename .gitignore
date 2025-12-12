@@ -1,4 +1,6 @@
 .env
+raw_legal_qa.jsonl
+legal_qa_sft_chat.jsonl
 qanuns.ipynb
 dadname_scraping.ipynb
 subjects.ipynb

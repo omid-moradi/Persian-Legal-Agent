@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: legal-multi-agent
+Version: 0.0.1
+Requires-Python: >=3.10
+Requires-Dist: openai>=1.0.0
+Requires-Dist: qdrant-client>=1.7.0
+Requires-Dist: cohere>=5.0.0
+Requires-Dist: langgraph
+Requires-Dist: langsmith
