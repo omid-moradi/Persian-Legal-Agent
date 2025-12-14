@@ -33,20 +33,39 @@ def critic_agent(state: MASharedState) -> MASharedState:
     system_msg = (
         "Role: exam QA critic for Iranian law.\n"
         "You see SOURCES (legal texts + cases), the question, options, and the assistant's TOON answer.\n"
-        "Your job is to check for CLEAR ERRORS, not to reject every unstated doctrinal detail.\n"
-        "You MUST treat the assistant's legal doctrine as acceptable UNLESS it directly contradicts the SOURCES.\n"
-        "Only set needs_revision=true if:\n"
-        "- The chosen option clearly conflicts with the SOURCES, OR\n"
-        "- The explanation clearly contradicts or misquotes the SOURCES, OR\n"
-        "- The TOON format is invalid.\n"
-        "If the explanation adds reasonable doctrinal concepts (e.g., distinguishing 'condition of act' vs 'condition of result')"
-        " that do not conflict with SOURCES, you MUST NOT mark them as unsupported.\n"
-        "Return ONLY a TOON table:\n"
+        "\n"
+        "Your job is to detect ONLY CLEAR, OBJECTIVE ERRORS, not to nitpick wording or unstated doctrines.\n"
+        "\n"
+        "DEFINITIONS:\n"
+        "- A CLEAR CONFLICT exists ONLY if the chosen option or explanation directly contradicts the explicit text of the SOURCES "
+        "(e.g., chooses option 2 while the statute explicitly says option 3).\n"
+        "- Mere differences in phrasing, emphasis, or level of detail DO NOT count as conflict if they are compatible with the SOURCES.\n"
+        "- If the SOURCES are silent or ambiguous on a doctrinal nuance, you MUST treat the assistant's doctrine as acceptable.\n"
+        "- Disagreement with a possible fiqhi/doctrinal view is NOT enough to mark an error unless the view clearly contradicts the statute or binding case.\n"
+        "\n"
+        "CRITERIA FOR needs_revision=true:\n"
+        "Set needs_revision=true ONLY if at least one of these holds:\n"
+        "1) The CHOSEN OPTION NUMBER clearly conflicts with the SOURCES.\n"
+        "   (Example: statute says the correct share is one-eighth, but the assistant chooses one-fourth.)\n"
+        "2) The EXPLANATION contains a specific legal claim that clearly contradicts or misquotes the SOURCES.\n"
+        "   (Example: the statute explicitly includes degree 6, but the assistant says 'degree 6 does not exist in this law'.)\n"
+        "3) The TOON format is invalid (missing fields, wrong answer range, or not a single row).\n"
+        "\n"
+        "IMPORTANT NEGATIVE RULES (when NOT to flag):\n"
+        "- Do NOT set needs_revision=true just because the wording does not exactly match the statute if the meaning is consistent.\n"
+        "- Do NOT set needs_revision=true when the assistant reasonably extends the SOURCES with compatible doctrinal explanation.\n"
+        "- Do NOT claim 'contradiction' unless you can point to a specific article/vote in SOURCES that says the opposite.\n"
+        "\n"
+        "OUTPUT FORMAT (STRICT):\n"
+        "You MUST return ONLY one TOON table in this exact format:\n"
         "results{needs_revision,issue,action}:\n"
         "<true/false>,<short issue>,<short action>\n"
+        "\n"
         "Constraints:\n"
-        "- issue: one short English phrase (no comma).\n"
-        "- action: one short English phrase (no comma), max 10 words.\n"
+        "- needs_revision: exactly 'true' or 'false' (lowercase).\n"
+        "- issue: one short English phrase (no comma), describing the main problem, "
+        "or 'no clear error' if there is none.\n"
+        "- action: one short English phrase (no comma), max 10 words, suggesting how to fix or 'keep answer as is' if no revision is needed.\n"
         "Do not output anything else."
     )
 
@@ -59,13 +78,15 @@ QUESTION:
 OPTIONS:
 {options}
 
-ASSISTANT OUTPUT:
+ASSISTANT OUTPUT (TOON):
 {draft_raw}
 
-Check:
-- Valid TOON format (one row)
-- answer is 1-4
-- explanation is grounded in SOURCES
+Check step by step:
+1) Is the TOON format valid (one row, fields explanation,answer,confidence)?
+2) Is the chosen answer (1-4) clearly inconsistent with any specific article or binding case in SOURCES?
+3) Does the explanation contain any statement that explicitly contradicts or misquotes a statute or case in SOURCES?
+
+If you do NOT find a clear, source-based conflict in steps 2 or 3, and the format is valid, you MUST set needs_revision=false.
 """
 
     resp = client.chat.completions.create(
@@ -84,8 +105,8 @@ Check:
     if critic_toon is None:
         critic_toon = {
             "needs_revision": True,
-            "issue": "Critic output could not be parsed as TOON.",
-            "action": "Return a valid TOON-CRITIC table exactly as specified.",
+            "issue": "Critic output could not be parsed as TOON",
+            "action": "Return a valid TOON-CRITIC table exactly as specified",
         }
 
     return {
