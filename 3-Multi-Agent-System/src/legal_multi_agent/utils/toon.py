@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 
 
 # ----------------------------
@@ -21,7 +21,7 @@ def _strip_code_fences(text: str) -> str:
     lines = t.splitlines()
 
     # remove first fence
-    if lines and _CODE_FENCE_RE.match(lines[0]):
+    if lines and _CODE_FENCE_RE.match(lines):
         lines = lines[1:]
 
     # remove last fence
@@ -29,7 +29,6 @@ def _strip_code_fences(text: str) -> str:
         lines = lines[:-1]
 
     return "\n".join(lines).strip()
-
 
 
 def _normalize_lines(text: str) -> List[str]:
@@ -147,6 +146,86 @@ def extract_toon_single_row(
 
 
 # ----------------------------
+# Multi-row TOON parser (for option verifier)
+# ----------------------------
+@dataclass
+class ToonMultiRowResult:
+    schema: List[str]
+    rows: List[Dict[str, str]]
+    header_line_index: int
+
+
+def extract_toon_multi_row(
+    content: str,
+    schema: List[str],
+    max_rows: int = 10,
+    verbose: bool = False,
+) -> Optional[ToonMultiRowResult]:
+    """
+    Extract a multi-row TOON table with a specific schema.
+
+    Expected pattern:
+      results{field1,field2,...}:
+      v1,v2,...
+      v1,v2,...
+      ...
+
+    Stops reading rows when:
+    - Next line starts with "results{" (new TOON table)
+    - Reached max_rows
+    - Line doesn't parse correctly
+
+    Returns:
+      ToonMultiRowResult or None
+    """
+    lines = _normalize_lines(content)
+    if not lines:
+        if verbose:
+            print("⚠️ TOON: empty content")
+        return None
+
+    header_re = _schema_to_regex(schema)
+
+    header_idx = None
+    for i, ln in enumerate(lines):
+        if header_re.match(ln):
+            header_idx = i
+            break
+
+    if header_idx is None:
+        if verbose:
+            print(f"⚠️ TOON: header not found for schema={schema}")
+        return None
+
+    rows = []
+    for row_offset in range(1, max_rows + 1):
+        idx = header_idx + row_offset
+        if idx >= len(lines):
+            break
+
+        line = lines[idx]
+
+        # Stop if next TOON header encountered
+        if line.lower().startswith("results{"):
+            break
+
+        parts = _split_csv_n(line, n=len(schema))
+        if parts is None:
+            # Invalid row, stop parsing
+            break
+
+        row = {schema[i]: parts[i].strip().strip('"').strip("'") for i in range(len(schema))}
+        rows.append(row)
+
+    if not rows:
+        if verbose:
+            print("⚠️ TOON: no valid data rows found")
+        return None
+
+    return ToonMultiRowResult(schema=schema, rows=rows, header_line_index=header_idx)
+
+
+# ----------------------------
 # Specific parsers
 # ----------------------------
 def extract_toon_answer(content: str, verbose: bool = False) -> Optional[Dict]:
@@ -216,3 +295,64 @@ def extract_toon_critic(content: str, verbose: bool = False) -> Optional[Dict]:
         "issue": parsed.row["issue"].strip(),
         "action": parsed.row["action"].strip(),
     }
+
+
+def extract_toon_verifier(content: str, verbose: bool = False) -> Optional[Dict[str, Any]]:
+    """
+    Parse option verifier output with two TOON tables:
+    
+    1) Multi-row scores:
+       results{option,support_level,reasoning}:
+       1,SUPPORTED,دلیل فارسی
+       2,NOT_SUPPORTED,دلیل فارسی
+       3,UNCLEAR,دلیل فارسی
+       4,NOT_SUPPORTED,دلیل فارسی
+    
+    2) Single-row recommendation:
+       results{recommended_answer,confidence}:
+       2,5
+
+    Returns:
+      {
+        "scores": [
+          {"option_number": 1, "support_level": "SUPPORTED", "reasoning": "..."},
+          ...
+        ],
+        "recommended_answer": int | None,
+        "confidence": int | None
+      }
+    """
+    result = {"scores": [], "recommended_answer": None, "confidence": None}
+
+    # Parse first TOON: multi-row scores
+    schema_scores = ["option", "support_level", "reasoning"]
+    parsed_scores = extract_toon_multi_row(
+        content, schema=schema_scores, max_rows=4, verbose=verbose
+    )
+
+    if parsed_scores:
+        for row in parsed_scores.rows:
+            opt_num = _to_int(row["option"])
+            if opt_num is None:
+                continue
+            result["scores"].append({
+                "option_number": opt_num,
+                "support_level": row["support_level"].strip(),
+                "reasoning": row["reasoning"].strip(),
+            })
+
+    # Parse second TOON: single-row recommendation
+    schema_rec = ["recommended_answer", "confidence"]
+    parsed_rec = extract_toon_single_row(content, schema=schema_rec, verbose=verbose)
+
+    if parsed_rec:
+        result["recommended_answer"] = _to_int(parsed_rec.row["recommended_answer"])
+        result["confidence"] = _to_int(parsed_rec.row["confidence"])
+
+    # Validate: must have at least some scores
+    if not result["scores"]:
+        if verbose:
+            print("⚠️ TOON(verifier): no valid scores found")
+        return None
+
+    return result

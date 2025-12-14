@@ -161,10 +161,19 @@ def legal_rag_retrieve(
     collections: Optional[QdrantCollections] = None,
     qavanin_path: Optional[str] = None,
     embed_model: str = "baai/bge-m3",
+    # 👇 پارامترهای جدید برای override metadata (اختیاری)
+    override_law_name: Optional[str] = None,
+    override_article_number: Optional[str] = None,
+    override_article_type: Optional[str] = None,
 ) -> List[Dict]:
     """
     Main API used by LangGraph nodes.
     - method: auto|metadata|semantic
+    - override_law_name: نام قانون برای فیلتر مستقیم (اختیاری)
+    - override_article_number: شماره ماده/اصل برای فیلتر مستقیم (اختیاری)
+    - override_article_type: نوع article ("ماده" یا "اصل") - اختیاری
+    
+    اگر override_* مشخص شود، به جای parsing از query استفاده می‌شود.
     """
     if not query or not query.strip():
         return []
@@ -189,11 +198,21 @@ def legal_rag_retrieve(
     if verbose:
         print(f"📝 Query: {query[:80]}...")
 
-    # 1) choose method
+    # 1) parse metadata از query
     parsed = parse_question_metadata_simple(query, qavanin_list)
+    
+    # 👇 استفاده از override اگر مشخص شده، وگرنه از parsed
+    law_name = override_law_name if override_law_name is not None else parsed.get("law_name")
+    article_num = override_article_number if override_article_number is not None else parsed.get("article_number")
+    article_type = override_article_type if override_article_type is not None else parsed.get("article_type")
+    
+    # اگر article_number داریم اما article_type نداریم، پیش‌فرض "ماده"
+    if article_num and not article_type:
+        article_type = "ماده"
 
+    # 2) choose method
     if method == "auto":
-        if parsed.get("article_number") or parsed.get("law_name"):
+        if article_num or law_name:
             method = "metadata"
             if verbose:
                 print("🎯 روش انتخاب شده: Metadata-aware")
@@ -202,10 +221,10 @@ def legal_rag_retrieve(
             if verbose:
                 print("🔍 روش انتخاب شده: Semantic search")
 
-    # 2) embed
+    # 3) embed
     query_vec = embedder.embed_query(query).tolist()
 
-    # 3) retrieve (overfetch for rerank)
+    # 4) retrieve (overfetch for rerank)
     top_k_total = max(top_k * 4, top_k)
 
     if method == "metadata":
@@ -213,9 +232,9 @@ def legal_rag_retrieve(
             qdrant=qdrant,
             collections=collections,
             query_vector=query_vec,
-            law_name=parsed.get("law_name"),
-            article_num=parsed.get("article_number"),
-            article_type=parsed.get("article_type"),
+            law_name=law_name,  # 👈 استفاده از law_name (override یا parsed)
+            article_num=article_num,  # 👈 استفاده از article_num (override یا parsed)
+            article_type=article_type,  # 👈 استفاده از article_type (override یا parsed)
             top_k_total=top_k_total,
             verbose=verbose,
         )
@@ -232,7 +251,7 @@ def legal_rag_retrieve(
     if verbose:
         print(f"   ✓ Retrieved: {len(results)} documents")
 
-    # 4) rerank
+    # 5) rerank
     if use_rerank and reranker is not None and results:
         results = reranker.rerank_with_cohere_smart(
             query=query,
