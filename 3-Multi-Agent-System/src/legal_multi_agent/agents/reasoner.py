@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 from typing import Any, Dict
 
 from openai import OpenAI
@@ -24,17 +23,39 @@ client = wrap_openai(_raw_client)
 
 @traceable(name="reasoner_agent")
 def reasoner_agent(state: MASharedState) -> MASharedState:
-    """ایجنت استدلال‌گر که TOON پاسخ را می‌سازد (MCQ چهارگزینه‌ای)."""
+    """
+    ایجنت استدلال‌گر که TOON پاسخ را می‌سازد (MCQ چهارگزینه‌ای).
+    
+    حالت‌های کاری:
+    1. اگر verifier_output وجود دارد → از نتایج آن استفاده می‌کند
+    2. وگرنه → استدلال عادی (مانند قبل)
+    """
     q = state["question"]
     options = state["options_text"]
     ctx = state.get("context", "")
 
+    # چک کردن فیدبک critic
     critic = state.get("critic_toon")
     critic_hint = ""
     if critic and critic.get("needs_revision", False):
         critic_hint = (
             f"Issue: {critic.get('issue','')}\n"
             f"Action: {critic.get('action','')}\n"
+        )
+
+    # 👇 چک کردن نتایج option_verifier
+    verifier_output = state.get("verifier_output")
+    verifier_hint = ""
+    if verifier_output and verifier_output.get("scores"):
+        verifier_hint = "\n📊 نتایج تحلیل گزینه‌ها:\n"
+        for score in verifier_output["scores"]:
+            verifier_hint += (
+                f"گزینه {score['option_number']}: {score['support_level']} - "
+                f"{score['reasoning'][:100]}...\n"
+            )
+        verifier_hint += (
+            f"\n✓ گزینه پیشنهادی: {verifier_output.get('recommended_answer')}\n"
+            f"✓ اطمینان: {verifier_output.get('confidence')}/5\n"
         )
 
     system_msg = (
@@ -63,11 +84,13 @@ OPTIONS:
 CRITIC FEEDBACK (if any):
 {critic_hint}
 
+OPTION VERIFIER ANALYSIS (if any):
+{verifier_hint}
+
 INSTRUCTIONS:
-- If there is no CRITIC FEEDBACK, answer normally.
-- If CRITIC FEEDBACK exists and needs_revision=true, you MUST correct the explanation
-  according to the critic's issue/action. The new explanation MUST be different from
-  the previous one and MUST fix the reported problem.
+- If OPTION VERIFIER ANALYSIS exists, you should strongly consider its recommendations.
+- If CRITIC FEEDBACK exists and needs_revision=true, you MUST correct the explanation.
+- The explanation MUST be grounded in SOURCES.
 """
 
     resp = client.chat.completions.create(

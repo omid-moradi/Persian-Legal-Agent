@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 from typing import Any, Dict, List
 
 from langsmith import traceable
@@ -19,11 +18,23 @@ def domain_top_k(domain: str) -> int:
 
 @traceable(name="researcher_agent")
 def researcher_agent(state: MASharedState) -> MASharedState:
-    """ایجنت پژوهشگر: اجرای RAG و ساخت context + متادیتا."""
+    """
+    ایجنت پژوهشگر: اجرای RAG و ساخت context + متادیتا.
+    
+    حالت‌های کاری:
+    1. اگر use_retriever_tool=True → از tool استفاده می‌کند (برای آینده)
+    2. وگرنه → مستقیماً RAG را اجرا می‌کند (حالت فعلی)
+    """
     q = state["question"]
     domain = state.get("domain", "")
     top_k = domain_top_k(domain)
-
+    
+    use_tool = state.get("use_retriever_tool", False)
+    
+    if use_tool:
+        pass
+    
+    # حالت مستقیم (بدون tool calling)
     results = legal_rag_retrieve(
         query=q,
         method="auto",
@@ -43,9 +54,9 @@ def researcher_agent(state: MASharedState) -> MASharedState:
         docs_meta.append(
             {
                 "i": i,
-                "law": m.get("law"),
+                "law": m.get("law_name"),
                 "article_number": m.get("article_number"),
-                "source_type": m.get("source_type"),
+                "source_type": r.get("source_type"),
                 "title": m.get("title"),
             }
         )
