@@ -7,6 +7,27 @@ def supervisor_agent(state: MASharedState) -> MASharedState:
     """
     Supervisor با قابلیت مدیریت tool execution
     """
+    # 👉 اول: چک کردن tool calls در آخرین پیام
+    messages = state.get("messages", [])
+    if messages:
+        last_msg = messages[-1]
+        # اگر آخرین پیام tool call است
+        if isinstance(last_msg, dict) and last_msg.get("tool_calls"):
+            # بررسی که آیا این tool call پاسخ گرفته یا نه
+            # با چک کردن اینکه آیا پیام tool با همان id وجود دارد
+            tool_call_ids = {tc.get("id") for tc in last_msg.get("tool_calls", [])}
+            
+            # چک کردن پیام‌های بعدی برای tool response
+            has_response = False
+            for i in range(len(messages) - 1, -1, -1):
+                msg = messages[i]
+                if msg.get("role") == "tool" and msg.get("tool_call_id") in tool_call_ids:
+                    has_response = True
+                    break
+            
+            if not has_response:
+                return {"next": "tools"}
+    
     # 1) اگر context نداریم → researcher
     if not state.get("context"):
         return {"next": "researcher"}

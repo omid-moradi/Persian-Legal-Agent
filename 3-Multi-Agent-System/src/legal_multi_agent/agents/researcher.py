@@ -19,11 +19,7 @@ def domain_top_k(domain: str) -> int:
 @traceable(name="researcher_agent")
 def researcher_agent(state: MASharedState) -> MASharedState:
     """
-    ایجنت پژوهشگر: اجرای RAG و ساخت context + متادیتا.
-    
-    حالت‌های کاری:
-    1. اگر use_retriever_tool=True → از tool استفاده می‌کند (برای آینده)
-    2. وگرنه → مستقیماً RAG را اجرا می‌کند (حالت فعلی)
+    ایجنت پژوهشگر: اجرای RAG یا استفاده از retriever_tool.
     """
     q = state["question"]
     domain = state.get("domain", "")
@@ -32,9 +28,60 @@ def researcher_agent(state: MASharedState) -> MASharedState:
     use_tool = state.get("use_retriever_tool", False)
     
     if use_tool:
-        pass
+        tool_results = state.get("tool_results", {})
+        
+        # 👉 مرحله 2: اگر tool اجرا شده، نتیجه را برگردان و context را SET کن
+        if "retriever_tool" in tool_results:
+            retriever_result = tool_results["retriever_tool"]
+            return {
+                "rag_results": retriever_result.get("rag_results", []),
+                "context": retriever_result.get("context", ""),  # ✅ کلیدی!
+                "context_preview": retriever_result.get("context_preview", ""),
+                "docs_meta": retriever_result.get("docs_meta", []),
+            }
+        
+        # 👉 مرحله 1: اگر context خالی است و هنوز tool call نکردیم
+        messages = state.get("messages", [])
+        
+        # چک کن که آیا قبلاً tool call کردیم
+        already_called = False
+        if messages:
+            for msg in messages:
+                if isinstance(msg, dict) and msg.get("tool_calls"):
+                    for tc in msg["tool_calls"]:
+                        if tc.get("name") == "retriever_tool":
+                            already_called = True
+                            break
+        
+        if not already_called:
+            # ساخت tool call request
+            new_message = {
+                "role": "assistant",
+                "content": f"جستجوی اسناد برای: {q[:50]}...",
+                "tool_calls": [
+                    {
+                        "id": "retriever_001",
+                        "name": "retriever_tool",
+                        "arguments": {
+                            "query": q,
+                            "top_k": top_k,
+                            "use_rerank": True,
+                        }
+                    }
+                ]
+            }
+            
+            messages_copy = messages.copy()
+            messages_copy.append(new_message)
+            
+            return {
+                "messages": messages_copy,
+            }
+        
+        # اگر tool call کردیم اما هنوز نتیجه نداریم، منتظر می‌مانیم
+        return {}
     
-    # حالت مستقیم (بدون tool calling)
+    # 👉 حالت مستقیم (بدون tool calling)
     results = legal_rag_retrieve(
         query=q,
         method="auto",
@@ -43,11 +90,8 @@ def researcher_agent(state: MASharedState) -> MASharedState:
         verbose=True,
     )
     context = format_results_for_llm(results, include_metadata=True)
-
-    # preview کوتاه برای دیباگ
     preview = context[:2500]
 
-    # متادیتای سبک برای لاگ/تحلیل
     docs_meta: List[Dict[str, Any]] = []
     for i, r in enumerate(results[:10], start=1):
         m = r.get("metadata", {}) if isinstance(r, dict) else {}

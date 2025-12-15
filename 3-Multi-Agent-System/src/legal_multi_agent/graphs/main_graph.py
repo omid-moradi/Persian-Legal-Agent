@@ -36,7 +36,7 @@ def build_graph() -> StateGraph:
     workflow.add_node("reasoner", reasoner_agent)
     workflow.add_node("critic", critic_agent)
     workflow.add_node("finalize", finalize_node)
-    workflow.add_node("tools", tool_executor_node)  # 👈 نود جدید
+    workflow.add_node("tools", tool_executor_node) 
 
     # یال‌های ثابت: همه به supervisor برمی‌گردند
     workflow.add_edge(START, "supervisor")
@@ -44,7 +44,7 @@ def build_graph() -> StateGraph:
     workflow.add_edge("reasoner", "supervisor")
     workflow.add_edge("critic", "supervisor")
     workflow.add_edge("finalize", "supervisor")
-    workflow.add_edge("tools", "supervisor")  # 👈 tools هم به supervisor برمی‌گردد
+    workflow.add_edge("tools", "supervisor")  
 
     # یال‌های شرطی: supervisor مسیرها را مدیریت می‌کند
     workflow.add_conditional_edges(
@@ -55,7 +55,7 @@ def build_graph() -> StateGraph:
             "reasoner": "reasoner",
             "critic": "critic",
             "finalize": "finalize",
-            "tools": "tools",  # 👈 مسیر جدید
+            "tools": "tools", 
             "FINISH": END,
         },
     )
