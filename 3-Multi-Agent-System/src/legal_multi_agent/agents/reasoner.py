@@ -214,7 +214,7 @@ Remember: When in doubt between verifier recommendation and explicit SOURCES tex
             {"role": "system", "content": system_msg},
             {"role": "user", "content": user_msg},
         ],
-        temperature=0.2,
+        temperature=0.1,
     )
 
     draft_raw = resp.choices[0].message.content

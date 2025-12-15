@@ -5,8 +5,6 @@ from typing import TypedDict, List, Dict, Any, Optional
 class MASharedState(TypedDict, total=False):
     # ورودی اصلی
     question_number: int
-    category: str
-    domain: str
     question: str
     options_text: str
 
