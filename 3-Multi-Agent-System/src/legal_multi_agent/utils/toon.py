@@ -233,7 +233,10 @@ def extract_toon_answer(content: str, verbose: bool = False) -> Optional[Dict]:
     Parse:
       results{explanation,answer,confidence}:
       <explanation>,<1-4>,<1-5>
-
+    
+    با fallback برای فرمت نادرست:
+      results{explanation,answer,confidence}
+    
     Returns:
       {
         "explanation": str,
@@ -243,26 +246,76 @@ def extract_toon_answer(content: str, verbose: bool = False) -> Optional[Dict]:
     """
     schema = ["explanation", "answer", "confidence"]
     parsed = extract_toon_single_row(content, schema=schema, verbose=verbose)
-    if not parsed:
+    
+    # اگر parse استاندارد موفق بود
+    if parsed:
+        explanation = parsed.row["explanation"].strip()
+        answer_raw = parsed.row["answer"]
+        conf_raw = parsed.row["confidence"]
+
+        # normalize answer to last digit 1-4
+        m = re.search(r"([1-4])$", answer_raw.strip())
+        answer = m.group(1) if m else None
+
+        confidence = _to_int(conf_raw)
+
+        if answer is None:
+            if verbose:
+                print(f"⚠️ TOON(answer): invalid answer: {answer_raw!r}")
+            return None
+
+        return {"explanation": explanation, "answer": answer, "confidence": confidence}
+    
+    # ═══════════════════════════════════════════════════════════
+    # Fallback: اگر LLM فرمت را اشتباه زده (همه چیز داخل {})
+    # ═══════════════════════════════════════════════════════════
+    if verbose:
+        print("⚠️ TOON(answer): standard format failed, trying fallback...")
+    
+    # الگوی fallback: results{...,...,...}
+    # ممکن است با یا بدون `:` باشد
+    fallback_pattern = r'results\s*\{([^}]+)\}'
+    match = re.search(fallback_pattern, content, re.IGNORECASE | re.DOTALL)
+    
+    if not match:
+        if verbose:
+            print("⚠️ TOON(answer): fallback also failed")
         return None
-
-    explanation = parsed.row["explanation"].strip()
-    answer_raw = parsed.row["answer"]
-    conf_raw = parsed.row["confidence"]
-
-    # normalize answer to last digit 1-4
-    m = re.search(r"([1-4])$", answer_raw.strip())
+    
+    inner_content = match.group(1).strip()
+    
+    # تلاش برای split به 3 قسمت
+    # explanation ممکن است خیلی طولانی باشد، پس فقط 2 کاما آخر را split می‌کنیم
+    parts = _split_csv_n(inner_content, n=3)
+    
+    if not parts:
+        if verbose:
+            print(f"⚠️ TOON(answer): fallback couldn't split into 3 parts: {inner_content[:100]}")
+        return None
+    
+    explanation = parts[0].strip()
+    answer_raw = parts[1].strip()
+    conf_raw = parts[2].strip()
+    
+    # normalize answer
+    m = re.search(r'([1-4])', answer_raw)
     answer = m.group(1) if m else None
-
+    
     confidence = _to_int(conf_raw)
-
+    
     if answer is None:
         if verbose:
-            print(f"⚠️ TOON(answer): invalid answer: {answer_raw!r}")
+            print(f"⚠️ TOON(answer): fallback invalid answer: {answer_raw!r}")
         return None
-
-    return {"explanation": explanation, "answer": answer, "confidence": confidence}
-
+    
+    if verbose:
+        print(f"✅ TOON(answer): fallback successful - answer={answer}, conf={confidence}")
+    
+    return {
+        "explanation": explanation,
+        "answer": answer,
+        "confidence": confidence
+    }
 
 def extract_toon_critic(content: str, verbose: bool = False) -> Optional[Dict]:
     """

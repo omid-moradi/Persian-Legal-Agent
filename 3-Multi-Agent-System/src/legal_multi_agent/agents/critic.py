@@ -8,6 +8,7 @@ from langsmith import traceable
 
 from legal_multi_agent.state.schemas import MASharedState
 from legal_multi_agent.utils.toon import extract_toon_critic
+from legal_multi_agent.utils.logger import log_debug, log_info
 
 import os
 import re
@@ -16,7 +17,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 OPENROUTER_API_KEY = os.environ["OPENROUTER_API_KEY"]
-MODEL_ID = "qwen/qwen3-235b-a22b-2507"
+MODEL_ID = os.environ["MODEL"]
 
 _raw_client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
@@ -28,15 +29,21 @@ client = wrap_openai(_raw_client)
 @traceable(name="critic_agent")
 def critic_agent(state: MASharedState) -> MASharedState:
     """ایجنت منتقد/قاضی که TOON-CRITIC را برمی‌گرداند."""
+    log_debug("\n🔍 ═══ CRITIC START ═══")
+    
     q = state["question"]
     options = state["options_text"]
     ctx = state.get("context", "")
     draft_raw = state.get("draft_raw", "")
 
+    log_debug(f"   📋 Question: {q[:60]}...")
+    log_debug(f"   📄 Draft length: {len(draft_raw)} chars")
+
     # 🔧 اضافه: اگر verifier وجود دارد، به critic اطلاع بده
     verifier = state.get("verifier_output")
     verifier_hint = ""
     if verifier and verifier.get("scores"):
+        log_debug("   📊 Verifier output available")
         supp_opts = [
             s["option_number"] 
             for s in verifier["scores"] 
@@ -49,6 +56,8 @@ def critic_agent(state: MASharedState) -> MASharedState:
             f"- Recommended: {rec} (confidence {verifier.get('confidence')})\n"
             f"⚠️ You may override verifier ONLY with explicit citation from SOURCES.\n"
         )
+    else:
+        log_debug("   ℹ️  No verifier output")
 
     # 🔧 system_msg و user_msg باید خارج از بلوک if باشند
     system_msg = (
@@ -168,6 +177,9 @@ If you CANNOT provide precise citations for steps 2–4, and the format is valid
 you MUST set needs_revision=false.
 """
 
+    log_debug("   📡 Calling LLM for critic review...")
+    log_debug(f"      Model: {MODEL_ID}")
+
     resp = client.chat.completions.create(
         model=MODEL_ID,
         messages=[
@@ -178,10 +190,13 @@ you MUST set needs_revision=false.
     )
 
     critic_raw = resp.choices[0].message.content
+    log_debug(f"   ✅ LLM response: {len(critic_raw)} chars")
+    
     critic_toon: Dict[str, Any] | None = extract_toon_critic(critic_raw)
 
     # اگر نتوانستیم TOON-CRITIC را parse کنیم، fail-safe:
     if critic_toon is None:
+        log_debug("   ⚠️  Failed to parse critic output → using fail-safe")
         critic_toon = {
             "needs_revision": True,
             "issue": "Critic output could not be parsed as TOON",
@@ -194,15 +209,28 @@ you MUST set needs_revision=false.
         """چک می‌کند که آیا critic ارجاع معتبر داده ([منبع N] + شماره ماده)"""
         return bool(re.search(r"\[منبع\s*\d+\]", txt))
 
-    if bool(critic_toon.get("needs_revision")):
+    needs_revision = bool(critic_toon.get("needs_revision"))
+    
+    if needs_revision:
+        log_debug("   🔍 Checking for valid citation...")
         if not _has_valid_citation(critic_raw):
-            print("   ⚠️ [Critic] needs_revision=true but no valid citation → forcing false")
+            log_debug("   ⚠️  needs_revision=true but no valid citation → forcing false")
+            log_info("🔍 Critic: Rejected revision request (no citation)")
             critic_toon = {
                 "needs_revision": False,
                 "issue": "no clear error",
                 "action": "keep answer as is",
                 "confidence": 3,
             }
+            needs_revision = False
+        else:
+            log_debug("   ✅ Valid citation found")
+            log_info(f"🔍 Critic: Revision requested - {critic_toon.get('issue', 'unknown')}")
+    else:
+        log_info("🔍 Critic: Draft approved")
+    
+    log_debug(f"   📊 Final critic decision: needs_revision={needs_revision}")
+    log_debug("🔍 ═══ CRITIC END ═══\n")
 
     return {
         "critic_raw": critic_raw,

@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Any, Dict
+from uuid import uuid4
 
 from openai import OpenAI
 from langsmith.wrappers import wrap_openai
@@ -8,13 +9,14 @@ from dotenv import load_dotenv
 
 from legal_multi_agent.state.schemas import MASharedState
 from legal_multi_agent.utils.toon import extract_toon_answer
+from legal_multi_agent.utils.logger import log_debug, log_info
 
 import os
 
 load_dotenv()
 
 OPENROUTER_API_KEY = os.environ["OPENROUTER_API_KEY"]
-MODEL_ID = "qwen/qwen3-235b-a22b-2507"
+MODEL_ID = os.environ["MODEL"]
 
 _raw_client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
@@ -23,94 +25,177 @@ _raw_client = OpenAI(
 client = wrap_openai(_raw_client)
 
 
+def _has_pending_verifier_call(messages: list) -> bool:
+    """
+    بررسی اینکه آیا یک tool_call برای option_verifier_tool وجود دارد
+    که هنوز پاسخ نگرفته است.
+    """
+    if not messages:
+        return False
+    
+    # پیدا کردن آخرین tool_call برای verifier
+    last_verifier_call_id = None
+    for msg in reversed(messages):
+        if isinstance(msg, dict) and msg.get("tool_calls"):
+            for tc in msg["tool_calls"]:
+                if tc.get("name") == "option_verifier_tool":
+                    last_verifier_call_id = tc.get("id")
+                    break
+            if last_verifier_call_id:
+                break
+    
+    if not last_verifier_call_id:
+        return False
+    
+    # بررسی اینکه آیا پاسخ برای این call_id وجود دارد
+    for msg in reversed(messages):
+        if isinstance(msg, dict) and msg.get("role") == "tool":
+            if msg.get("tool_call_id") == last_verifier_call_id:
+                return False  # پاسخ پیدا شد، pending نیست
+    
+    return True  # tool_call وجود دارد ولی پاسخ نداریم
+
+
 @traceable(name="reasoner_agent")
 def reasoner_agent(state: MASharedState) -> MASharedState:
     """
     ایجنت استدلال‌گر که TOON پاسخ را می‌سازد.
+    
+    وظایف:
+    1. اگر use_option_verifier=True: درخواست تحلیل گزینه‌ها از verifier
+    2. دریافت نتیجه verifier و ذخیره در verifier_output
+    3. استدلال نهایی بر اساس SOURCES + verifier hints (اختیاری) + critic feedback
     """
+    log_debug("\n🔵 ═══ REASONER START ═══")
+    
     q = state["question"]
     options = state["options_text"]
     ctx = state.get("context", "")
     
-    use_verifier = state.get("use_option_verifier", False)
+    log_debug(f"   📋 Question: {q[:60]}...")
+    log_debug(f"   📄 Context length: {len(ctx)} chars")
     
-    # 🔧 مدیریت verifier
-    if use_verifier:
-        tool_results = state.get("tool_results", {})
+    use_verifier = state.get("use_option_verifier", False)
+    tool_results = state.get("tool_results") or {}
+    messages = state.get("messages") or []
+    
+    log_debug(f"   🔧 use_verifier: {use_verifier}")
+    log_debug(f"   🛠️  tool_results keys: {list(tool_results.keys())}")
+    log_debug(f"   💬 messages count: {len(messages)}")
+    
+    # ═══════════════════════════════════════════════════════════
+    # مرحله 1: مدیریت verifier (اگر فعال باشد)
+    # ═══════════════════════════════════════════════════════════
+    if use_verifier and ctx:
+        log_debug("   ✓ Entering verifier logic (use_verifier=True and ctx exists)")
         
-        # مرحله 2: اگر verifier اجرا شده، نتیجه را ذخیره کن
-        if "option_verifier_tool" in tool_results and not state.get("verifier_output"):
+        verifier_output_in_state = state.get("verifier_output")
+        log_debug(f"   📊 verifier_output in state: {bool(verifier_output_in_state)}")
+        
+        # ⭐ اگر verifier_output قبلاً در state ست شده → ادامه به استدلال
+        if verifier_output_in_state:
+            log_debug("   ✅ Verifier output already in state → proceeding to reasoning")
+            # همه چیز آماده است - به استدلال می‌رویم
+        
+        # اگر verifier در tool_results هست ولی در state نیست → ذخیره کن
+        elif "option_verifier_tool" in tool_results:
+            log_info("🔵 Reasoner: Saving verifier output")
+            log_debug("   💾 Verifier found in tool_results → saving to state")
             verifier_output = tool_results["option_verifier_tool"]
+            log_debug(f"   ↩️  RETURNING: verifier_output")
             return {
                 "verifier_output": verifier_output,
             }
         
-        # مرحله 1: اگر context داریم و verifier هنوز اجرا نشده
-        if ctx and "option_verifier_tool" not in tool_results:
-            messages = state.get("messages", [])
+        # اگر verifier هنوز اجرا نشده → tool_call بساز یا منتظر بمان
+        else:
+            log_debug("   ⚠️  Verifier not ready → checking pending calls")
+            has_pending = _has_pending_verifier_call(messages)
+            log_debug(f"   🔍 has_pending_verifier_call: {has_pending}")
             
-            # چک کن که قبلاً tool call نکردیم
-            already_called = False
-            if messages:
-                for msg in messages:
-                    if isinstance(msg, dict) and msg.get("tool_calls"):
-                        for tc in msg["tool_calls"]:
-                            if tc.get("name") == "option_verifier_tool":
-                                already_called = True
-                                break
+            if has_pending:
+                log_debug("   ⏳ Pending verifier call exists → waiting")
+                log_debug("   ↩️  RETURNING: {} (empty dict)")
+                return {}
             
-            if not already_called:
-                # ساخت tool call request
-                new_message = {
-                    "role": "assistant",
-                    "content": "تحلیل گزینه‌ها با منابع...",
-                    "tool_calls": [
-                        {
-                            "id": "verifier_001",
-                            "name": "option_verifier_tool",
-                            "arguments": {
-                                "question": q,
-                                "options_text": options,
-                                "sources": ctx,
-                            }
+            log_info("🔵 Reasoner: Requesting verifier tool")
+            log_debug("   🆕 No pending call → creating new verifier tool_call")
+            call_id = f"verifier_{uuid4().hex[:8]}"
+            
+            new_message = {
+                "role": "assistant",
+                "content": "🔍 در حال تحلیل گزینه‌ها بر اساس منابع...",
+                "tool_calls": [
+                    {
+                        "id": call_id,
+                        "name": "option_verifier_tool",
+                        "arguments": {
+                            "question": q,
+                            "options_text": options,
+                            "sources": ctx,
                         }
-                    ]
-                }
-                
-                messages_copy = messages.copy()
-                messages_copy.append(new_message)
-                
-                return {
-                    "messages": messages_copy,
-                }
+                    }
+                ]
+            }
             
-            # اگر tool call کردیم اما هنوز نتیجه نداریم، منتظر می‌مانیم
-            return {}
+            messages_copy = messages.copy()
+            messages_copy.append(new_message)
+            
+            log_debug(f"   📤 Created tool_call with id: {call_id}")
+            log_debug(f"   ↩️  RETURNING: messages (with new tool_call)")
+            return {
+                "messages": messages_copy,
+            }
     
-    # 🔧 ساخت hints برای critic و verifier
+    # ═══════════════════════════════════════════════════════════
+    # مرحله 2: ساخت hints برای LLM
+    # ═══════════════════════════════════════════════════════════
+    log_debug("   ✅ All prerequisites met → proceeding to reasoning phase")
+    
+    # 2.1) Critic hint (اگر revision است)
     critic = state.get("critic_toon")
     critic_hint = ""
-    if critic and critic.get("needs_revision", False):
+    if critic and isinstance(critic, dict) and critic.get("needs_revision", False):
         critic_hint = (
-            f"Issue: {critic.get('issue','')}\n"
-            f"Action: {critic.get('action','')}\n"
+            f"⚠️ CRITIC FEEDBACK (you MUST address this):\n"
+            f"Issue: {critic.get('issue', 'unknown')}\n"
+            f"Action: {critic.get('action', 'revise')}\n"
         )
+        log_debug(f"   📝 Critic hint: {len(critic_hint)} chars")
+    else:
+        log_debug(f"   ℹ️  No critic feedback")
 
+    # 2.2) Verifier hint (اگر استفاده شده)
     verifier_output = state.get("verifier_output")
     verifier_hint = ""
-    if verifier_output and verifier_output.get("scores"):
-        verifier_hint = "\n📊 نتایج تحلیل گزینه‌ها (ADVISORY - مستقلاً بررسی کنید):\n"
+    if verifier_output and isinstance(verifier_output, dict) and verifier_output.get("scores"):
+        verifier_hint = "\n📊 VERIFIER ANALYSIS (ADVISORY - verify independently):\n"
+        verifier_hint += "─" * 60 + "\n"
+        
         for score in verifier_output["scores"]:
             verifier_hint += (
-                f"گزینه {score['option_number']}: {score['support_level']} - "
-                f"{score['reasoning'][:100]}...\n"
+                f"• گزینه {score.get('option_number', '?')}: "
+                f"{score.get('support_level', 'UNKNOWN')}\n"
+                f"  └─ {score.get('reasoning', '')[:150]}...\n"
             )
+        
+        recommended = verifier_output.get("recommended_answer", "?")
+        confidence = verifier_output.get("confidence", "?")
         verifier_hint += (
-            f"\n⚠️ گزینه پیشنهادی verifier: {verifier_output.get('recommended_answer')}\n"
-            f"   ⚠️ این فقط یک نظر مشورتی است - شما باید مستقلاً منابع را بررسی کنید!\n"
+            f"\n💡 Recommended: گزینه {recommended} (confidence: {confidence}/5)\n"
+            f"⚠️  IMPORTANT: This is advisory only - YOU must verify against SOURCES!\n"
+            f"─" * 60 + "\n"
         )
+        log_debug(f"   📊 Verifier hint: {len(verifier_hint)} chars")
+    else:
+        log_debug(f"   ℹ️  No verifier output")
 
-    # 🔧 تعریف system_msg و user_msg (باید خارج از همه if ها باشد)
+    # ═══════════════════════════════════════════════════════════
+    # مرحله 3: ساخت prompt و فراخوانی LLM
+    # ═══════════════════════════════════════════════════════════
+    
+    log_debug("   🤖 Preparing LLM call...")
+    
     system_msg = (
         "You are an Iranian legal exam QA assistant.\n\n"
         
@@ -207,27 +292,55 @@ STEP-BY-STEP INSTRUCTIONS
 Remember: When in doubt between verifier recommendation and explicit SOURCES text, ALWAYS trust the SOURCES.
 """
 
-    # 🔧 فراخوانی LLM
-    resp = client.chat.completions.create(
-        model=MODEL_ID,
-        messages=[
-            {"role": "system", "content": system_msg},
-            {"role": "user", "content": user_msg},
-        ],
-        temperature=0.1,
-    )
+    try:
+        log_debug(f"   📡 Calling OpenAI API...")
+        log_debug(f"      Model: {MODEL_ID}")
+        log_debug(f"      System msg: {len(system_msg)} chars")
+        log_debug(f"      User msg: {len(user_msg)} chars")
+        
+        resp = client.chat.completions.create(
+            model=MODEL_ID,
+            messages=[
+                {"role": "system", "content": system_msg},
+                {"role": "user", "content": user_msg},
+            ],
+            temperature=0.1,
+        )
+        
+        draft_raw = resp.choices[0].message.content
+        log_debug(f"   ✅ LLM response received: {len(draft_raw)} chars")
+        log_debug(f"   📄 First 200 chars: {draft_raw[:200]}")
+        
+        draft_toon: Dict[str, Any] = extract_toon_answer(draft_raw)
+        log_debug(f"   🎯 Extracted TOON: {draft_toon}")
+        
+        if not draft_toon:
+            log_debug(f"   ⚠️  WARNING: extract_toon_answer returned None/empty!")
+        else:
+            # نتیجه مهم (INFO level)
+            log_info(f"🔵 Reasoner: Draft generated → answer={draft_toon['answer']}, confidence={draft_toon['confidence']}")
+        
+    except Exception as e:
+        log_debug(f"   ❌ LLM CALL FAILED!")
+        log_debug(f"   ❌ Exception: {e.__class__.__name__}: {str(e)}")
+        log_debug(f"   ↩️  RETURNING: empty dict due to error")
+        return {}
 
-    draft_raw = resp.choices[0].message.content
-    draft_toon: Dict[str, Any] = extract_toon_answer(draft_raw)
-
-    # 🔧 افزایش revision_count فقط در revision
-    rc = int(state.get("revision_count", 0))
-    if critic and critic.get("needs_revision"):
+    # ═══════════════════════════════════════════════════════════
+    # مرحله 4: افزایش revision_count (فقط در حالت revision)
+    # ═══════════════════════════════════════════════════════════
+    rc = int(state.get("revision_count", 0) or 0)
+    if critic and isinstance(critic, dict) and critic.get("needs_revision", False):
         rc += 1
+        log_debug(f"   🔄 Revision mode: incrementing revision_count to {rc}")
 
+    log_debug(f"   ✅ REASONER COMPLETE")
+    log_debug(f"   ↩️  RETURNING: draft_raw, draft_toon, revision_count={rc}")
+    log_debug("🔵 ═══ REASONER END ═══\n")
+    
     return {
         "draft_raw": draft_raw,
         "draft_toon": draft_toon,
         "revision_count": rc,
-        "critic_toon": None,  # پاک کردن critic قدیمی
+        "critic_toon": None,  # پاک کردن critic قدیمی برای دور بعدی
     }
