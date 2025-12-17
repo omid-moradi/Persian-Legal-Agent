@@ -1,0 +1,5 @@
+﻿Model,Accuracy (%)
+gemini 2.5 flash,64.7
+llama 4 maverick,64.5
+qwen3 80,60.4
+qwen3 235,62.8
