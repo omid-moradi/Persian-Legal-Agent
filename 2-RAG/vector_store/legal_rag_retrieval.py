@@ -5,7 +5,7 @@ Legal RAG Retrieval System
 سیستم جستجوی هوشمند برای پرسش‌وپاسخ حقوقی با استفاده از:
 - Metadata-aware retrieval (نام قانون + شماره ماده/اصل)
 - Semantic search (bge-m3 embeddings روی Qdrant)
-- Cohere reranking (rerank-multilingual-v3.0)
+- Cohere reranking (rerank-v3.5)
 
 نویسنده: OMID Moradi
 تاریخ: دسامبر 2025
@@ -496,7 +496,7 @@ def rerank_with_cohere_smart(query: str, results: list, top_k: int = 5):
     """
     Reranking هوشمند با Cohere:
       - اگر سندی با matched_via == "law+article" داریم، آنها را در اولویت نگه می‌دارد.
-      - بقیه نتایج با مدل rerank-multilingual-v3.0 مرتب می‌شوند.
+      - بقیه نتایج با مدل rerank-v3.5 مرتب می‌شوند.
       - اگر متادیتا نداشتیم، همه چیز صرفاً بر اساس امتیاز Cohere مرتب می‌شود.
     """
     if not results:
@@ -515,7 +515,7 @@ def rerank_with_cohere_smart(query: str, results: list, top_k: int = 5):
             response = co.rerank(
                 query=query,
                 documents=documents,
-                model="rerank-multilingual-v3.0",
+                model="rerank-v3.5",
                 top_n=min(top_k, len(documents))
             )
 
@@ -552,7 +552,7 @@ def rerank_with_cohere_smart(query: str, results: list, top_k: int = 5):
             response = co.rerank(
                 query=query,
                 documents=documents,
-                model="rerank-multilingual-v3.0",
+                model="rerank-v3.5",
                 top_n=min(available_slots, len(documents))
             )
 

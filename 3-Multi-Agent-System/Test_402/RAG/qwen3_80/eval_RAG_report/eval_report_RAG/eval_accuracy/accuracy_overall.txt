@@ -1,0 +1,8 @@
+Total Questions    : 10
+Answered           : 10
+Correct            : 6
+Wrong              : 4
+No Answer / Error  : 0
+RAG Accuracy (all)     : 60.00%
+RAG Accuracy (answered): 60.00%
+RAG top_k used     : 10
