@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>Evaluation Report – deepseek/deepseek-v4-flash</title>
+<style>
+  body { font-family: Tahoma, Arial, sans-serif; background:#f8f9fa; color:#333; margin:0; padding:24px; direction:rtl }
+  h1 { color:#2c3e50; border-bottom:3px solid #4E79A7; padding-bottom:10px; margin-bottom:6px }
+  h2 { color:#4E79A7; margin-top:32px; margin-bottom:12px }
+  .kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin:16px 0 }
+  .kpi-card { background:white; border-radius:10px; padding:16px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,.07) }
+  .kpi-card .val { font-size:1.9em; font-weight:bold; color:#4E79A7 }
+  .kpi-card .lbl { font-size:.82em; color:#666; margin-top:4px }
+  table { width:100%; border-collapse:collapse; background:white; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.07); font-size:13px }
+  th { background:#4E79A7; color:white; padding:10px 8px; font-weight:600; text-align:right }
+  td { padding:8px; border-bottom:1px solid #eee; text-align:right; vertical-align:top }
+  .img-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:18px; margin:16px 0 }
+  .img-card { background:white; border-radius:10px; padding:14px; box-shadow:0 2px 8px rgba(0,0,0,.07) }
+  .img-card img { width:100%; border-radius:6px }
+  .img-card p { margin:8px 0 0; font-size:.83em; color:#777; text-align:center }
+  footer { margin-top:40px; text-align:center; color:#aaa; font-size:.82em }
+</style>
+</head>
+<body>
+<h1>📊 گزارش ارزیابی مدل — deepseek/deepseek-v4-flash</h1>
+<p style="color:#888;margin-top:2px">سوالات: 10 | پاسخ‌داده‌شده: 10 | بی‌پاسخ/خطا: 0</p>
+
+<h2>🎯 خلاصه عملکرد</h2>
+<div class="kpi-grid">
+  <div class="kpi-card"><div class="val">10</div><div class="lbl">کل سوالات</div></div>
+  <div class="kpi-card"><div class="val" style="color:#59A14F">5</div><div class="lbl">پاسخ صحیح</div></div>
+  <div class="kpi-card"><div class="val" style="color:#E15759">5</div><div class="lbl">پاسخ غلط</div></div>
+  <div class="kpi-card"><div class="val" style="color:#F28E2B">0</div><div class="lbl">بی‌پاسخ / خطا</div></div>
+  <div class="kpi-card"><div class="val">50.0%</div><div class="lbl">دقت کل</div></div>
+  <div class="kpi-card"><div class="val">50.0%</div><div class="lbl">دقت پاسخ‌داده‌شده</div></div>
+  <div class="kpi-card"><div class="val">47978 ms</div><div class="lbl">میانگین تأخیر</div></div>
+  <div class="kpi-card"><div class="val">2626</div><div class="lbl">میانگین توکن خروجی</div></div>
+</div>
+
+<h2>📈 نمودارها</h2>
+<div class="img-grid">
+  <div class="img-card"><img src="eval_accuracy/plot_accuracy_overall.png"><p>دقت کلی مدل</p></div>
+  <div class="img-card"><img src="eval_accuracy/plot_accuracy_by_pred.png"><p>دقت به تفکیک گزینه</p></div>
+  <div class="img-card"><img src="eval_accuracy/plot_status_donut.png"><p>توزیع وضعیت پاسخ‌ها</p></div>
+  <div class="img-card"><img src="eval_accuracy/plot_confusion_heatmap.png"><p>ماتریس درهم‌ریختگی</p></div>
+  <div class="img-card"><img src="tokens_usage/plot_tokens_hist.png"><p>توزیع توکن‌های خروجی</p></div>
+  <div class="img-card"><img src="tokens_usage/plot_tokens_vs_latency.png"><p>توکن vs تأخیر</p></div>
+  <div class="img-card"><img src="explanation_quality/plot_explain_len_box.png"><p>طول توضیح vs صحت</p></div>
+  <div class="img-card"><img src="latency_profile/plot_latency_dist.png"><p>توزیع تأخیر</p></div>
+  <div class="img-card"><img src="latency_profile/plot_latency_by_correct.png"><p>تأخیر به تفکیک صحت</p></div>
+</div>
+
+<h2>📋 جزئیات پاسخ‌ها</h2>
+<table>
+<thead><tr>
+  <th>ID</th><th>پاسخ مدل</th><th>پاسخ صحیح</th><th>نتیجه</th>
+  <th>تأخیر (ms)</th><th>توکن</th><th>خلاصه استدلال</th>
+</tr></thead>
+<tbody>
+    <tr style="background:#f8d7da">
+      <td>1</td>
+      <td><b>2</b></td>
+      <td><b>3</b></td>
+      <td style="text-align:center">❌</td>
+      <td>59210</td>
+      <td>4290</td>
+      <td style="font-size:12px;max-width:320px;direction:rtl">با فسخ بیع، دین ثمن منحل می‌شود و حواله (ماده ۷۲۵ و ۷۳۵ قانون مدنی) که مبتنی بر آن بود منفسخ می‌گردد؛ در نتیجه ذمه «ب» بری و دین اصلی «الف» به «ج» احی...</td>
+    </tr>
+    <tr style="background:#d4edda">
+      <td>2</td>
+      <td><b>1</b></td>
+      <td><b>1</b></td>
+      <td style="text-align:center">✅</td>
+      <td>38232</td>
+      <td>1039</td>
+      <td style="font-size:12px;max-width:320px;direction:rtl">دلیل لبّی فاقد اطلاق لفظی است و طبق قاعده اصولی فقط به قدر متیقن آن اخذ می‌شود؛ اصول لفظی در آن جاری نیست و عرف و عادت از مصادیق آن هستند...</td>
+    </tr>
+    <tr style="background:#f8d7da">
+      <td>3</td>
+      <td><b>4</b></td>
+      <td><b>2</b></td>
+      <td style="text-align:center">❌</td>
+      <td>41159</td>
+      <td>4390</td>
+      <td style="font-size:12px;max-width:320px;direction:rtl">مطابق ماده ۴ قانون تشدید مجازات اسیدپاشی مصوب ۱۳۹۸، آزادی مشروط، تخفیف مجازات و تعلیق اجرای مجازات به طور مطلق ممنوع شده‌اند اما تعویق صدور حکم ذکر نش...</td>
+    </tr>
+    <tr style="background:#f8d7da">
+      <td>4</td>
+      <td><b>3</b></td>
+      <td><b>1</b></td>
+      <td style="text-align:center">❌</td>
+      <td>86767</td>
+      <td>5392</td>
+      <td style="font-size:12px;max-width:320px;direction:rtl">گزینه ۳ نادرست است؛ زیرا ماده ۵ قانون جرم سیاسی امکان تخفیف مجازات را پیش‌بینی کرده که نشان‌دهنده تأثیر سیاسی بودن جرم بر میزان مجازات است، برخلاف ادع...</td>
+    </tr>
+    <tr style="background:#f8d7da">
+      <td>5</td>
+      <td><b>1</b></td>
+      <td><b>4</b></td>
+      <td style="text-align:center">❌</td>
+      <td>43240</td>
+      <td>958</td>
+      <td style="font-size:12px;max-width:320px;direction:rtl">به موجب مواد ۲۵۳ و ۲۶۳ قانون مدنی، ولی و وصی می‌توانند با رعایت مصلحت و اجازه دادگاه بدهکاران مولی‌علیه را ابراء کنند؛ ادعای مطلق نبود صلاحیت خلاف قان...</td>
+    </tr>
+    <tr style="background:#d4edda">
+      <td>6</td>
+      <td><b>2</b></td>
+      <td><b>2</b></td>
+      <td style="text-align:center">✅</td>
+      <td>41712</td>
+      <td>1642</td>
+      <td style="font-size:12px;max-width:320px;direction:rtl">به موجب ماده ۱۰۷ قانون آیین دادرسی مدنی، استرداد دعوا قبل از ورود خوانده به ماهیت (اجرای تحقیق محلی) بدون رضایت پذیرفته و قرار رد دعوای قطعی صادر می‌ش...</td>
+    </tr>
+    <tr style="background:#d4edda">
+      <td>7</td>
+      <td><b>2</b></td>
+      <td><b>2</b></td>
+      <td style="text-align:center">✅</td>
+      <td>28501</td>
+      <td>4503</td>
+      <td style="font-size:12px;max-width:320px;direction:rtl">نامه خوانده حاوی انکار ادعا و درخواست تغییر وقت دادرسی به عنوان لایحه دفاعیه تلقی می‌شود؛ لذا حکم حضوری و قابل تجدیدنظر است....</td>
+    </tr>
+    <tr style="background:#d4edda">
+      <td>8</td>
+      <td><b>1</b></td>
+      <td><b>1</b></td>
+      <td style="text-align:center">✅</td>
+      <td>32900</td>
+      <td>989</td>
+      <td style="font-size:12px;max-width:320px;direction:rtl">به موجب ماده ۲۰۴ لایحه اصلاحی قانون تجارت ۱۳۴۷، تصمیم به انحلال و اسامی مدیران تصفیه باید ظرف پنج روز به مرجع ثبت شرکت‌ها اعلام شود؛ سایر گزینه‌ها با ...</td>
+    </tr>
+    <tr style="background:#f8d7da">
+      <td>9</td>
+      <td><b>3</b></td>
+      <td><b>4</b></td>
+      <td style="text-align:center">❌</td>
+      <td>86945</td>
+      <td>898</td>
+      <td style="font-size:12px;max-width:320px;direction:rtl">به موجب اصل 141 قانون اساسی، کارمندان دولت حق تأسیس شرکت خصوصی ندارند و عضویت در هیئت مؤسس مصداق تأسیس شرکت است و ممنوع می‌باشد...</td>
+    </tr>
+    <tr style="background:#d4edda">
+      <td>10</td>
+      <td><b>2</b></td>
+      <td><b>2</b></td>
+      <td style="text-align:center">✅</td>
+      <td>21117</td>
+      <td>2164</td>
+      <td style="font-size:12px;max-width:320px;direction:rtl">بر اساس اصل ۱۶۷ قانون اساسی، قاضی موظف به استناد به قوانین مدوّن است؛ اما ذکر نظریه فقهی هم‌جهت با قانون، تخلف محسوب نمی‌شود و رأی قابل نقض نیست زیرا ...</td>
+    </tr></tbody>
+</table>
+<footer>Eval Pipeline · 2026-06-23 13:07</footer>
+</body>
+</html>

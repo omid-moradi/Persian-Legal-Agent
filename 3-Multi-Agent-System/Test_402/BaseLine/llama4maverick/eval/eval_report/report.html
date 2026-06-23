@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>Evaluation Report – meta-llama/llama-4-maverick</title>
+<style>
+  body { font-family: Tahoma, Arial, sans-serif; background:#f8f9fa; color:#333; margin:0; padding:24px; direction:rtl }
+  h1 { color:#2c3e50; border-bottom:3px solid #4E79A7; padding-bottom:10px; margin-bottom:6px }
+  h2 { color:#4E79A7; margin-top:32px; margin-bottom:12px }
+  .kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin:16px 0 }
+  .kpi-card { background:white; border-radius:10px; padding:16px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,.07) }
+  .kpi-card .val { font-size:1.9em; font-weight:bold; color:#4E79A7 }
+  .kpi-card .lbl { font-size:.82em; color:#666; margin-top:4px }
+  table { width:100%; border-collapse:collapse; background:white; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.07); font-size:13px }
+  th { background:#4E79A7; color:white; padding:10px 8px; font-weight:600; text-align:right }
+  td { padding:8px; border-bottom:1px solid #eee; text-align:right; vertical-align:top }
+  .img-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:18px; margin:16px 0 }
+  .img-card { background:white; border-radius:10px; padding:14px; box-shadow:0 2px 8px rgba(0,0,0,.07) }
+  .img-card img { width:100%; border-radius:6px }
+  .img-card p { margin:8px 0 0; font-size:.83em; color:#777; text-align:center }
+  footer { margin-top:40px; text-align:center; color:#aaa; font-size:.82em }
+</style>
+</head>
+<body>
+<h1>📊 گزارش ارزیابی مدل — meta-llama/llama-4-maverick</h1>
+<p style="color:#888;margin-top:2px">سوالات: 10 | پاسخ‌داده‌شده: 10 | بی‌پاسخ/خطا: 0</p>
+
+<h2>🎯 خلاصه عملکرد</h2>
+<div class="kpi-grid">
+  <div class="kpi-card"><div class="val">10</div><div class="lbl">کل سوالات</div></div>
+  <div class="kpi-card"><div class="val" style="color:#59A14F">3</div><div class="lbl">پاسخ صحیح</div></div>
+  <div class="kpi-card"><div class="val" style="color:#E15759">7</div><div class="lbl">پاسخ غلط</div></div>
+  <div class="kpi-card"><div class="val" style="color:#F28E2B">0</div><div class="lbl">بی‌پاسخ / خطا</div></div>
+  <div class="kpi-card"><div class="val">30.0%</div><div class="lbl">دقت کل</div></div>
+  <div class="kpi-card"><div class="val">30.0%</div><div class="lbl">دقت پاسخ‌داده‌شده</div></div>
+  <div class="kpi-card"><div class="val">15646 ms</div><div class="lbl">میانگین تأخیر</div></div>
+  <div class="kpi-card"><div class="val">747</div><div class="lbl">میانگین توکن خروجی</div></div>
+</div>
+
+<h2>📈 نمودارها</h2>
+<div class="img-grid">
+  <div class="img-card"><img src="eval_accuracy/plot_accuracy_overall.png"><p>دقت کلی مدل</p></div>
+  <div class="img-card"><img src="eval_accuracy/plot_accuracy_by_pred.png"><p>دقت به تفکیک گزینه</p></div>
+  <div class="img-card"><img src="eval_accuracy/plot_status_donut.png"><p>توزیع وضعیت پاسخ‌ها</p></div>
+  <div class="img-card"><img src="eval_accuracy/plot_confusion_heatmap.png"><p>ماتریس درهم‌ریختگی</p></div>
+  <div class="img-card"><img src="tokens_usage/plot_tokens_hist.png"><p>توزیع توکن‌های خروجی</p></div>
+  <div class="img-card"><img src="tokens_usage/plot_tokens_vs_latency.png"><p>توکن vs تأخیر</p></div>
+  <div class="img-card"><img src="explanation_quality/plot_explain_len_box.png"><p>طول توضیح vs صحت</p></div>
+  <div class="img-card"><img src="latency_profile/plot_latency_dist.png"><p>توزیع تأخیر</p></div>
+  <div class="img-card"><img src="latency_profile/plot_latency_by_correct.png"><p>تأخیر به تفکیک صحت</p></div>
+</div>
+
+<h2>📋 جزئیات پاسخ‌ها</h2>
+<table>
+<thead><tr>
+  <th>ID</th><th>پاسخ مدل</th><th>پاسخ صحیح</th><th>نتیجه</th>
+  <th>تأخیر (ms)</th><th>توکن</th><th>خلاصه استدلال</th>
+</tr></thead>
+<tbody>
+    <tr style="background:#f8d7da">
+      <td>1</td>
+      <td><b>4</b></td>
+      <td><b>3</b></td>
+      <td style="text-align:center">❌</td>
+      <td>17126</td>
+      <td>734</td>
+      <td style="font-size:12px;max-width:320px;direction:rtl">مطابق مواد ۳۰۱ و ۳۷۱ قانون مدنی، با فسخ بیع، «الف» به‌جهت دارا شدن بلاجهت و لزوم رد عوضین باید ثمن را به «ج» مسترد کند...</td>
+    </tr>
+    <tr style="background:#d4edda">
+      <td>2</td>
+      <td><b>1</b></td>
+      <td><b>1</b></td>
+      <td style="text-align:center">✅</td>
+      <td>13137</td>
+      <td>608</td>
+      <td style="font-size:12px;max-width:320px;direction:rtl">در اصول فقه، اخذ به قدر متیقن در ادله لبّی الزامی است زیرا این ادله فاقد اطلاق لفظی هستند...</td>
+    </tr>
+    <tr style="background:#f8d7da">
+      <td>3</td>
+      <td><b>4</b></td>
+      <td><b>2</b></td>
+      <td style="text-align:center">❌</td>
+      <td>13640</td>
+      <td>742</td>
+      <td style="font-size:12px;max-width:320px;direction:rtl">مطابق مواد ۴۶ و ۲۶ قانون مجازات اسلامی، تعویق صدور حکم در جرایم اسیدپاشی که محاربه تلقی می‌شوند اما قصاص نفس نیستند، ممنوع نیست...</td>
+    </tr>
+    <tr style="background:#d4edda">
+      <td>4</td>
+      <td><b>1</b></td>
+      <td><b>1</b></td>
+      <td style="text-align:center">✅</td>
+      <td>16322</td>
+      <td>845</td>
+      <td style="font-size:12px;max-width:320px;direction:rtl">با توجه به قوانین موجود، همه گزینه‌ها صحیح هستند و سؤال دارای ابهام است...</td>
+    </tr>
+    <tr style="background:#f8d7da">
+      <td>5</td>
+      <td><b>2</b></td>
+      <td><b>4</b></td>
+      <td style="text-align:center">❌</td>
+      <td>13442</td>
+      <td>690</td>
+      <td style="font-size:12px;max-width:320px;direction:rtl">مطابق ماده ۸۰۱ قانون مدنی، وصیت به ابراء دین نیازمند قبول موصی‌له (مدیون) است و صرفاً با اراده یک‌جانبه موصی واقع نمی‌شود...</td>
+    </tr>
+    <tr style="background:#f8d7da">
+      <td>6</td>
+      <td><b>3</b></td>
+      <td><b>2</b></td>
+      <td style="text-align:center">❌</td>
+      <td>14589</td>
+      <td>701</td>
+      <td style="font-size:12px;max-width:320px;direction:rtl">مطابق ماده ۸۷ قانون آیین دادرسی مدنی استرداد دعوی در هر مرحله‌ای منوط به رضایت خوانده است و منجر به قرار رد دعوی قابل تجدیدنظر می‌شود...</td>
+    </tr>
+    <tr style="background:#d4edda">
+      <td>7</td>
+      <td><b>2</b></td>
+      <td><b>2</b></td>
+      <td style="text-align:center">✅</td>
+      <td>13123</td>
+      <td>755</td>
+      <td style="font-size:12px;max-width:320px;direction:rtl">با ارسال لایحه دفاعیه توسط خوانده و وجود فرصت کافی برای ابلاغ به خواهان و حضور در جلسه بعدی مطابق ماده ۳۰۶ قانون آیین دادرسی مدنی، حکم حضوری و قابل تج...</td>
+    </tr>
+    <tr style="background:#f8d7da">
+      <td>8</td>
+      <td><b>3</b></td>
+      <td><b>1</b></td>
+      <td style="text-align:center">❌</td>
+      <td>18033</td>
+      <td>812</td>
+      <td style="font-size:12px;max-width:320px;direction:rtl">انحلال شرکت پس از تصویب مجمع عمومی و طی مراحل آگهی طبق مواد ۲۰۶ و ۲۰۸ لایحه اصلاحی قانون تجارت نسبت به همه اشخاص مؤثر است...</td>
+    </tr>
+    <tr style="background:#f8d7da">
+      <td>9</td>
+      <td><b>3</b></td>
+      <td><b>4</b></td>
+      <td style="text-align:center">❌</td>
+      <td>17156</td>
+      <td>807</td>
+      <td style="font-size:12px;max-width:320px;direction:rtl">اصل ۱۴۱ قانون اساسی اشتغال به شغل دولتی یا استخدام در دستگاه‌های دولتی یا مؤسسات وابسته به بودجه عمومی را برای کارمندان دولت پس از بازنشستگی یا استعفا...</td>
+    </tr>
+    <tr style="background:#f8d7da">
+      <td>10</td>
+      <td><b>3</b></td>
+      <td><b>2</b></td>
+      <td style="text-align:center">❌</td>
+      <td>19891</td>
+      <td>777</td>
+      <td style="font-size:12px;max-width:320px;direction:rtl">مطابق اصل ۱۶۷ قانون اساسی و ماده ۳ قانون آیین دادرسی مدنی، قاضی موظف است ابتدا حکم را در قوانین مدوّن جستجو کند و در صورت فقدان، به منابع فقهی استناد ...</td>
+    </tr></tbody>
+</table>
+<footer>Eval Pipeline · 2026-06-23 13:05</footer>
+</body>
+</html>
