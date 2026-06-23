@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>RAG Evaluation Report – deepseek/deepseek-v4-flash</title>
+<style>
+  body { font-family: Tahoma, Arial, sans-serif; background:#f8f9fa; color:#333; margin:0; padding:24px; direction:rtl }
+  h1 { color:#2c3e50; border-bottom:3px solid #4E79A7; padding-bottom:10px; margin-bottom:6px }
+  h2 { color:#4E79A7; margin-top:32px; margin-bottom:12px }
+  .kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin:16px 0 }
+  .kpi-card { background:white; border-radius:10px; padding:16px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,.07) }
+  .kpi-card .val { font-size:1.9em; font-weight:bold; color:#4E79A7 }
+  .kpi-card .lbl { font-size:.82em; color:#666; margin-top:4px }
+  table { width:100%; border-collapse:collapse; background:white; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.07); font-size:13px }
+  th { background:#4E79A7; color:white; padding:10px 8px; font-weight:600; text-align:right }
+  td { padding:8px; border-bottom:1px solid #eee; text-align:right; vertical-align:top }
+  .img-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:18px; margin:16px 0 }
+  .img-card { background:white; border-radius:10px; padding:14px; box-shadow:0 2px 8px rgba(0,0,0,.07) }
+  .img-card img { width:100%; border-radius:6px }
+  .img-card p { margin:8px 0 0; font-size:.83em; color:#777; text-align:center }
+  footer { margin-top:40px; text-align:center; color:#aaa; font-size:.82em }
+</style>
+</head>
+<body>
+<h1>📊 گزارش ارزیابی RAG — deepseek/deepseek-v4-flash</h1>
+<p style="color:#888;margin-top:2px">
+  سوالات: 10 | پاسخ‌داده‌شده: 10 | بی‌پاسخ/خطا: 0 | RAG top_k: 10
+</p>
+
+<h2>🎯 خلاصه عملکرد</h2>
+<div class="kpi-grid">
+  <div class="kpi-card"><div class="val">10</div><div class="lbl">کل سوالات</div></div>
+  <div class="kpi-card"><div class="val" style="color:#59A14F">7</div><div class="lbl">پاسخ صحیح</div></div>
+  <div class="kpi-card"><div class="val" style="color:#E15759">3</div><div class="lbl">پاسخ غلط</div></div>
+  <div class="kpi-card"><div class="val" style="color:#F28E2B">0</div><div class="lbl">بی‌پاسخ / خطا</div></div>
+  <div class="kpi-card"><div class="val">70.0%</div><div class="lbl">دقت کل (RAG)</div></div>
+  <div class="kpi-card"><div class="val">70.0%</div><div class="lbl">دقت پاسخ‌داده‌شده</div></div>
+  <div class="kpi-card"><div class="val">48355 ms</div><div class="lbl">میانگین تأخیر</div></div>
+  <div class="kpi-card"><div class="val">10</div><div class="lbl">RAG top_k</div></div>
+</div>
+
+<h2>📈 نمودارها</h2>
+<div class="img-grid"><div class="img-card"><img src="eval_accuracy/plot_accuracy_overall.png"><p>دقت کلی مدل (RAG)</p></div><div class="img-card"><img src="eval_accuracy/plot_accuracy_by_pred.png"><p>دقت به تفکیک گزینه</p></div><div class="img-card"><img src="eval_accuracy/plot_status_donut.png"><p>توزیع وضعیت پاسخ‌ها</p></div><div class="img-card"><img src="eval_accuracy/plot_confusion_heatmap.png"><p>ماتریس درهم‌ریختگی</p></div><div class="img-card"><img src="tokens_usage/plot_RAG_tokens_hist.png"><p>توزیع توکن‌های خروجی</p></div><div class="img-card"><img src="tokens_usage/plot_RAG_tokens_vs_latency.png"><p>توکن vs تأخیر</p></div><div class="img-card"><img src="tokens_usage/plot_RAG_prompt_tokens_dist.png"><p>توزیع prompt tokens (RAG context)</p></div><div class="img-card"><img src="explanation_quality/plot_RAG_explain_len_box.png"><p>طول توضیح vs صحت</p></div><div class="img-card"><img src="latency_profile/plot_RAG_latency_dist.png"><p>توزیع تأخیر</p></div><div class="img-card"><img src="latency_profile/plot_RAG_latency_by_correct.png"><p>تأخیر به تفکیک صحت</p></div><div class="img-card"><img src="calibration_confidence/plot_RAG_reliability_curve.png"><p>Reliability Curve</p></div></div>
+
+<h2>📋 جزئیات پاسخ‌ها</h2>
+<table>
+<thead><tr>
+  <th>ID</th><th>پاسخ مدل</th><th>پاسخ صحیح</th><th>نتیجه</th>
+  <th>تأخیر (ms)</th><th>توکن خروجی</th><th>top_k</th><th>خلاصه استدلال</th>
+</tr></thead>
+<tbody>
+    <tr style="background:#d4edda">
+      <td>1</td>
+      <td><b>3</b></td>
+      <td><b>3</b></td>
+      <td style="text-align:center">✅</td>
+      <td>47524</td>
+      <td>4858</td>
+      <td>10</td>
+      <td style="font-size:12px;max-width:300px;direction:rtl">مطابق ماده ۷۳۳ قانون مدنی در فسخ بیع حواله باطل نمی‌شود و محال‌علیه بری است و بایع (ب) باید ثمن را به مشتری (ج) مسترد دارد...</td>
+    </tr>
+    <tr style="background:#d4edda">
+      <td>2</td>
+      <td><b>1</b></td>
+      <td><b>1</b></td>
+      <td style="text-align:center">✅</td>
+      <td>28846</td>
+      <td>862</td>
+      <td>10</td>
+      <td style="font-size:12px;max-width:300px;direction:rtl">دلیل لبّی (عقلی و عرفی) به موجب اصول حقوقی ایران فقط به قدر متیقّن اخذ می‌شود و اصول لفظی در آن جاری نیست...</td>
+    </tr>
+    <tr style="background:#f8d7da">
+      <td>3</td>
+      <td><b>4</b></td>
+      <td><b>2</b></td>
+      <td style="text-align:center">❌</td>
+      <td>36230</td>
+      <td>886</td>
+      <td>10</td>
+      <td style="font-size:12px;max-width:300px;direction:rtl">به موجب ماده ۳ قانون تشدید مجازات اسیدپاشی, آزادی مشروط, تعلیق و تخفیف مجازات ممنوعیت مطلق دارند (با استثنا برای تخفیف در صورت گذشت) اما تعویق صدور حک...</td>
+    </tr>
+    <tr style="background:#d4edda">
+      <td>4</td>
+      <td><b>1</b></td>
+      <td><b>1</b></td>
+      <td style="text-align:center">✅</td>
+      <td>10727</td>
+      <td>967</td>
+      <td>10</td>
+      <td style="font-size:12px;max-width:300px;direction:rtl">به موجب ماده ۲ قانون جرم سیاسی, توهین به رؤسای سه قوه و رئیس مجمع تشخیص مصلحت نظام در صورت انطباق با شرایط ماده ۱, جرم سیاسی محسوب می‌شود و ادعای «در ...</td>
+    </tr>
+    <tr style="background:#f8d7da">
+      <td>5</td>
+      <td><b>2</b></td>
+      <td><b>4</b></td>
+      <td style="text-align:center">❌</td>
+      <td>87183</td>
+      <td>8461</td>
+      <td>10</td>
+      <td style="font-size:12px;max-width:300px;direction:rtl">وصیت به ابراء یک وصیت تملیکی است و به موجب ماده 830 قانون مدنی نیاز به قبول موصی‌له پس از فوت دارد, بنابراین ادعای عدم نیاز به قبول نادرست است....</td>
+    </tr>
+    <tr style="background:#f8d7da">
+      <td>6</td>
+      <td><b>4</b></td>
+      <td><b>2</b></td>
+      <td style="text-align:center">❌</td>
+      <td>73531</td>
+      <td>3209</td>
+      <td>10</td>
+      <td style="font-size:12px;max-width:300px;direction:rtl">به موجب ماده ۱۰۷ قانون آیین دادرسی مدنی, استرداد دعوا در مرحله قبل از ختم مذاکرات (اعم از جریان اجرای قرار تحقیق محلی یا پس از صدور قرار کارشناسی) بدو...</td>
+    </tr>
+    <tr style="background:#d4edda">
+      <td>7</td>
+      <td><b>2</b></td>
+      <td><b>2</b></td>
+      <td style="text-align:center">✅</td>
+      <td>44266</td>
+      <td>3658</td>
+      <td>10</td>
+      <td style="font-size:12px;max-width:300px;direction:rtl">به موجب ماده ۳۰۳ قانون آیین دادرسی مدنی, تقدیم لایحه دفاعیه (ولو به صورت مختصر) از سوی خوانده که در آن ادعای خواهان را کذب خوانده, رأی را از حالت غیاب...</td>
+    </tr>
+    <tr style="background:#d4edda">
+      <td>8</td>
+      <td><b>1</b></td>
+      <td><b>1</b></td>
+      <td style="text-align:center">✅</td>
+      <td>92500</td>
+      <td>1421</td>
+      <td>10</td>
+      <td style="font-size:12px;max-width:300px;direction:rtl">طبق ماده 209 قانون تجارت, تصمیم راجع به انحلال و اسامی مدیران تصفیه باید ظرف پنج روز توسط مدیران تصفیه به مرجع ثبت شرکت‌ها اعلام شود. سایر گزینه‌ها با...</td>
+    </tr>
+    <tr style="background:#d4edda">
+      <td>9</td>
+      <td><b>4</b></td>
+      <td><b>4</b></td>
+      <td style="text-align:center">✅</td>
+      <td>27400</td>
+      <td>2034</td>
+      <td>10</td>
+      <td style="font-size:12px;max-width:300px;direction:rtl">طبق اصل 141 قانون اساسی, مشاوره حقوقی برای کارمندان دولت ممنوع است, در حالی که سایر گزینه‌ها (عضویت در هیئت بازرسی, مشاوره فنی و مالی, عضویت در هیئت م...</td>
+    </tr>
+    <tr style="background:#d4edda">
+      <td>10</td>
+      <td><b>2</b></td>
+      <td><b>2</b></td>
+      <td style="text-align:center">✅</td>
+      <td>35345</td>
+      <td>3001</td>
+      <td>10</td>
+      <td style="font-size:12px;max-width:300px;direction:rtl">رأی صادره قابل نقض نیست زیرا نظریه فقهی استناد شده دقیقاً منطبق با ماده قانونی مربوطه است و مفاد رأی با قانون مطابقت دارد؛ لذا اسباب توجیهی بر خلاف ما...</td>
+    </tr></tbody>
+</table>
+<footer>RAG Eval Pipeline · 2026-06-23 17:54</footer>
+</body>
+</html>

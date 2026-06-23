@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>RAG Evaluation Report – qwen/qwen3-235b-a22b-2507</title>
+<style>
+  body { font-family: Tahoma, Arial, sans-serif; background:#f8f9fa; color:#333; margin:0; padding:24px; direction:rtl }
+  h1 { color:#2c3e50; border-bottom:3px solid #4E79A7; padding-bottom:10px; margin-bottom:6px }
+  h2 { color:#4E79A7; margin-top:32px; margin-bottom:12px }
+  .kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin:16px 0 }
+  .kpi-card { background:white; border-radius:10px; padding:16px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,.07) }
+  .kpi-card .val { font-size:1.9em; font-weight:bold; color:#4E79A7 }
+  .kpi-card .lbl { font-size:.82em; color:#666; margin-top:4px }
+  table { width:100%; border-collapse:collapse; background:white; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.07); font-size:13px }
+  th { background:#4E79A7; color:white; padding:10px 8px; font-weight:600; text-align:right }
+  td { padding:8px; border-bottom:1px solid #eee; text-align:right; vertical-align:top }
+  .img-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:18px; margin:16px 0 }
+  .img-card { background:white; border-radius:10px; padding:14px; box-shadow:0 2px 8px rgba(0,0,0,.07) }
+  .img-card img { width:100%; border-radius:6px }
+  .img-card p { margin:8px 0 0; font-size:.83em; color:#777; text-align:center }
+  footer { margin-top:40px; text-align:center; color:#aaa; font-size:.82em }
+</style>
+</head>
+<body>
+<h1>📊 گزارش ارزیابی RAG — qwen/qwen3-235b-a22b-2507</h1>
+<p style="color:#888;margin-top:2px">
+  سوالات: 10 | پاسخ‌داده‌شده: 10 | بی‌پاسخ/خطا: 0 | RAG top_k: 10
+</p>
+
+<h2>🎯 خلاصه عملکرد</h2>
+<div class="kpi-grid">
+  <div class="kpi-card"><div class="val">10</div><div class="lbl">کل سوالات</div></div>
+  <div class="kpi-card"><div class="val" style="color:#59A14F">6</div><div class="lbl">پاسخ صحیح</div></div>
+  <div class="kpi-card"><div class="val" style="color:#E15759">4</div><div class="lbl">پاسخ غلط</div></div>
+  <div class="kpi-card"><div class="val" style="color:#F28E2B">0</div><div class="lbl">بی‌پاسخ / خطا</div></div>
+  <div class="kpi-card"><div class="val">60.0%</div><div class="lbl">دقت کل (RAG)</div></div>
+  <div class="kpi-card"><div class="val">60.0%</div><div class="lbl">دقت پاسخ‌داده‌شده</div></div>
+  <div class="kpi-card"><div class="val">109012 ms</div><div class="lbl">میانگین تأخیر</div></div>
+  <div class="kpi-card"><div class="val">10</div><div class="lbl">RAG top_k</div></div>
+</div>
+
+<h2>📈 نمودارها</h2>
+<div class="img-grid"><div class="img-card"><img src="eval_accuracy/plot_accuracy_overall.png"><p>دقت کلی مدل (RAG)</p></div><div class="img-card"><img src="eval_accuracy/plot_accuracy_by_pred.png"><p>دقت به تفکیک گزینه</p></div><div class="img-card"><img src="eval_accuracy/plot_status_donut.png"><p>توزیع وضعیت پاسخ‌ها</p></div><div class="img-card"><img src="eval_accuracy/plot_confusion_heatmap.png"><p>ماتریس درهم‌ریختگی</p></div><div class="img-card"><img src="tokens_usage/plot_RAG_tokens_hist.png"><p>توزیع توکن‌های خروجی</p></div><div class="img-card"><img src="tokens_usage/plot_RAG_tokens_vs_latency.png"><p>توکن vs تأخیر</p></div><div class="img-card"><img src="tokens_usage/plot_RAG_prompt_tokens_dist.png"><p>توزیع prompt tokens (RAG context)</p></div><div class="img-card"><img src="explanation_quality/plot_RAG_explain_len_box.png"><p>طول توضیح vs صحت</p></div><div class="img-card"><img src="latency_profile/plot_RAG_latency_dist.png"><p>توزیع تأخیر</p></div><div class="img-card"><img src="latency_profile/plot_RAG_latency_by_correct.png"><p>تأخیر به تفکیک صحت</p></div><div class="img-card"><img src="calibration_confidence/plot_RAG_reliability_curve.png"><p>Reliability Curve</p></div></div>
+
+<h2>📋 جزئیات پاسخ‌ها</h2>
+<table>
+<thead><tr>
+  <th>ID</th><th>پاسخ مدل</th><th>پاسخ صحیح</th><th>نتیجه</th>
+  <th>تأخیر (ms)</th><th>توکن خروجی</th><th>top_k</th><th>خلاصه استدلال</th>
+</tr></thead>
+<tbody>
+    <tr style="background:#d4edda">
+      <td>1</td>
+      <td><b>3</b></td>
+      <td><b>3</b></td>
+      <td style="text-align:center">✅</td>
+      <td>47085</td>
+      <td>1818</td>
+      <td>10</td>
+      <td style="font-size:12px;max-width:300px;direction:rtl">مطابق ماده ۷۳۳ قانون مدنی, فسخ بیع به علت خیار غبن (که نوعی فسخ است) تأثیری در بطلان حواله ندارد و حواله باقی می‌ماند؛ بنابراین مسئولیت استرداد ثمن در...</td>
+    </tr>
+    <tr style="background:#d4edda">
+      <td>2</td>
+      <td><b>1</b></td>
+      <td><b>1</b></td>
+      <td style="text-align:center">✅</td>
+      <td>364913</td>
+      <td>1587</td>
+      <td>10</td>
+      <td style="font-size:12px;max-width:300px;direction:rtl">دلیل لبّی مبتنی بر یقین قلبی فقیه است و برای داشتن حجیت باید به قدر متیقّن اخذ شود, همان‌طور که در اصول فقه اسلامی مقرر است...</td>
+    </tr>
+    <tr style="background:#d4edda">
+      <td>3</td>
+      <td><b>2</b></td>
+      <td><b>2</b></td>
+      <td style="text-align:center">✅</td>
+      <td>34963</td>
+      <td>1490</td>
+      <td>10</td>
+      <td style="font-size:12px;max-width:300px;direction:rtl">مطابق ماده ۳ قانون تشدید مجازات اسیدپاشی, تخفیف مجازات در صورت اعلام گذشت بزه‌دیده یا اولیای دم بلامانع است؛ سایر نهادهای ارفاقی مانند آزادی مشروط, تع...</td>
+    </tr>
+    <tr style="background:#d4edda">
+      <td>4</td>
+      <td><b>1</b></td>
+      <td><b>1</b></td>
+      <td style="text-align:center">✅</td>
+      <td>60927</td>
+      <td>1876</td>
+      <td>10</td>
+      <td style="font-size:12px;max-width:300px;direction:rtl">گزینه ۱ نادرست است؛ زیرا مطابق ماده ۲ قانون جرم سیاسی, توهین به رؤسای سه قوه و رئیس مجمع تشخیص مصلحت نظام در صورت انطباق با شرایط ماده ۱ (انگیزه اصلاح...</td>
+    </tr>
+    <tr style="background:#f8d7da">
+      <td>5</td>
+      <td><b>2</b></td>
+      <td><b>4</b></td>
+      <td style="text-align:center">❌</td>
+      <td>22684</td>
+      <td>1960</td>
+      <td>10</td>
+      <td style="font-size:12px;max-width:300px;direction:rtl">مطابق ماده ۸۳۰ قانون مدنی قبول یا رد وصیت پس از فوت موصی معتبر است؛ بنابراین وصیت به ابراء نیاز به قبول موصی‌له دارد و دین ایقاع محسوب نمی‌شود...</td>
+    </tr>
+    <tr style="background:#f8d7da">
+      <td>6</td>
+      <td><b>4</b></td>
+      <td><b>2</b></td>
+      <td style="text-align:center">❌</td>
+      <td>43949</td>
+      <td>1851</td>
+      <td>10</td>
+      <td style="font-size:12px;max-width:300px;direction:rtl">مطابق ماده ۱۰۷ قانون آیین دادرسی مدنی, استرداد دعوی تا قبل از ختم دادرسی بدون نیاز به رضایت خوانده مجاز است و منجر به صدور قرار رد دعوی می‌شود که مطاب...</td>
+    </tr>
+    <tr style="background:#f8d7da">
+      <td>7</td>
+      <td><b>1</b></td>
+      <td><b>2</b></td>
+      <td style="text-align:center">❌</td>
+      <td>53282</td>
+      <td>1879</td>
+      <td>10</td>
+      <td style="font-size:12px;max-width:300px;direction:rtl">مطابق ماده ۳۰۴ قانون آیین دادرسی دادگاه‌های عمومی و انقلاب در امور مدنی, عدم حضور خوانده و عدم تسلیم لایحه دفاعیه حکم را غیابی می‌کند و ماده ۳۰۵ این ح...</td>
+    </tr>
+    <tr style="background:#d4edda">
+      <td>8</td>
+      <td><b>1</b></td>
+      <td><b>1</b></td>
+      <td style="text-align:center">✅</td>
+      <td>51410</td>
+      <td>1841</td>
+      <td>10</td>
+      <td style="font-size:12px;max-width:300px;direction:rtl">مطابق ماده ۲۰۹ قانون تجارت تصمیم راجع به انحلال شرکت و اسامی مدیران تصفیه باید ظرف پنج روز به مرجع ثبت اعلام شود؛ سایر گزینه‌ها با مفاد ماده ۲۱۱, دادن...</td>
+    </tr>
+    <tr style="background:#d4edda">
+      <td>9</td>
+      <td><b>4</b></td>
+      <td><b>4</b></td>
+      <td style="text-align:center">✅</td>
+      <td>61746</td>
+      <td>1243</td>
+      <td>10</td>
+      <td style="font-size:12px;max-width:300px;direction:rtl">مطابق اصل ۱۴۱ قانون اساسی مشاوره حقوقی به‌طور صریح در فهرست ممنوعیت‌های شغلی کارمندان دولت قرار دارد, در حالی که مشاوره فنی و مالی, عضویت در هیئت بازر...</td>
+    </tr>
+    <tr style="background:#f8d7da">
+      <td>10</td>
+      <td><b>3</b></td>
+      <td><b>2</b></td>
+      <td style="text-align:center">❌</td>
+      <td>349157</td>
+      <td>1667</td>
+      <td>10</td>
+      <td style="font-size:12px;max-width:300px;direction:rtl">مطابق ماده ۳ قانون آیین دادرسی دادگاه‌های عمومی و انقلاب در امور مدنی, قاضی موظف است ابتدا به قوانین مدوّن استناد کند و تنها در صورت نقص یا سکوت قانون...</td>
+    </tr></tbody>
+</table>
+<footer>RAG Eval Pipeline · 2026-06-23 17:48</footer>
+</body>
+</html>

@@ -1,0 +1,1 @@
+﻿id,model,rag_top_k,answer,explanation,latency_ms,prompt_tokens,completion_tokens,total_tokens,explain_len_chars,explain_len_words,raw,error,idx,gold_set,is_multi,gold_primary,correct,status
