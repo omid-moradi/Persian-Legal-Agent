@@ -26,31 +26,33 @@ client = wrap_openai(_raw_client)
 
 
 # ═══════════════════════════════════════════════════════════
-# Helper: بررسی وجود استناد معتبر در متن critic
+# Helper: بررسی وجود استناد معتبر — نسخه اصلاح‌شده
 # ═══════════════════════════════════════════════════════════
 def _has_valid_citation(txt: str) -> bool:
     """
-    وجود استناد معتبر را بررسی می‌کند:
-    - فرمت [منبع N]  → مثلاً [منبع ۳] یا [منبع 3]
-    - یا ذکر ماده قانونی → مثلاً «ماده ۱۰۷» یا «اصل ۱۶۷»
+    وجود استناد معتبر را بررسی می‌کند.
+    
+    تغییرات:
+    - فرمت [N] و [۱] علاوه بر [منبع N] پذیرفته می‌شود
+    - بررسی «اصل» حذف شد (خیلی عمومی بود و false positive می‌داد)
+    - حداقل یک فرمت از فرمت‌های زیر کافی است
     """
     # فرمت استاندارد [منبع N]
     if re.search(r"\[منبع\s*[\d۰-۹]+\]", txt):
         return True
-    # ذکر ماده یا اصل به‌همراه شماره
-    if re.search(r"ماده\s*[\d۰-۹]+", txt):
+    # فرمت مختصر [N] — مدل گاهی این را استفاده می‌کند
+    if re.search(r"\[[\d۰-۹]+\]", txt):
         return True
-    if re.search(r"اصل\s*[\d۰-۹]+", txt):
+    # ذکر ماده با شماره
+    if re.search(r"ماده\s*[\d۰-۹]+", txt):
         return True
     return False
 
+
 # ═══════════════════════════════════════════════════════════
-# Helper: ساخت verifier hint بدون confidence
+# Helper: ساخت verifier hint
 # ═══════════════════════════════════════════════════════════
 def _build_verifier_hint(verifier: Optional[Dict[str, Any]]) -> str:
-    """
-    اطلاعات verifier را به‌صورت کمکی و بدون confidence به critic می‌دهد.
-    """
     if not verifier or not isinstance(verifier, dict):
         return ""
 
@@ -73,138 +75,147 @@ def _build_verifier_hint(verifier: Optional[Dict[str, Any]]) -> str:
     if supp_opts:
         lines.append(f"- گزینه‌های دارای پشتوانه منبعی (طبق verifier): {', '.join(supp_opts)}")
     if rec:
-        lines.append(
-            f"- گزینه پیشنهادی verifier: {rec} "
-            f"(این پیشنهاد بدون citation صریح از SOURCES ارزشی برای تأیید یا رد ندارد)"
-        )
+        lines.append(f"- گزینه پیشنهادی verifier: {rec}")
     lines.append(
-        "⚠️ critic فقط در صورتی مجاز به درخواست revision است که خطا را با [منبع N] مستند کرده باشد."
+        "⚠️ critic فقط در صورتی مجاز به درخواست revision است که خطا را با ماده/[منبع N] مستند کرده باشد."
     )
 
     return "\n".join(lines)
 
 
 # ═══════════════════════════════════════════════════════════
-# System Prompt — نسخه اصلاح‌شده critic
+# System Prompt — نسخه اصلاح‌شده
 # ═══════════════════════════════════════════════════════════
 SYSTEM_MSG = """# Iranian Legal QA Auditor — 5-Step Review
 
 You are a **senior Iranian legal auditor** (بازرس ارشد حقوقی) reviewing a reasoner AI's answer to a bar-exam multiple-choice question.
 
-Your one and only mission:
+Your mission:
 Detect errors that are **directly and explicitly contradicted** by the provided SOURCES (statutes, codes, or binding judicial decisions).
 
 You are NOT allowed to request revision based on:
 - Stylistic or wording differences that do not change legal meaning
 - Reasonable doctrinal interpretation when SOURCES are silent or ambiguous
 - Interpretive choices not expressly prohibited by SOURCES
-- Scholarly disagreement without explicit statutory contradiction
 - Verifier suggestions that lack direct SOURCES contradiction
 
-**When in doubt → NO ERROR.**
+**When SOURCES are silent or ambiguous → NO ERROR.**
+**When you find a clear contradiction with SOURCES → ERROR FOUND (with full citation).**
 
 ---
 ## Mandatory 5-Step Review Structure
 
-You MUST complete all five steps fully before writing the TOON. Do NOT skip any step. Each step must be written in Persian.
-
----
 **گام ۱ — شناسایی مسئله حقوقی**
-در یک جمله دقیق فارسی بگو: هسته اصلی این سؤال چه قاعده یا موضوع حقوقی است؟
-شاخه حقوقی (مدنی، کیفری، تجاری، آیین دادرسی، ...) و ماهیت رابطه یا اختلاف را مشخص کن.
+هسته اصلی سؤال را در یک جمله دقیق فارسی بیان کن.
+شاخه حقوقی (مدنی، کیفری، تجاری، آیین دادرسی، ...) را مشخص کن.
 
 ---
 **گام ۲ — استخراج قاعده حاکم از SOURCES**
-ماده یا اصل حاکم بر موضوع را از SOURCES با فرمت زیر نقل یا بازنویسی دقیق کن:
+ماده یا اصل حاکم بر موضوع را از SOURCES به فرمت زیر نقل کن:
 [منبع N] ماده/اصل X — متن یا مضمون دقیق ماده
-اگر هیچ ماده‌ای مستقیماً در SOURCES حاکم نیست، صریحاً بنویس:
+
+اگر هیچ ماده‌ای مستقیماً در SOURCES حاکم نیست:
 «هیچ ماده حاکم مستقیمی در SOURCES یافت نشد.»
-در این صورت در گام ۴ باید NO ERROR صادر کنی.
+← در این صورت در گام ۴ حتماً NO ERROR صادر کن.
 
 ---
 **گام ۳ — مقایسه پاسخ reasoner با قاعده حاکم**
-پاسخ reasoner را در این نقاط بررسی کن:
+پاسخ reasoner را در این موارد بررسی کن:
 الف) آیا شماره گزینه انتخابی با متن ماده سازگار است؟
-ب) آیا شماره مواد استناد‌شده در توضیح درست است؟
+ب) آیا شماره مواد استنادشده درست است؟
 ج) آیا اصطلاحات فنی حقوقی به‌درستی به‌کار رفته‌اند؟
-د) آیا اعداد و ارقام (مهلت‌ها، حدود، درجات، نسبت‌ها، شروط کمّی) با نص ماده منطبق است؟
-ه) آیا شروط استثناها، یا محدوده اعمال قاعده به‌درستی بیان شده‌اند؟
-برای هر مورد، متن گفته‌شده توسط reasoner را با متن SOURCES کنار هم بگذار.
+د) آیا اعداد، مهلت‌ها، حدود، نسبت‌ها با نص ماده منطبق است؟
+ه) آیا شروط و استثناهای قاعده به‌درستی بیان شده‌اند؟
 
 ---
 **گام ۴ — حکم (Verdict)**
 دقیقاً یکی از دو گزینه زیر را بنویس:
 
-الف) اگر پاسخ با SOURCES سازگار است (حتی اگر ناقص باشد):
-«NO ERROR: [توضیح فارسی چرا اشکال صریحی یافت نشد]»
+اگر پاسخ با SOURCES سازگار است:
+«NO ERROR: [توضیح فارسی]»
 
-ب) اگر خطای صریح قابل مستندسازی یافتی:
-«ERROR FOUND: [توضیح فارسی کامل]»
+اگر خطای صریح و قابل مستندسازی یافتی:
+«ERROR FOUND: [توضیح فارسی کامل شامل: شماره منبع + ماده + تعارض صریح]»
 
 قوانین صدور ERROR FOUND:
-- حتماً باید [منبع N] + شماره ماده + متن دقیق ماده ذکر شود.
-- حتماً باید نشان دهی reasoner دقیقاً چه گفته که با نص ماده تعارض دارد.
-- اگر نمی‌توانی هر دو شرط بالا را با هم محقق کنی → باید NO ERROR بنویسی.
+۱. باید [منبع N] + شماره ماده + تعارض صریح ذکر شود.
+۲. باید نشان دهی reasoner دقیقاً چه گفته که با نص ماده تعارض دارد.
+۳. اگر هر دو شرط بالا را نمی‌توانی محقق کنی → NO ERROR بنویس.
 
 ---
-**گام ۵ — دستور اصلاح (فقط در صورت ERROR FOUND)**
-اگر در گام ۴ ERROR FOUND نوشتی، دستور اصلاح واضح و چند مرحله‌ای بنویس:
-- کدام گزینه باید بازنگری شود و چرا؟
-- کدام ماده باید مجدداً خوانده شود؟
-- دقیقاً چه اصلاحی در استدلال یا گزینه انتخابی لازم است؟
-- reasoner باید پاسخ را از کدام نقطه بازنویسی کند؟
+**گام ۵ — دستور اصلاح**
+فقط در صورت ERROR FOUND:
+- کدام گزینه بازنگری شود و چرا؟
+- کدام ماده مجدداً خوانده شود؟
+- چه اصلاحی در استدلال لازم است؟
 
-اگر در گام ۴ NO ERROR نوشتی، فقط بنویس: «نیازی به اصلاح نیست.»
+در صورت NO ERROR:
+«نیازی به اصلاح نیست.»
 
 ---
-## Output Format (STRICT)
+## Output Format (STRICT — این بخش بسیار مهم است)
 
-بعد از تکمیل همه ۵ گام، دقیقاً یک TOON به این شکل بنویس:
+**پس از تکمیل همه ۵ گام، دقیقاً یک خط TOON بنویس:**
 
-results{needs_revision,issue,action}:
-<true/false>,<توضیح فارسی مسئله>,<دستور اصلاح فارسی چند مرحله‌ای>
+results{needs_revision,issue,action}:true,<مشکل فارسی>,<دستور اصلاح فارسی>
 
-محدودیت‌ها:
-- needs_revision: دقیقاً 'true' یا 'false' (حروف کوچک انگلیسی).
-- issue: یک عبارت فارسی واضح از مشکل شناسایی‌شده؛ اگر خطایی نیست بنویس: «خطای صریحی یافت نشد».
-- action: دستور اصلاح کامل فارسی با جزئیات کافی برای اقدام؛ اگر اصلاحی لازم نیست بنویس: «پاسخ قابل قبول است و نیازی به تغییر ندارد».
-- هیچ کاما داخل issue یا action استفاده نکن — به‌جای کاما از نقطه‌ویرگول استفاده کن.
-- هیچ متنی بعد از ردیف TOON نباید باشد.
+یا:
+
+results{needs_revision,issue,action}:false,خطای صریحی یافت نشد,پاسخ قابل قبول است و نیازی به تغییر ندارد
+
+قوانین TOON:
+- needs_revision: دقیقاً 'true' یا 'false' — بدون فاصله — بدون ترجمه
+- issue: عبارت فارسی کوتاه از مشکل
+- action: دستور اصلاح فارسی
+- **از کاما داخل issue یا action استفاده نکن — به‌جای کاما از نقطه‌ویرگول استفاده کن**
+- **هیچ متنی بعد از خط TOON نباشد**
+- **خط TOON باید آخرین خط پاسخ تو باشد**
 """
 
 
 # ═══════════════════════════════════════════════════════════
-# Critic Agent
+# Critic Agent — نسخه اصلاح‌شده
 # ═══════════════════════════════════════════════════════════
 @traceable(name="critic_agent")
 def critic_agent(state: MASharedState) -> MASharedState:
     """
-    ایجنت منتقد که پاسخ reasoner را در ۵ گام بررسی می‌کند.
+    ایجنت منتقد — نسخه اصلاح‌شده.
 
-    تغییرات نسبت به نسخه قبل:
-    - confidence کامل حذف شد از verifier_hint
-    - issue در TOON حالا فارسی و مفصل است
-    - action در TOON حالا دستور چندمرحله‌ای واضح است
-    - ساختار ۵ گام prompt عمق بیشتری دارد
-    - گام‌های ۳ و ۴ اعداد، مهلت‌ها، درجات و شروط را صریحاً بررسی می‌کنند
+    تغییرات کلیدی:
+    1. draft_raw با fallback به draft_toon.explanation خوانده می‌شود
+    2. parse fail → log بهتر + retry یک بار
+    3. citation check با فرمت‌های بیشتر
+    4. prompt واضح‌تر برای خط TOON
+    5. اگر parse دوباره هم شکست خورد → fallback NO ERROR با log صریح
     """
     log_debug("\n🔍 ═══ CRITIC START ═══")
 
     q = state["question"]
     options = state["options_text"]
     ctx = state.get("context", "")
-    draft_raw = state.get("draft_raw", "")
     messages: List[Dict[str, Any]] = list(state.get("messages") or [])
+
+    # ── draft_raw با fallback ────────────────────────────────────────────
+    draft_raw = state.get("draft_raw", "")
+    if not draft_raw:
+        # fallback: از draft_toon بساز
+        draft_toon = state.get("draft_toon") or {}
+        explanation = draft_toon.get("explanation", "")
+        answer = draft_toon.get("answer", "")
+        if explanation or answer:
+            draft_raw = f"گزینه انتخابی: {answer}\n\nاستدلال:\n{explanation}"
+            log_debug(f" ⚠️ draft_raw خالی بود — از draft_toon ساخته شد ({len(draft_raw)} chars)")
+        else:
+            log_debug(" ⚠️ draft_raw و draft_toon هر دو خالی هستند")
 
     log_debug(f" 📋 Question: {q[:80]}...")
     log_debug(f" 📄 Draft length: {len(draft_raw)} chars")
 
-    # ── verifier hint بدون confidence ──────────────────────────────────
+    # ── verifier hint ────────────────────────────────────────────────────
     verifier = state.get("verifier_output")
     verifier_hint = _build_verifier_hint(verifier)
-    log_debug(f" 📊 verifier_hint length: {len(verifier_hint)}")
 
-    # ── User prompt ─────────────────────────────────────────────────────
+    # ── User prompt ──────────────────────────────────────────────────────
     user_parts = [
         "SOURCES:",
         ctx if ctx else "هیچ متن بازیابی‌شده‌ای ارائه نشده است.",
@@ -217,39 +228,26 @@ def critic_agent(state: MASharedState) -> MASharedState:
         "",
         "---",
         "",
-        f"پاسخ کامل reasoner (شامل استدلال ۵ گام و TOON):\n{draft_raw}",
+        f"پاسخ کامل reasoner:\n{draft_raw}",
     ]
 
     if verifier_hint:
-        user_parts.extend([
-            "",
-            "---",
-            "",
-            verifier_hint,
-        ])
+        user_parts.extend(["", "---", "", verifier_hint])
 
     user_parts.extend([
         "",
         "---",
         "",
-        "اکنون بررسی ۵ گامه‌ات را انجام بده:",
-        "",
-        "گام ۱ — شناسایی مسئله حقوقی:",
-        "گام ۲ — استخراج قاعده حاکم از SOURCES:",
-        "گام ۳ — مقایسه پاسخ reasoner با قاعده حاکم:",
-        "گام ۴ — حکم (Verdict):",
-        "گام ۵ — دستور اصلاح:",
-        "",
-        "سپس TOON را بنویس.",
+        "اکنون بررسی ۵ گامه‌ات را انجام بده.",
+        "⚠️ یادآوری مهم: آخرین خط پاسخت باید دقیقاً به این شکل باشد:",
+        "results{needs_revision,issue,action}:true/false,<issue>,<action>",
+        "هیچ متنی بعد از این خط ننویس.",
     ])
 
     user_msg = "\n".join(user_parts)
 
     # ── فراخوانی مدل ────────────────────────────────────────────────────
-    log_debug(" 📡 Calling LLM for critic review...")
-    log_debug(f" Model: {MODEL_ID}")
-    log_debug(f" System msg length: {len(SYSTEM_MSG)}")
-    log_debug(f" User msg length: {len(user_msg)}")
+    log_debug(f" 📡 Calling LLM | model={MODEL_ID} | user_msg={len(user_msg)} chars")
 
     resp = client.chat.completions.create(
         model=MODEL_ID,
@@ -258,48 +256,75 @@ def critic_agent(state: MASharedState) -> MASharedState:
             {"role": "user", "content": user_msg},
         ],
         temperature=0.0,
-        max_tokens=4096
+        max_tokens=4096,
     )
 
     critic_raw: str = (resp.choices[0].message.content or "").strip()
     log_debug(f" ✅ LLM response: {len(critic_raw)} chars")
 
-    # ── Parse TOON ──────────────────────────────────────────────────────
+    # ── Parse TOON — با retry ────────────────────────────────────────────
     critic_toon: Optional[Dict[str, Any]] = extract_toon_critic(critic_raw)
 
     if critic_toon is None:
-        log_debug(" ⚠️ Failed to parse critic TOON → fail-safe NO ERROR")
-        # fail-safe: parse شکست خورد → فرض بر عدم خطا تا loop ایجاد نشود
-        critic_toon = {
-            "needs_revision": False,
-            "issue": "خطای پارس TOON critic — به‌صورت محافظه‌کارانه NO ERROR اعمال شد",
-            "action": "پاسخ قابل قبول است و نیازی به تغییر ندارد",
-        }
-        log_info("🔍 Critic: TOON parse failed → defaulting to NO ERROR (safe fallback)")
+        log_debug(" ⚠️ Parse شکست خورد — retry با prompt ساده‌تر")
+        log_info("🔍 Critic: TOON parse failed — retrying with simplified prompt")
 
-    # ── Post-check: بدون citation معتبر revision رد می‌شود ─────────────
+        # retry: فقط از critic بخواه خط TOON را بنویسد
+        retry_prompt = (
+            f"متن زیر پاسخ یک بازرس حقوقی است:\n\n{critic_raw}\n\n"
+            "بر اساس این پاسخ، دقیقاً یک خط TOON بنویس:\n"
+            "اگر خطا یافت شد:\n"
+            "results{needs_revision,issue,action}:true,<خلاصه مشکل>,<دستور اصلاح>\n"
+            "اگر خطایی نبود:\n"
+            "results{needs_revision,issue,action}:false,خطای صریحی یافت نشد,پاسخ قابل قبول است و نیازی به تغییر ندارد\n"
+            "فقط همین یک خط را بنویس و چیز دیگری ننویس."
+        )
+
+        retry_resp = client.chat.completions.create(
+            model=MODEL_ID,
+            messages=[{"role": "user", "content": retry_prompt}],
+            temperature=0.0,
+            max_tokens=256,
+        )
+        retry_raw = (retry_resp.choices[0].message.content or "").strip()
+        log_debug(f" 🔄 Retry response: {retry_raw[:200]}")
+
+        critic_toon = extract_toon_critic(retry_raw)
+        if critic_toon is not None:
+            # خط TOON را به critic_raw اضافه کن
+            critic_raw = critic_raw + "\n\n[TOON از retry]\n" + retry_raw
+            log_info("🔍 Critic: TOON parse succeeded after retry")
+        else:
+            log_debug(" ❌ Retry هم شکست خورد → fail-safe NO ERROR")
+            log_info("🔍 Critic: TOON parse failed after retry → NO ERROR fallback")
+            critic_toon = {
+                "needs_revision": False,
+                "issue": "خطای پارس TOON critic — به‌صورت محافظه‌کارانه NO ERROR اعمال شد",
+                "action": "پاسخ قابل قبول است و نیازی به تغییر ندارد",
+            }
+
+    # ── Post-check: citation validation ─────────────────────────────────
     needs_revision = bool(critic_toon.get("needs_revision"))
 
     if needs_revision:
-        log_debug(" 🔍 Checking for valid citation in critic output...")
+        log_debug(" 🔍 Checking citation validity...")
         if not _has_valid_citation(critic_raw):
-            log_debug(" ⚠️ needs_revision=true but no valid [منبع N] citation → forcing NO ERROR")
-            log_info("🔍 Critic: Revision request rejected — no [منبع N] citation found")
+            log_debug(" ⚠️ needs_revision=true اما citation معتبر نیست → NO ERROR")
+            log_info("🔍 Critic: Revision rejected — no valid citation found")
             critic_toon = {
                 "needs_revision": False,
-                "issue": "خطای صریحی یافت نشد",
+                "issue": "درخواست revision بدون استناد معتبر رد شد",
                 "action": "پاسخ قابل قبول است و نیازی به تغییر ندارد",
             }
             needs_revision = False
         else:
-            log_debug(" ✅ Valid [منبع N] citation found — revision approved")
-            log_info(f"🔍 Critic: Revision requested — issue: {critic_toon.get('issue', 'نامشخص')}")
+            log_debug(" ✅ Citation valid — revision approved")
+            log_info(f"🔍 Critic: Revision approved — issue: {critic_toon.get('issue', '')[:80]}")
     else:
-        log_info("🔍 Critic: Draft approved — no revision needed")
+        log_info("🔍 Critic: No revision needed")
 
-    # ── ذخیره کامل پیام critic در messages ─────────────────────────────
-    # کل استدلال ۵ گامه و تصمیم نهایی critic برای trace و CSV ذخیره می‌شود
-    critic_message: Dict[str, Any] = {
+    # ── ذخیره در messages ────────────────────────────────────────────────
+    messages.append({
         "role": "assistant",
         "name": "critic",
         "content": critic_raw,
@@ -309,11 +334,9 @@ def critic_agent(state: MASharedState) -> MASharedState:
             "issue": critic_toon.get("issue"),
             "action": critic_toon.get("action"),
         },
-    }
-    messages.append(critic_message)
+    })
 
-    log_debug(f" 📊 Final critic decision: needs_revision={needs_revision}")
-    log_debug(f" 📝 issue: {critic_toon.get('issue')}")
+    log_debug(f" 📊 Final: needs_revision={needs_revision} | issue={critic_toon.get('issue','')[:60]}")
     log_debug("🔍 ═══ CRITIC END ═══\n")
 
     return {
