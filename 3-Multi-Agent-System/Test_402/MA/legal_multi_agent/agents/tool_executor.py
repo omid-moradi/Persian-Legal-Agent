@@ -2,13 +2,14 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Tuple
 import json
+import copy
 
 from langsmith import traceable
 
 from legal_multi_agent.state.schemas import MASharedState
 from legal_multi_agent.tools.retriever_tool import retrieve_documents
 from legal_multi_agent.tools.option_verifier_tool import verify_options_direct
-from legal_multi_agent.utils.logger import log_debug, log_info
+from legal_multi_agent.utils.logger import log_debug, log_info, log_error
 
 
 # ═══════════════════════════════════════════════════════════
@@ -23,15 +24,13 @@ def _find_pending_tool_calls(
 
     خروجی: (پیام assistant، لیست tool_call‌های حل‌نشده)
     """
-    # جمع‌آوری همه tool_call_idهایی که پاسخ گرفته‌اند
-    responded_ids = set()
+    responded_ids: set = set()
     for msg in messages:
         if isinstance(msg, dict) and msg.get("role") == "tool":
             tc_id = msg.get("tool_call_id")
             if tc_id:
                 responded_ids.add(tc_id)
 
-    # پیدا کردن آخرین assistant که tool_call حل‌نشده دارد
     for msg in reversed(messages):
         if not isinstance(msg, dict):
             continue
@@ -59,38 +58,32 @@ def tool_executor_node(state: MASharedState) -> MASharedState:
     """
     Node برای اجرای tools بر اساس درخواست‌های موجود در messages.
 
-    این node:
-    1. آخرین tool_call حل‌نشده را در messages پیدا می‌کند
-    2. tools را اجرا می‌کند
-    3. نتایج را در tool_results و state fields مربوطه ذخیره می‌کند
-    4. پیام‌های tool response را با metadata کامل به messages اضافه می‌کند
-
-    تغییرات نسبت به نسخه قبل:
-        - جستجو در کل messages (نه فقط last_message) — bugfix مهم
-        - حذف confidence از پیام verifier
-        - اضافه شدن metadata به پیام‌های tool response
-        - import logger اضافه شد
+    ✅ FIX 1: deep copy از messages — جلوگیری از تغییر state اصلی
+    ✅ FIX 2: وقتی sources خالی است، verifier با context موجود اجرا می‌شود
+    ✅ FIX 3: بعد از verifier، یک پیام summary اضافه می‌شود که
+              Supervisor بداند باید Reasoner را دوباره فراخوانی کند
     """
     log_debug("\n🔧 ═══ TOOL EXECUTOR START ═══")
 
     messages = list(state.get("messages") or [])
     if not messages:
-        log_debug("  ⚠️ No messages found")
+        log_debug(" ⚠️ No messages found")
         log_debug("🔧 ═══ TOOL EXECUTOR END ═══\n")
         return {}
 
-    # ── پیدا کردن tool_call‌های حل‌نشده در کل messages ──────────────────
     source_message, pending_tool_calls = _find_pending_tool_calls(messages)
 
     if not pending_tool_calls:
-        log_debug("  ✅ No pending tool_calls found")
+        log_debug(" ✅ No pending tool_calls found")
         log_debug("🔧 ═══ TOOL EXECUTOR END ═══\n")
         return {}
 
-    log_debug(f"  🔍 Found {len(pending_tool_calls)} pending tool_call(s)")
+    log_debug(f" 🔍 Found {len(pending_tool_calls)} pending tool_call(s)")
 
     tool_results: Dict[str, Any] = (state.get("tool_results") or {}).copy()
-    new_messages  = messages.copy()
+
+    # ✅ FIX 1: deep copy — جلوگیری از shallow copy مشکل‌ساز
+    new_messages: List[Dict[str, Any]] = copy.deepcopy(messages)
     state_updates: Dict[str, Any] = {}
 
     # ═══════════════════════════════════════════════════════
@@ -98,16 +91,16 @@ def tool_executor_node(state: MASharedState) -> MASharedState:
     # ═══════════════════════════════════════════════════════
     for tool_call in pending_tool_calls:
         func      = tool_call.get("function", {}) or {}
-        tool_name = func.get("name") or tool_call.get("name")          # backward compat
+        tool_name = func.get("name") or tool_call.get("name")
         _raw_args = func.get("arguments") or tool_call.get("arguments", {})
         tool_args = (
             json.loads(_raw_args)
             if isinstance(_raw_args, str)
             else (_raw_args or {})
         )
-        tool_id   = tool_call.get("id") or tool_name or "unknown"
+        tool_id = tool_call.get("id") or tool_name or "unknown"
 
-        log_debug(f"  ⚙️ Executing: {tool_name} (id={tool_id})")
+        log_debug(f" ⚙️ Executing: {tool_name} (id={tool_id})")
 
         if not tool_name:
             new_messages.append({
@@ -141,25 +134,23 @@ def tool_executor_node(state: MASharedState) -> MASharedState:
                     raise ValueError("نتیجه retriever_tool یک dict نیست")
 
                 tool_results["retriever_tool"] = result
+                state_updates["rag_results"]      = result.get("rag_results", [])
+                state_updates["context"]          = result.get("context", "")
+                state_updates["context_preview"]  = result.get("context_preview", "")
+                state_updates["docs_meta"]        = result.get("docs_meta", [])
 
-                state_updates["rag_results"]     = result.get("rag_results", [])
-                state_updates["context"]         = result.get("context", "")
-                state_updates["context_preview"] = result.get("context_preview", "")
-                state_updates["docs_meta"]       = result.get("docs_meta", [])
-
-                num_docs = len(result.get("rag_results", []))
-                preview  = result.get("context_preview", "")[:500]
-
-                # خلاصه اسناد برای خوانایی در CSV
+                num_docs  = len(result.get("rag_results", []))
+                preview   = result.get("context_preview", "")[:500]
                 docs_meta = result.get("docs_meta", []) or []
+
                 docs_lines = []
                 for doc in docs_meta[:6]:
-                    law   = doc.get("law_name") or "نامشخص"
-                    art   = doc.get("article_number") or "—"
-                    score = doc.get("score")
+                    law      = doc.get("law_name") or "نامشخص"
+                    art      = doc.get("article_number") or "—"
+                    score    = doc.get("score")
                     score_str = f" | امتیاز: {score:.3f}" if isinstance(score, float) else ""
-                    docs_lines.append(f"  - {law}، ماده {art}{score_str}")
-                docs_summary = "\n".join(docs_lines) if docs_lines else "  (سندی یافت نشد)"
+                    docs_lines.append(f" - {law}، ماده {art}{score_str}")
+                docs_summary = "\n".join(docs_lines) if docs_lines else " (سندی یافت نشد)"
 
                 content = (
                     f"✅ بازیابی اسناد موفق\n"
@@ -183,14 +174,11 @@ def tool_executor_node(state: MASharedState) -> MASharedState:
                 })
 
             except Exception as e:
-                log_debug(f"  ❌ retriever_tool error: {e}")
+                log_error(f"🔧 retriever_tool ERROR: {e}")
                 error_msg = f"⚠️ خطا در اجرای retriever_tool: {str(e)}"
                 tool_results["retriever_tool"] = {
-                    "error":           str(e),
-                    "rag_results":     [],
-                    "context":         "",
-                    "context_preview": "",
-                    "docs_meta":       [],
+                    "error": str(e), "rag_results": [],
+                    "context": "", "context_preview": "", "docs_meta": [],
                 }
                 new_messages.append({
                     "role":         "tool",
@@ -207,14 +195,18 @@ def tool_executor_node(state: MASharedState) -> MASharedState:
             try:
                 question     = tool_args.get("question", "")
                 options_text = tool_args.get("options_text", "")
-                sources      = tool_args.get("sources", "")
+
+                # ✅ FIX 2: اگر sources در args خالی بود از state.context استفاده کن
+                sources = tool_args.get("sources", "") or state.get("context", "") or ""
 
                 if not question:
                     raise ValueError("question خالی است")
                 if not options_text:
                     raise ValueError("options_text خالی است")
                 if not sources:
-                    raise ValueError("sources خالی است")
+                    # ✅ FIX 2: به جای exception، پیام هشدار بده و ادامه بده
+                    log_error("🔧 option_verifier_tool: sources خالی است — verifier با context خالی اجرا می‌شود")
+                    sources = "هیچ منبعی موجود نیست."
 
                 result = verify_options_direct(
                     question=question,
@@ -226,20 +218,24 @@ def tool_executor_node(state: MASharedState) -> MASharedState:
                     raise ValueError("نتیجه option_verifier_tool یک dict نیست")
 
                 tool_results["option_verifier_tool"] = result
-                state_updates["verifier_output"]     = result
 
-                # ✅ بدون confidence — فقط support_level و reasoning
-                if result.get("scores") and isinstance(result["scores"], list):
+                # ✅ FIX 3: verifier_output را در state_updates ذخیره کن
+                # این مهم‌ترین خط است — بدون این، Reasoner نتیجه را نمی‌بیند
+                state_updates["verifier_output"] = result
+
+                # ── ساخت content خوانا برای messages ──────
+                scores = result.get("scores") or []
+                if scores and isinstance(scores, list):
                     summary_lines = [
-                        f"✅ تحلیل {len(result['scores'])} گزینه انجام شد:",
+                        f"✅ تحلیل {len(scores)} گزینه انجام شد:",
                         "",
                     ]
-                    for score in result["scores"]:
+                    for score in scores:
                         if not isinstance(score, dict):
                             continue
                         opt_num   = score.get("option_number", "?")
                         support   = score.get("support_level", "UNKNOWN")
-                        reasoning = score.get("reasoning", "")[:200]
+                        reasoning = str(score.get("reasoning", ""))[:200]
                         summary_lines.append(f"• گزینه {opt_num}: {support}")
                         summary_lines.append(f"  └─ {reasoning}...")
                         summary_lines.append("")
@@ -251,7 +247,9 @@ def tool_executor_node(state: MASharedState) -> MASharedState:
                     error = result.get("error", "نامشخص")
                     content = f"⚠️ خطا در تحلیل گزینه‌ها: {error}"
 
-                log_info(f"🔧 option_verifier_tool: recommended={result.get('recommended_answer')}")
+                recommended = result.get("recommended_answer")
+                log_info(f"🔧 option_verifier_tool: recommended={recommended}")
+
                 new_messages.append({
                     "role":         "tool",
                     "tool_call_id": tool_id,
@@ -260,18 +258,21 @@ def tool_executor_node(state: MASharedState) -> MASharedState:
                     "metadata": {
                         "tool_name":          tool_name,
                         "status":             "success",
-                        "recommended_answer": result.get("recommended_answer"),
-                        "scores_count":       len(result.get("scores", [])),
+                        "recommended_answer": recommended,
+                        "verifier_answer":    recommended,   # ✅ FIX 3: اضافه شد برای CSV
+                        "scores_count":       len(scores),
                     },
                 })
 
             except Exception as e:
-                log_debug(f"  ❌ option_verifier_tool error: {e}")
+                log_error(f"🔧 option_verifier_tool ERROR: {e}")
                 error_msg = f"⚠️ خطا در اجرای option_verifier_tool: {str(e)}"
                 tool_results["option_verifier_tool"] = {
-                    "error":              str(e),
-                    "scores":             [],
-                    "recommended_answer": None,
+                    "error": str(e), "scores": [], "recommended_answer": None,
+                }
+                # ✅ FIX 3: حتی در خطا، verifier_output را با error state ذخیره کن
+                state_updates["verifier_output"] = {
+                    "error": str(e), "scores": [], "recommended_answer": None,
                 }
                 new_messages.append({
                     "role":         "tool",
@@ -285,7 +286,7 @@ def tool_executor_node(state: MASharedState) -> MASharedState:
         # ۳. tool ناشناخته
         # ──────────────────────────────────────────────────
         else:
-            log_debug(f"  ⚠️ Unknown tool: {tool_name}")
+            log_error(f"🔧 Unknown tool requested: {tool_name}")
             new_messages.append({
                 "role":         "tool",
                 "tool_call_id": tool_id,
@@ -294,7 +295,7 @@ def tool_executor_node(state: MASharedState) -> MASharedState:
                 "metadata":     {"tool_name": tool_name, "status": "unknown_tool"},
             })
 
-    log_debug(f"  ✅ Executed {len(pending_tool_calls)} tool(s)")
+    log_debug(f" ✅ Executed {len(pending_tool_calls)} tool(s)")
     log_debug("🔧 ═══ TOOL EXECUTOR END ═══\n")
 
     return {

@@ -30,11 +30,19 @@ client = wrap_openai(_raw_client)
 # ═══════════════════════════════════════════════════════════
 def _has_valid_citation(txt: str) -> bool:
     """
-    وجود [منبع N] در متن critic را بررسی می‌کند.
-    بدون این استناد هیچ revision معتبر نیست.
+    وجود استناد معتبر را بررسی می‌کند:
+    - فرمت [منبع N]  → مثلاً [منبع ۳] یا [منبع 3]
+    - یا ذکر ماده قانونی → مثلاً «ماده ۱۰۷» یا «اصل ۱۶۷»
     """
-    return bool(re.search(r"\[منبع\s*\d+\]", txt))
-
+    # فرمت استاندارد [منبع N]
+    if re.search(r"\[منبع\s*[\d۰-۹]+\]", txt):
+        return True
+    # ذکر ماده یا اصل به‌همراه شماره
+    if re.search(r"ماده\s*[\d۰-۹]+", txt):
+        return True
+    if re.search(r"اصل\s*[\d۰-۹]+", txt):
+        return True
+    return False
 
 # ═══════════════════════════════════════════════════════════
 # Helper: ساخت verifier hint بدون confidence

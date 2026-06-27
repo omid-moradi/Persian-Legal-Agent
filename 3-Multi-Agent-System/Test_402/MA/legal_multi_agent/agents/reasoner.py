@@ -34,6 +34,7 @@ def _has_pending_verifier_call(messages: List[Dict[str, Any]]) -> bool:
     if not messages:
         return False
 
+    # ── پیدا کردن آخرین tool_call مربوط به option_verifier_tool ──
     last_verifier_call_id = None
     for msg in reversed(messages):
         if isinstance(msg, dict) and msg.get("tool_calls"):
@@ -42,19 +43,21 @@ def _has_pending_verifier_call(messages: List[Dict[str, Any]]) -> bool:
                 func = tc.get("function", {})
                 if func.get("name") == "option_verifier_tool":
                     last_verifier_call_id = tc.get("id")
-                    break
-        if last_verifier_call_id:
-            break
+            # ✅ FIX: خروج از حلقه خارجی فقط بعد از بررسی همه tc های یک message
+            if last_verifier_call_id:
+                break
 
+    # اگر هیچ verifier call ای وجود ندارد → pending نیست
     if not last_verifier_call_id:
         return False
 
+    # ── بررسی وجود tool response برای آن call_id ──────────────────
     for msg in reversed(messages):
         if isinstance(msg, dict) and msg.get("role") == "tool":
             if msg.get("tool_call_id") == last_verifier_call_id:
-                return False
+                return False  # جواب رسیده → pending نیست
 
-    return True
+    return True  # جواب نرسیده → هنوز pending است
 
 
 # ═══════════════════════════════════════════════════════════
@@ -154,6 +157,7 @@ def _parse_reasoner_toon(raw_text: str) -> Optional[Dict[str, Any]]:
     if not raw_text or not isinstance(raw_text, str):
         return None
 
+    # ── مرحله ۱: از extract_toon_answer کمک بگیر ─────────
     parsed = extract_toon_answer(raw_text)
     if isinstance(parsed, dict):
         answer = parsed.get("answer")
@@ -164,37 +168,56 @@ def _parse_reasoner_toon(raw_text: str) -> Optional[Dict[str, Any]]:
                 "answer": str(answer).strip(),
             }
 
+    # ── مرحله ۲: regex مقاوم — فاصله و بدون فاصله ───────
+    # پشتیبانی از: results{explanation,answer}: و results{explanation, answer}:
     m = re.search(
-        r"results\{explanation,answer(?:,confidence)?\}:\s*\n(.+)",
+        r"results\s*\{\s*explanation\s*,\s*answer(?:\s*,\s*confidence)?\s*\}\s*:\s*\n(.+)",
         raw_text,
         flags=re.IGNORECASE | re.DOTALL,
     )
     if m:
         row = m.group(1).strip().splitlines()[0].strip()
-        parts = [p.strip() for p in row.split(",")]
-        if len(parts) >= 2:
-            explanation = ",".join(parts[:-1]).strip() if len(parts) == 2 else parts[0].strip()
-            answer = parts[-1].strip() if len(parts) == 2 else parts[1].strip()
+        # آخرین بخش بعد از آخرین کاما = answer
+        last_comma = row.rfind(",")
+        if last_comma != -1:
+            explanation = row[:last_comma].strip()
+            answer = row[last_comma + 1:].strip()
+            # پاکسازی کاراکترهای اضافه
+            answer = re.sub(r"[^\d]", "", answer)
             if answer in {"1", "2", "3", "4"} and explanation:
-                return {
-                    "explanation": explanation,
-                    "answer": answer,
-                }
+                return {"explanation": explanation, "answer": answer}
 
-    m2 = re.search(r"گزینه\s*([1-4])\s*(?:صحیح|درست)", raw_text)
+    # ── مرحله ۳: fallback — جستجوی مستقیم گزینه در گام ۵ ─
+    m2 = re.search(r"گزینه\s*([\d۱-۴])\s*(?:صحیح|درست|انتخاب)", raw_text)
+    if not m2:
+        # اعداد فارسی را هم چک کن
+        m2 = re.search(r"گام\s*۵[^\n]*\n.*?گزینه\s*([\d۱-۴])", raw_text, flags=re.DOTALL)
     if m2:
-        answer = m2.group(1)
+        raw_answer = m2.group(1).strip()
+        # تبدیل اعداد فارسی به لاتین
+        fa_to_en = str.maketrans("۱۲۳۴", "1234")
+        answer = raw_answer.translate(fa_to_en)
         step5_match = re.search(
-            r"گام\s*۵[^\n:：]*[:：]\s*(.+?)(?:\n\s*results\{|\Z)",
+            r"گام\s*۵[^\n:：]*[:：]\s*(.+?)(?:\nresults\{|\Z)",
             raw_text,
             flags=re.DOTALL,
         )
         explanation = ""
         if step5_match:
             explanation = " ".join(step5_match.group(1).strip().split())
-        if explanation:
+        if explanation and answer in {"1", "2", "3", "4"}:
+            return {"explanation": explanation, "answer": answer}
+
+    # ── مرحله ۴: آخرین fallback — هر جایی در متن که گزینه ذکر شده ─
+    last_match = None
+    for m3 in re.finditer(r"گزینه\s*([\d۱-۴])", raw_text):
+        last_match = m3
+    if last_match:
+        fa_to_en = str.maketrans("۱۲۳۴", "1234")
+        answer = last_match.group(1).translate(fa_to_en)
+        if answer in {"1", "2", "3", "4"}:
             return {
-                "explanation": explanation,
+                "explanation": "استخراج از متن با روش fallback انجام شد.",
                 "answer": answer,
             }
 

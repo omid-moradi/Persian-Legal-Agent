@@ -46,7 +46,7 @@ def _schema_to_regex(schema: List[str]) -> re.Pattern:
     """
     # escape each field name but keep it simple (fields are ascii identifiers)
     fields_pat = r"\s*,\s*".join([re.escape(f) for f in schema])
-    pat = rf"^results\s*\{{\s*{fields_pat}\s*\}}\s*:\s*$"
+    pat = rf"^results\s*\{{\s*{fields_pat}\s*\}}\s*:.*$"
     return re.compile(pat, re.IGNORECASE)
 
 
@@ -250,7 +250,7 @@ def extract_toon_answer(content: str, verbose: bool = False) -> Optional[Dict]:
         explanation = parsed.row["explanation"].strip()
         answer_raw  = parsed.row["answer"]
 
-        m = re.search(r"([1-4])$", answer_raw.strip())
+        m = re.search(r"([1-4])\s*$", answer_raw.strip(), re.MULTILINE)
         answer = m.group(1) if m else None
 
         if answer is None:
@@ -264,7 +264,7 @@ def extract_toon_answer(content: str, verbose: bool = False) -> Optional[Dict]:
     if verbose:
         print("⚠️ TOON(answer): standard format failed, trying fallback...")
 
-    fallback_pattern = r'results\s*\{([^}]+)\}'
+    fallback_pattern = r'results\s*\{([^}]+)\}\s*:\s*\n?\s*(.+)'
     match = re.search(fallback_pattern, content, re.IGNORECASE | re.DOTALL)
 
     if not match:
@@ -272,19 +272,19 @@ def extract_toon_answer(content: str, verbose: bool = False) -> Optional[Dict]:
             print("⚠️ TOON(answer): fallback also failed")
         return None
 
-    inner_content = match.group(1).strip()
+    data_line = match.group(2).strip().splitlines()[0].strip()
 
     # ✅ تلاش برای split به 2 قسمت (بدون confidence)
-    parts = _split_csv_n(inner_content, n=2)
+    parts = _split_csv_n(data_line, n=2)
 
     if not parts:
         # fallback سازگار با نسخه قدیمی (3 قسمت) — اگر LLM هنوز confidence می‌فرستد
-        parts3 = _split_csv_n(inner_content, n=3)
+        parts3 = _split_csv_n(data_line, n=3)
         if parts3:
             parts = [parts3[0], parts3[1]]  # explanation و answer را نگه‌دار
         else:
             if verbose:
-                print(f"⚠️ TOON(answer): fallback couldn't split: {inner_content[:100]}")
+                print(f"⚠️ TOON(answer): fallback couldn't split: {data_line[:100]}")
             return None
 
     explanation = parts[0].strip()

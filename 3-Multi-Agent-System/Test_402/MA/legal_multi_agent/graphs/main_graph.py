@@ -25,121 +25,145 @@ from legal_multi_agent.utils.toon import extract_toon_answer
 from legal_multi_agent.utils.logger import log_debug, log_info, log_error
 
 
-def finalize_node(state: MASharedState) -> MASharedState:
-    """
-    نود نهایی‌سازی: draft_toon را به final_toon منتقل می‌کند.
-
-    این نود فقط زمانی فراخوانی می‌شود که:
-    - draft_toon موجود باشد
-    - critic تأیید کرده باشد یا max_revisions رسیده باشد
-    """
-    log_debug("\n🟣 ═══ FINALIZE START ═══")
-
-    draft_raw  = state.get("draft_raw", "")
-    draft_toon = state.get("draft_toon")
-
-    log_debug(f"  📄 draft_raw length: {len(draft_raw)}")
-    log_debug(f"  🎯 draft_toon exists: {bool(draft_toon)}")
-
-    # اگر draft_toon موجود نیست، سعی می‌کنیم از draft_raw استخراج کنیم
-    if not draft_toon and draft_raw:
-        log_debug("  ⚠️ draft_toon not found, extracting from draft_raw...")
-        draft_toon = extract_toon_answer(draft_raw)
-        if draft_toon:
-            # ✅ بدون confidence
-            log_debug(f"  ✅ Extracted: answer={draft_toon['answer']}")
-
-    # اگر هنوز draft_toon نداریم، یک خطای fallback بساز
-    if not draft_toon:
-        log_debug("  ❌ ERROR: No draft_toon available!")
-        draft_toon = {
-            "explanation": "خطا: پاسخ نهایی تولید نشد",
-            "answer":      "1",
-        }
-        draft_raw = "Error: No draft available"
-        log_error("🟣 Finalize: ERROR - no draft available")
-    else:
-        # ✅ بدون confidence در لاگ
-        log_info(f"🟣 Finalize: answer={draft_toon['answer']}")
-        log_debug(f"  ✅ Finalizing answer: {draft_toon['answer']}")
-
-    log_debug("🟣 ═══ FINALIZE END ═══\n")
-
-    return {
-        "final_raw":  draft_raw,
-        "final_toon": draft_toon,
-    }
-
+# ═══════════════════════════════════════════════════════════
+# نود اولیه‌سازی
+# ═══════════════════════════════════════════════════════════
 
 def initialize_node(state: MASharedState) -> MASharedState:
     """
     نود اولیه‌سازی: تنظیمات پیش‌فرض را اعمال می‌کند.
 
-    این نود اطمینان می‌دهد که:
-    - max_revisions مقدار معتبر دارد
-    - revision_count از 0 شروع می‌شود
-    - total_steps از 0 شروع می‌شود
-    - messages یک list است
-    - tool_results یک dict است
+    ✅ FIX: verifier_output، draft_raw، draft_toon و critic_toon
+    همیشه ریست می‌شوند تا بین سوالات مختلف تداخل نباشد.
     """
     log_debug("\n🔷 ═══ INITIALIZE START ═══")
 
     updates: Dict[str, Any] = {}
 
+    # ── مقادیر شمارنده ──────────────────────────────────────
     if state.get("max_revisions") is None:
         updates["max_revisions"] = 2
-        log_debug("  ✓ Set max_revisions = 2")
+        log_debug(" ✓ Set max_revisions = 2")
 
-    if state.get("revision_count") is None:
-        updates["revision_count"] = 0
-        log_debug("  ✓ Set revision_count = 0")
+    # revision_count همیشه از صفر شروع می‌شود
+    updates["revision_count"] = 0
+    log_debug(" ✓ Reset revision_count = 0")
 
-    # ✅ مقداردهی اولیه total_steps
-    if state.get("total_steps") is None:
-        updates["total_steps"] = 0
-        log_debug("  ✓ Set total_steps = 0")
+    updates["total_steps"] = 0
+    log_debug(" ✓ Reset total_steps = 0")
 
+    # ── ساختارهای داده ──────────────────────────────────────
     if state.get("messages") is None:
         updates["messages"] = []
-        log_debug("  ✓ Initialized messages = []")
+        log_debug(" ✓ Initialized messages = []")
 
     if state.get("tool_results") is None:
         updates["tool_results"] = {}
-        log_debug("  ✓ Initialized tool_results = {}")
+        log_debug(" ✓ Initialized tool_results = {}")
+
+    # ✅ FIX: ریست کردن state های قبلی — جلوگیری از تداخل بین سوالات
+    updates["verifier_output"] = None
+    updates["draft_raw"] = ""
+    updates["draft_toon"] = None
+    updates["critic_toon"] = None
+    updates["critic_raw"] = ""
+    updates["final_toon"] = None
+    updates["final_raw"] = ""
+    log_debug(" ✓ Reset verifier_output, draft_toon, critic_toon, final_toon")
 
     log_debug("🔷 ═══ INITIALIZE END ═══\n")
-
     return updates
 
 
+# ═══════════════════════════════════════════════════════════
+# نود نهایی‌سازی
+# ═══════════════════════════════════════════════════════════
+
+def finalize_node(state: MASharedState) -> MASharedState:
+    """
+    نود نهایی‌سازی: draft_toon را به final_toon منتقل می‌کند.
+
+    ✅ FIX 1: اگر answer خالی بود، از draft_raw مجدداً extract می‌کند.
+    ✅ FIX 2: fallback دیگر answer="1" نمی‌دهد — answer="" باقی می‌ماند.
+    ✅ FIX 3: validate می‌کند که answer یکی از {"1","2","3","4"} باشد.
+    """
+    log_debug("\n🟣 ═══ FINALIZE START ═══")
+
+    draft_raw  = state.get("draft_raw", "") or ""
+    draft_toon = state.get("draft_toon")
+
+    log_debug(f" 📄 draft_raw length  : {len(draft_raw)}")
+    log_debug(f" 🎯 draft_toon exists : {bool(draft_toon)}")
+
+    # ── مرحله ۱: اگر draft_toon نداریم از draft_raw استخراج کن ──
+    if not draft_toon and draft_raw:
+        log_debug(" ⚠️ draft_toon not found → extracting from draft_raw...")
+        extracted = extract_toon_answer(draft_raw)
+        if extracted and isinstance(extracted, dict):
+            draft_toon = extracted
+            log_debug(f" ✅ Extracted draft_toon: answer={draft_toon.get('answer')}")
+
+    # ── مرحله ۲: validate کردن answer ────────────────────────
+    VALID_ANSWERS = {"1", "2", "3", "4"}
+
+    if draft_toon and isinstance(draft_toon, dict):
+        answer = str(draft_toon.get("answer", "")).strip()
+
+        # ✅ FIX: تبدیل اعداد فارسی به لاتین در صورت لزوم
+        fa_to_en = str.maketrans("۱۲۳۴", "1234")
+        answer = answer.translate(fa_to_en)
+
+        if answer not in VALID_ANSWERS:
+            # ✅ FIX: به جای فرض "1"، answer خالی می‌ماند و لاگ می‌شود
+            log_error(f"🟣 Finalize: INVALID answer='{answer}' — keeping empty")
+            log_info("🟣 Finalize: WARNING — no valid answer extracted")
+            draft_toon = {
+                "explanation": draft_toon.get("explanation", "پاسخ معتبر استخراج نشد"),
+                "answer": "",   # ✅ خالی — نه "1" فرضی
+            }
+        else:
+            draft_toon["answer"] = answer   # نسخه لاتین normalize شده
+            log_info(f"🟣 Finalize: answer={answer} ✅")
+            log_debug(f" ✅ Valid answer confirmed: {answer}")
+
+    # ── مرحله ۳: اگر هنوز هیچ draft_toon نداریم ─────────────
+    if not draft_toon:
+        log_error("🟣 Finalize: ERROR — no draft_toon available at all!")
+        draft_toon = {
+            "explanation": "خطا: پاسخ نهایی تولید نشد — هیچ draft_toon موجود نیست",
+            "answer": "",   # ✅ FIX: خالی به جای "1"
+        }
+        draft_raw = draft_raw or "Error: No draft available"
+
+    log_debug("🟣 ═══ FINALIZE END ═══\n")
+
+    return {
+        "final_raw" : draft_raw,
+        "final_toon": draft_toon,
+    }
+
+
+# ═══════════════════════════════════════════════════════════
+# ساخت گراف
+# ═══════════════════════════════════════════════════════════
+
 def build_graph(
-    enable_debug:  bool         = False,
-    checkpointer:  Optional[Any] = None,
+    enable_debug: bool = False,
+    checkpointer: Optional[Any] = None,
 ) -> StateGraph:
     """
     ساخت گراف کامل مولتی‌ایجنت (با tool execution support)
 
     Args:
         enable_debug: فعال‌سازی حالت دیباگ (لاگ‌های بیشتر)
-        checkpointer: اختیاری - برای ذخیره وضعیت گراف (persistence)
+        checkpointer: اختیاری — برای ذخیره وضعیت گراف (persistence)
 
     Returns:
-        گراف کامپایل شده آماده برای اجرا
-
-    Example:
-        >>> graph = build_graph()
-        >>> result = graph.invoke({
-        ...     "question": "سوال",
-        ...     "options_text": "گزینه‌ها",
-        ...     "max_revisions": 2,
-        ... })
+        گراف کامپایل‌شده آماده برای اجرا
     """
     workflow = StateGraph(MASharedState)
 
-    # ═══════════════════════════════════════════════════════════
-    # اضافه کردن نودها
-    # ═══════════════════════════════════════════════════════════
-
+    # ── اضافه کردن نودها ────────────────────────────────────
     workflow.add_node("initialize", initialize_node)
     workflow.add_node("supervisor", supervisor_agent)
     workflow.add_node("researcher", researcher_agent)
@@ -148,10 +172,7 @@ def build_graph(
     workflow.add_node("finalize",   finalize_node)
     workflow.add_node("tools",      tool_executor_node)
 
-    # ═══════════════════════════════════════════════════════════
-    # یال‌های ثابت
-    # ═══════════════════════════════════════════════════════════
-
+    # ── یال‌های ثابت ────────────────────────────────────────
     workflow.add_edge(START,        "initialize")
     workflow.add_edge("initialize", "supervisor")
 
@@ -161,18 +182,20 @@ def build_graph(
     workflow.add_edge("finalize",   "supervisor")
     workflow.add_edge("tools",      "supervisor")
 
-    # ═══════════════════════════════════════════════════════════
-    # یال‌های شرطی: supervisor مسیرها را مدیریت می‌کند
-    # ═══════════════════════════════════════════════════════════
-
+    # ── یال‌های شرطی ────────────────────────────────────────
     def route_supervisor(state: MASharedState) -> str:
-        """تابع routing با error handling"""
+        """
+        تابع routing با error handling.
+
+        ✅ FIX: وقتی next=None است به FINISH می‌رود نه researcher
+        تا از حلقه بی‌پایان جلوگیری شود.
+        """
         next_step = state.get("next")
 
         if not next_step:
-            # ✅ همیشه لاگ می‌شود — نه فقط در enable_debug
-            log_error("⚠️ route_supervisor: next is None, defaulting to researcher")
-            return "researcher"
+            # ✅ FIX: None → FINISH (نه researcher)
+            log_error("⚠️ route_supervisor: next is None → FINISH")
+            return "FINISH"
 
         valid_routes = {
             "researcher", "reasoner", "critic",
@@ -180,12 +203,11 @@ def build_graph(
         }
 
         if next_step not in valid_routes:
-            # ✅ همیشه لاگ می‌شود
-            log_error(f"⚠️ route_supervisor: مسیر نامعتبر '{next_step}' — به FINISH می‌رویم")
+            log_error(f"⚠️ route_supervisor: مسیر نامعتبر '{next_step}' → FINISH")
             return "FINISH"
 
         if enable_debug:
-            log_debug(f"  🔀 route_supervisor → {next_step}")
+            log_debug(f" 🔀 route_supervisor → {next_step}")
 
         return next_step
 
@@ -202,15 +224,10 @@ def build_graph(
         },
     )
 
-    # ═══════════════════════════════════════════════════════════
-    # کامپایل گراف
-    # ═══════════════════════════════════════════════════════════
-
+    # ── کامپایل گراف ────────────────────────────────────────
     compile_kwargs: Dict[str, Any] = {}
-
     if checkpointer:
         compile_kwargs["checkpointer"] = checkpointer
-
     if enable_debug:
         compile_kwargs["debug"] = True
 
@@ -221,51 +238,41 @@ def build_graph(
 # نمونه‌های گراف آماده برای استفاده
 # ═══════════════════════════════════════════════════════════
 
-# گراف پیش‌فرض (بدون debug، بدون persistence)
 graph = build_graph()
-
-# graph_debug = build_graph(enable_debug=True)
+# graph_debug      = build_graph(enable_debug=True)
 # from langgraph.checkpoint.memory import MemorySaver
 # graph_persistent = build_graph(checkpointer=MemorySaver())
 
 
 def run_graph(
-    question:            str,
-    options_text:        str,
-    max_revisions:       int  = 2,
+    question: str,
+    options_text: str,
+    max_revisions: int = 2,
     use_option_verifier: bool = True,
-    use_retriever_tool:  bool = False,
-    recursion_limit:     int  = 50,
+    use_retriever_tool: bool = False,
+    recursion_limit: int = 60,   # ✅ FIX: از 50 به 60 — برای revision loop کافی باشد
 ) -> Dict[str, Any]:
     """
-    Helper function برای اجرای ساده گراف
+    Helper function برای اجرای ساده گراف.
 
     Args:
-        question:            متن سوال
-        options_text:        متن گزینه‌ها
-        max_revisions:       حداکثر تعداد بازبینی
+        question          : متن سوال
+        options_text      : متن گزینه‌ها
+        max_revisions     : حداکثر تعداد بازبینی
         use_option_verifier: استفاده از verifier tool
-        use_retriever_tool:  استفاده از retriever tool
-        recursion_limit:     حداکثر تعداد گام‌های گراف
+        use_retriever_tool : استفاده از retriever tool
+        recursion_limit   : حداکثر تعداد گام‌های گراف
 
     Returns:
         نتیجه نهایی state
-
-    Example:
-        >>> result = run_graph(
-        ...     question="سوال",
-        ...     options_text="1) گزینه یک\\n2) گزینه دو",
-        ... )
-        >>> print(result["final_toon"]["answer"])
     """
     initial_state = {
-        "question":            question,
-        "options_text":        options_text,
-        "max_revisions":       max_revisions,
+        "question":           question,
+        "options_text":       options_text,
+        "max_revisions":      max_revisions,
         "use_option_verifier": use_option_verifier,
         "use_retriever_tool":  use_retriever_tool,
     }
 
     config = {"recursion_limit": recursion_limit}
-
     return graph.invoke(initial_state, config)
