@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
-MODEL_ID = "google/gemini-2.5-flash"
+MODEL_ID = "google/gemini-3-flash-preview"
 
 _client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
